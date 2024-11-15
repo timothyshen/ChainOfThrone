@@ -1,0 +1,8 @@
+{
+  "sepolia": {
+    "MyNFT": "0x97F70f234225afccf603294d5b3b1AFc8A9350dc"
+  },
+  "baseSepolia": {
+    "MyNFT": "0x40467D1A64EC51a5c87342fbD38a08a71dc7ebD0"
+  }
+}

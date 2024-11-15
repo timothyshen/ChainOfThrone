@@ -1,0 +1,55 @@
+{
+  "name": "hardhat-project",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "hardhat test --network hardhat",
+    "compile": "hardhat compile",
+    "deploy:localhost": "hardhat --network hardhat deploy",
+    "deploy:baseSepolia": "hardhat --network baseSepolia deploy",
+    "test:ci": "hardhat test --network hardhat"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-viem": "2.0.0",
+    "@nomiclabs/hardhat-ethers": "2.2.2",
+    "@openzeppelin/contracts": "^4.8.0",
+    "@typechain/ethers-v5": "10.2.0",
+    "@typechain/hardhat": "6.1.5",
+    "@types/chai": "4.3.4",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "18.13.0",
+    "chai": "4.3.7",
+    "chalk": "5.2.0",
+    "dotenv": "16.0.3",
+    "hardhat": "^2.17.3",
+    "hardhat-abi-exporter": "2.10.1",
+    "hardhat-deploy": "0.12.2",
+    "hardhat-gas-reporter": "^1.0.2",
+    "ts-node": "^10.0.0",
+    "typechain": "8.1.1",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@account-abstraction/contracts": "^0.6.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.7",
+    "@nomicfoundation/hardhat-viem": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@openzeppelin/contracts-upgradeable": "^5.0.2",
+    "@story-protocol/protocol-core": "https://github.com/storyprotocol/protocol-core-v1#v1.0.0",
+    "@story-protocol/protocol-periphery": "https://github.com/storyprotocol/protocol-periphery-v1#main",
+    "@typechain/ethers-v5": "10.2.0",
+    "dn404": "^0.0.7",
+    "erc6551": "^0.3.1",
+    "solady": "^0.0.180",
+    "solhint": "^3.4.1",
+    "solidity-coverage": "^0.7.21",
+    "solmate": "^6.2.0",
+    "viem": "^2.21.27"
+  },
+  "files": [
+    "src/**/*",
+    "!src/contract-config"
+  ]
+}
