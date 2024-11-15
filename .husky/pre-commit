@@ -1,5 +1,0 @@
-# Run prettier
-npx prettier --write .
-
-# Add staged files
-git add .
