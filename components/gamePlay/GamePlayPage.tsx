@@ -127,7 +127,7 @@ export default function DiplomacyGame() {
             }
 
             // Make the move
-            await makeMove(move);
+            makeMove(move);
 
             toast({
                 title: "Move Submitted",
