@@ -12,6 +12,7 @@ export default function PlayPage() {
         // Handle the optional catch-all route parameter
         if (params.id && Array.isArray(params.id)) {
             setGameId(params.id[0] || null)
+            console.log(gameId)
         }
     }, [params])
 

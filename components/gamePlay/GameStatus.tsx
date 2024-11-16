@@ -9,6 +9,7 @@ interface GameStatusProps {
 export default function GameStatus({ currentPlayer, players }: GameStatusProps) {
     const getWinningPlayer = () => {
         const [player1, player2] = players
+        if (!player1 || !player2) return null
         if (player1.supplyCenters > player2.supplyCenters) {
             return player1
         } else if (player2.supplyCenters > player1.supplyCenters) {

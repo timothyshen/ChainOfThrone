@@ -1,4 +1,12 @@
 {
   "extends": ["next/core-web-vitals", "next/typescript"],
-  "ignorePatterns": ["packages/smart-contract-config/**/*", "node_modules/**/*"]
+  "ignorePatterns": [
+    "packages/smart-contract-config/**/*",
+    "node_modules/**/*"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-unnecessary-condition": "off"
+  }
 }

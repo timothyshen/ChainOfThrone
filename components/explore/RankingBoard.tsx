@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 import { PlayerRank } from '@/lib/types/setup'
-import CreateNewGame from "./CreateNewGame"
+import CreateNewGame from "@/components/explore/CreateNewGame"
 
 const mockPlayers: PlayerRank[] = [
     { id: '1', walletAddress: '0x1234567890123456789012345678901234567890', wins: 15 },

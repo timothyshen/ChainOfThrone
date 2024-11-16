@@ -1,5 +1,5 @@
-import RankingBoard from '@/components/explore/Rankingboard'
-import AvailableGameList from './AvailableGameList'
+import RankingBoard from '@/components/explore/RankingBoard'
+import AvailableGameList from '@/components/explore/AvailableGameList'
 
 export function ExplorePageComponent() {
 

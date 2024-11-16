@@ -25,8 +25,7 @@ export default function DiplomacyGame() {
     const [turnComplete, setTurnComplete] = useState<boolean>(false)
     const [actionLog, setActionLog] = useState<string[]>([])
     const [players, setPlayers] = useState<Player[]>(initialPlayers)
-    const [currentPlayer, setCurrentPlayer] = useState<Player | null>(initialPlayers[0])
-    const [countdown, setCountdown] = useState<number | null>(null)
+    const [currentPlayer, setCurrentPlayer] = useState<Player | null>(initialPlayers[0] || null)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const { toast } = useToast()
 
@@ -76,7 +75,7 @@ export default function DiplomacyGame() {
                 return
             }
 
-            let newOrder: Order = {
+            const newOrder: Order = {
                 type: actionType,
                 unitId: selectedUnit.id,
                 from: selectedUnit.position,
@@ -148,7 +147,6 @@ export default function DiplomacyGame() {
                     p.id === currentPlayer?.id ? { ...p, isReady: true } : p
                 )
             )
-            setCountdown(30)
         } else {
             const allPlayersReady = players.every(p => p.isReady)
             if (allPlayersReady) {
@@ -173,19 +171,7 @@ export default function DiplomacyGame() {
                     )
                 )
             }
-            setCountdown(null)
         }
-    }
-
-    const getWinningPlayer = () => {
-        const [player1, player2] = players
-        if (player1 == null || player2 == null) return
-        if (player1.supplyCenters > player2.supplyCenters) {
-            return player1
-        } else if (player2.supplyCenters > player1.supplyCenters) {
-            return player2
-        }
-        return null // It's a tie
     }
 
     const handleSendMessage = (recipientId: string, content: string) => {

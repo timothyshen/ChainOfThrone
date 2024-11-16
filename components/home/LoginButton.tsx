@@ -4,12 +4,8 @@ import { Button } from "@/components/ui/button"
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core"
 import { useAccount } from "wagmi";
 import Link from "next/link";
-import { Wallet } from "lucide-react";
-interface LoginButtonProps {
-    className?: string
-}
 
-export default function LoginButton({ className }: LoginButtonProps) {
+export default function LoginButton() {
     const { isConnected } = useAccount();
     const { setShowAuthFlow } = useDynamicContext();
     return (

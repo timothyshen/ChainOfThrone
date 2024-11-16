@@ -1,10 +1,8 @@
 import {
-    Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 
 function HowToPlay() {
@@ -45,7 +43,7 @@ function HowToPlay() {
                 <ul className="list-disc list-inside mb-4">
                     <li>Move: Attempt to move a unit to an adjacent province.</li>
                     <li>Hold: Unit remains in place and defends against attacks.</li>
-                    <li>Support: Increase the strength of another unit's order.</li>
+                    <li>Support: Increase the strength of another unit&apos;s order.</li>
                     <li>Convoy: Fleets can transport armies across sea spaces.</li>
                 </ul>
 
