@@ -1,6 +1,7 @@
 import { Territory, Unit } from '@/lib/types/game'
-import { Star } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import CastleIcon from '@/public/images/castle.svg'
+import Image from 'next/image'
 
 interface GameMapProps {
     territories: Territory[]
@@ -23,7 +24,7 @@ export default function GameMap({ territories, units, onTerritoryClick }: GameMa
                                 y={territory.y * 100}
                                 width="100"
                                 height="100"
-                                fill={territory.type === 'supply' ? '#FFFACD' : 'white'}
+                                fill={territory.type === 'castle' ? '#FFFACD' : 'white'}
                                 stroke="black"
                                 strokeWidth="2"
                                 onClick={() => onTerritoryClick(territory)}
@@ -35,19 +36,23 @@ export default function GameMap({ territories, units, onTerritoryClick }: GameMa
                                 textAnchor="middle"
                                 dominantBaseline="middle"
                                 fill="black"
-                                fontSize="12"
+                                fontSize="10"
                             >
                                 {territory.name}
                             </text>
-                            {territory.type === 'supply' && (
-                                <Star
-                                    size={24}
-                                    fill="gold"
-                                    stroke="black"
-                                    strokeWidth={1}
-                                    x={territory.x * 100 + 38}
-                                    y={territory.y * 100 + 60}
-                                />
+
+                            {territory.type === 'castle' && (
+                                // castle svg
+                                <svg
+                                    x={territory.x * 100 + 40}
+                                    y={territory.y * 100 + 45}
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                >
+                                    <path d="M12 2L2 8v14h20V8L12 2zm-2 17H6v-3h4v3zm8 0h-4v-3h4v3zm2-7H4v-5l8-4.5 8 4.5v5z" />
+                                </svg>
                             )}
                             {units.filter(unit => unit.position === territory.id).map((unit, index) => (
                                 <g key={unit.id}>
@@ -55,13 +60,13 @@ export default function GameMap({ territories, units, onTerritoryClick }: GameMa
                                         cx={territory.x * 100 + 50 + index * 20 - 10}
                                         cy={territory.y * 100 + 80}
                                         r="8"
-                                        fill={unit.type === 'army' ? 'black' : 'white'}
+                                        fill='black'
                                         stroke="black"
                                         strokeWidth="2"
                                     />
                                     <text
-                                        x={territory.x * 100 + 50 + index * 20 - 10}
-                                        y={territory.y * 100 + 95}
+                                        x={territory.x * 100 + 70 + index * 20 - 10}
+                                        y={territory.y * 100 + 81}
                                         textAnchor="middle"
                                         dominantBaseline="middle"
                                         fill="black"

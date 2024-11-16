@@ -17,7 +17,7 @@ export type Unit = {
 };
 
 export type Order = {
-  type: "move" | "split";
+  type: "move";
   unitId: string;
   from: string;
   to: string;
@@ -50,14 +50,14 @@ export const initialUnits: Unit[] = [
     id: "unit1",
     type: "army",
     countryId: "player1",
-    position: "territory2",
+    position: "territory1",
     strength: 10,
   },
   {
     id: "unit2",
     type: "army",
     countryId: "player2",
-    position: "territory8",
+    position: "territory9",
     strength: 10,
   },
 ];
