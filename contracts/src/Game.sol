@@ -8,6 +8,7 @@ contract Game {
 
     struct Cell {
         Move[] pendingMoves;
+        Loan[] pendingLoans;
         address player;
         uint256 units;
         bool isCastle;
@@ -34,8 +35,18 @@ contract Game {
         uint8 toY;
         uint256 units;
     }
-    Move[] moves;
+    struct Loan {
+        address lender;
+        address borrower;
+        uint8 fromX;
+        uint8 fromY;
+        uint8 toX;
+        uint8 toY;
+        uint256 units;
+    }
     bool[MAX_PLAYERS] roundSubmitted;
+
+    uint256 public roundNumber;
 
     event GameStarted();
     event GameFinalized(address indexed winner);
@@ -98,6 +109,12 @@ contract Game {
         grid[1][0].player = idToAddress[1];
         grid[1][0].units = 10;
         grid[1][0].isCastle = false;
+
+        if (MAX_PLAYERS == 3) {
+            grid[1][2].player = idToAddress[2];
+            grid[1][2].units = 10;
+            grid[1][2].isCastle = false;
+        }
 
         emit GameStarted();
     }
@@ -172,6 +189,14 @@ contract Game {
         }
     }
 
+    function makeLoan(Loan memory _loan) public onlyOngoing {
+        require(_loan.lender == msg.sender, "Invalid loan (address)");
+        require(checkValidLoan(_loan), "Invalid loan");
+
+        Cell storage toCell = grid[_loan.toX][_loan.toY];
+        toCell.pendingLoans.push(_loan);
+    }
+
     function _allMovesSubmitted() internal view returns (bool) {
         for (uint8 i = 0; i < totalPlayers; i++) {
             if (!roundSubmitted[i]) {
@@ -199,6 +224,19 @@ contract Game {
                         }
                     }
                 }
+
+                // manage loans
+                for (uint256 k = 0; k < cell.pendingLoans.length; k++) {
+                    Loan storage loan = cell.pendingLoans[k];
+                    // look for pending Move such that the loan borrower = pending move
+                    for (uint256 l = 0; l < cell.pendingMoves.length; l++) {
+                        if (loan.borrower == cell.pendingMoves[l].player) {
+                            cell.pendingMoves[l].units += loan.units;
+                            break;
+                        }
+                    }
+                }
+
                 address largestAddress = cell.player;
                 uint256 largest = cell.units;
                 uint256 secondLargest = 0;
@@ -218,9 +256,32 @@ contract Game {
                 } else {
                     cell.player = largestAddress;
                 }
+                delete cell.pendingMoves;
+                delete cell.pendingLoans;
             }
         }
+        // start new round
+        roundNumber++;
+        for (uint i = 0; i < MAX_PLAYERS; i++) {
+            roundSubmitted[i] = false;
+        }
         _checkGameStatus();
+    }
+
+    function getGrid() public view returns (Cell[9] memory cells) {
+        for (uint8 i = 0; i < 3; i++) {
+            for (uint8 j = 0; j < 3; j++) {
+                cells[3 * i + j] = grid[i][j];
+            }
+        }
+    }
+
+    function get2dGrid() public view returns (Cell[3][3] memory cells) {
+        for (uint8 i = 0; i < 3; i++) {
+            for (uint8 j = 0; j < 3; j++) {
+                cells[i][j] = grid[i][j];
+            }
+        }
     }
 
     function checkValidMove(Move memory _move) public view returns (bool) {
@@ -239,6 +300,28 @@ contract Game {
 
         Cell storage fromCell = grid[_move.fromX][_move.fromY];
         if (fromCell.player == msg.sender && fromCell.units >= _move.units) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function checkValidLoan(Loan memory _loan) public view returns (bool) {
+        if (
+            _loan.fromX >= 3 ||
+            _loan.fromY >= 3 ||
+            _loan.toX >= 3 ||
+            _loan.toY >= 3
+        ) {
+            return false;
+        }
+
+        if (!_isAdjacent(_loan.fromX, _loan.fromY, _loan.toX, _loan.toY)) {
+            return false;
+        }
+
+        Cell storage fromCell = grid[_loan.fromX][_loan.fromY];
+        if (fromCell.player == msg.sender && fromCell.units >= _loan.units) {
             return true;
         }
 
