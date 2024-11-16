@@ -1,4 +1,8 @@
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useAccount,
+} from "wagmi";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import abi from "@/lib/contract/abi.json";
 import { MakeMoveArgs } from "@/lib/types/setup";
@@ -12,6 +16,8 @@ interface UseMakeMoveReturn {
 }
 
 export const useMakeMove = (): UseMakeMoveReturn => {
+  const { isConnected } = useAccount();
+
   // Initialize the writeContract hook from wagmi
   const { data: hash, error, isPending, writeContract } = useWriteContract();
 
@@ -24,14 +30,12 @@ export const useMakeMove = (): UseMakeMoveReturn => {
     toY,
     units,
   }: MakeMoveArgs) => {
-    if (!writeContract) {
-      console.error("writeContract is not initialized");
-      return;
-    }
+    if (!isConnected) throw new Error("Wallet not connected");
+    if (!writeContract) throw new Error("writeContract is not initialized");
     console.log("fucking here");
     try {
       const result = await writeContract({
-        address: "0x4e3eEd3c8315dbBD07Ef3C76ad22eEbc63B59ddB" as `0x${string}`,
+        address: CONTRACT_ADDRESS,
         abi: abi.abi,
         functionName: "makeMove",
         args: [
@@ -45,7 +49,7 @@ export const useMakeMove = (): UseMakeMoveReturn => {
           },
         ],
       });
-
+      debugger;
       console.log("Transaction submitted:", result);
       return result;
     } catch (err) {

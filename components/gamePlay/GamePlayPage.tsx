@@ -115,19 +115,19 @@ export default function DiplomacyGame() {
 
             console.log("MOVE", move);
             // Validate move
-            const isValidMove = await checkValidMove(move);
-            console.log("IS VALID MOVE", isValidMove);
-            if (isValidMove === false) {
-                toast({
-                    title: "Invalid Move",
-                    description: "This move is not allowed by the game rules.",
-                    variant: "destructive",
-                });
-                return;
-            }
+            // const isValidMove = await checkValidMove(move);
+            // console.log("IS VALID MOVE", isValidMove);
+            // if (isValidMove === false) {
+            //     toast({
+            //         title: "Invalid Move",
+            //         description: "This move is not allowed by the game rules.",
+            //         variant: "destructive",
+            //     });
+            //     return;
+            // }
 
             // Make the move
-            makeMove(move);
+            await makeMove(move);
 
             toast({
                 title: "Move Submitted",

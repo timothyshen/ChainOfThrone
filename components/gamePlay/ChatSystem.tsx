@@ -5,6 +5,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
+import { PushAPI, CONSTANTS } from '@pushprotocol/restapi';
+import { walletClient } from '@/lib/contract/client';
+
 
 type Player = {
     id: string
@@ -34,31 +37,39 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
         }
     }, [chatMessages])
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (selectedRecipient && messageContent.trim()) {
             const content = messageContent.trim()
             const isNegotiation = content.startsWith('/nego ')
 
-            if (isNegotiation) {
-                const negoContent = content.substring(6)
-                onSendMessage(selectedRecipient, negoContent, 'negotiation')
-                setChatMessages(prev => [...prev, {
-                    senderId: currentPlayerId,
-                    recipientId: selectedRecipient,
-                    content: negoContent,
-                    timestamp: Date.now(),
-                    type: 'negotiation'
-                }])
-            } else {
-                onSendMessage(selectedRecipient, content)
-                setChatMessages(prev => [...prev, {
-                    senderId: currentPlayerId,
-                    recipientId: selectedRecipient,
-                    content: content,
-                    timestamp: Date.now()
-                }])
+            const newMessage: ChatMessage = {
+                senderId: currentPlayerId,
+                recipientId: selectedRecipient,
+                content: isNegotiation ? content.substring(6) : content,
+                timestamp: Date.now(),
+                ...(isNegotiation && { type: 'negotiation' })
             }
-            setMessageContent('')
+
+            try {
+                const userAlice = await PushAPI.initialize(walletClient, {
+                    env: CONSTANTS.ENV.STAGING,
+                });
+
+                const recipientWallet = players.find(p => p.id === selectedRecipient)?.wallet
+                if (recipientWallet) {
+                    await userAlice.chat.send(recipientWallet, {
+                        content: newMessage.content,
+                        type: 'Text'
+                    });
+                }
+
+                setChatMessages(prev => [...prev, newMessage])
+                onSendMessage(selectedRecipient, newMessage.content, isNegotiation ? 'negotiation' : undefined)
+                setMessageContent('')
+
+            } catch (error) {
+                console.error('Error sending message:', error)
+            }
         }
     }
 
