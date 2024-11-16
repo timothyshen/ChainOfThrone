@@ -23,6 +23,32 @@
     },
     {
       "type": "function",
+      "name": "checkValidLoan",
+      "inputs": [
+        {
+          "name": "_loan",
+          "type": "tuple",
+          "internalType": "struct Game.Loan",
+          "components": [
+            { "name": "lender", "type": "address", "internalType": "address" },
+            {
+              "name": "borrower",
+              "type": "address",
+              "internalType": "address"
+            },
+            { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+            { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+            { "name": "toX", "type": "uint8", "internalType": "uint8" },
+            { "name": "toY", "type": "uint8", "internalType": "uint8" },
+            { "name": "units", "type": "uint256", "internalType": "uint256" }
+          ]
+        }
+      ],
+      "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
       "name": "checkValidMove",
       "inputs": [
         {
@@ -89,6 +115,32 @@
                 }
               ]
             },
+            {
+              "name": "pendingLoans",
+              "type": "tuple[]",
+              "internalType": "struct Game.Loan[]",
+              "components": [
+                {
+                  "name": "lender",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "borrower",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+                { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+                { "name": "toX", "type": "uint8", "internalType": "uint8" },
+                { "name": "toY", "type": "uint8", "internalType": "uint8" },
+                {
+                  "name": "units",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                }
+              ]
+            },
             { "name": "player", "type": "address", "internalType": "address" },
             { "name": "units", "type": "uint256", "internalType": "uint256" },
             { "name": "isCastle", "type": "bool", "internalType": "bool" }
@@ -117,6 +169,32 @@
       "inputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
       "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
       "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "makeLoan",
+      "inputs": [
+        {
+          "name": "_loan",
+          "type": "tuple",
+          "internalType": "struct Game.Loan",
+          "components": [
+            { "name": "lender", "type": "address", "internalType": "address" },
+            {
+              "name": "borrower",
+              "type": "address",
+              "internalType": "address"
+            },
+            { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+            { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+            { "name": "toX", "type": "uint8", "internalType": "uint8" },
+            { "name": "toY", "type": "uint8", "internalType": "uint8" },
+            { "name": "units", "type": "uint256", "internalType": "uint256" }
+          ]
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
     },
     {
       "type": "function",

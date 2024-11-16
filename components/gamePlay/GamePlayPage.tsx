@@ -17,6 +17,7 @@ import GameMap from '@/components/gamePlay/GameMap'
 import { getGrid } from '@/lib/hooks/ReadContract'
 
 export default function DiplomacyGame() {
+    const [grid, setGrid] = useState<Territory[]>(territories)
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [units, setUnits] = useState<Unit[]>(initialUnits)
     const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
@@ -29,13 +30,12 @@ export default function DiplomacyGame() {
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const { toast } = useToast()
 
-
     useEffect(() => {
-        const getGrid = async () => {
+        const getGrids = async () => {
             const grid = await getGrid();
             console.log("grid", grid);
         };
-        getGrid();
+        getGrids();
     }, []);
 
 
