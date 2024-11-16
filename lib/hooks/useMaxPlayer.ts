@@ -28,8 +28,8 @@ export const useMaxPlayer = () => {
     try {
       const resp = await contractsApi.callContractFunction(
         "ethereum",
-        "chainofthrone1",
-        "chainofthrone",
+        "chainofthronev21",
+        "chainofthronev2",
         "maxPlayer",
         payload
       );
