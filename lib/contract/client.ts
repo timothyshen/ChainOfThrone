@@ -3,7 +3,13 @@ import { CONTRACT_ADDRESS } from "../constants/contracts";
 import { abi } from "./abi.json";
 import * as MultiBaas from "@curvegrid/multibaas-sdk";
 
-import { http, createPublicClient, getContract } from "viem";
+import {
+  http,
+  createPublicClient,
+  getContract,
+  createWalletClient,
+  custom,
+} from "viem";
 
 export const contractClient = createPublicClient({
   chain: sepolia,
@@ -24,3 +30,8 @@ export const config = new MultiBaas.Configuration({
 export const chain = "ethereum";
 export const deployedAddressOrLabel = "chainofthrone1";
 export const contractLabel = "chainofthrone";
+
+export const walletClient = createWalletClient({
+  chain: sepolia,
+  transport: custom(window.ethereum),
+});

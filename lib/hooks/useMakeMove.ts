@@ -24,17 +24,34 @@ export const useMakeMove = (): UseMakeMoveReturn => {
     toY,
     units,
   }: MakeMoveArgs) => {
+    if (!writeContract) {
+      console.error("writeContract is not initialized");
+      return;
+    }
+    console.log("fucking here");
     try {
-      // Call the writeContract method with the specified parameters
-      await writeContract({
-        address: CONTRACT_ADDRESS as `0x${string}`, // Cast BodhiAddress to the appropriate type
-        abi: abi.abi, // ABI for the Bodhi contract
-        functionName: "makeMove", // Function name to call
-        args: [{ player, fromX, fromY, toX, toY, units }], // Arguments for the function
+      const result = await writeContract({
+        address: "0x4e3eEd3c8315dbBD07Ef3C76ad22eEbc63B59ddB" as `0x${string}`,
+        abi: abi.abi,
+        functionName: "makeMove",
+        args: [
+          {
+            player: player,
+            fromX: fromX,
+            fromY: fromY,
+            toX: toX,
+            toY: toY,
+            units: units,
+          },
+        ],
       });
+
+      console.log("Transaction submitted:", result);
+      return result;
     } catch (err) {
-      // Log any errors that occur
+      console.log("fucking here");
       console.error("Error calling makeMove:", err);
+      throw err;
     }
   };
 
