@@ -13,6 +13,7 @@ export type PlayerRank = {
 };
 
 export type MakeMoveArgs = {
+  player: string;
   fromX: number;
   fromY: number;
   toX: number;

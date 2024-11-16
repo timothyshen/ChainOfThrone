@@ -1,6 +1,7 @@
 import { contractClient } from "@/lib/contract/client";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import abi from "@/lib/contract/abi.json";
+import { MakeMoveArgs } from "../types/setup";
 
 export const totalPlayers = async () => {
   const result = await contractClient.readContract({
@@ -63,6 +64,26 @@ export const getMaxPlayer = async () => {
     address: CONTRACT_ADDRESS,
     abi: abi.abi,
     functionName: "MAX_PLAYERS",
+  });
+  return result;
+};
+
+export const checkValidMove = async (args: MakeMoveArgs) => {
+  console.log("ARGS", args);
+  const result = await contractClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: abi.abi,
+    functionName: "checkValidMove",
+    args: [
+      {
+        player: args.player,
+        fromX: args.fromX,
+        fromY: args.fromY,
+        toX: args.toX,
+        toY: args.toY,
+        units: args.units,
+      },
+    ],
   });
   return result;
 };

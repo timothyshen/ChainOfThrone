@@ -13,11 +13,10 @@ import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
-import { get2DGrid } from '@/lib/hooks/ReadContract'
+import { get2DGrid, checkValidMove } from '@/lib/hooks/ReadContract'
 import { useAccount } from 'wagmi'
 import { Move } from '@/lib/types/game'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
-import { useValidMove } from '@/lib/hooks/useValidMove'
 
 
 export default function DiplomacyGame() {
@@ -32,15 +31,21 @@ export default function DiplomacyGame() {
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove } = useMakeMove()
-    const { validMove } = useValidMove()
 
     useEffect(() => {
         const getGrids = async () => {
             try {
                 const gridData = await get2DGrid();
+                if (!gridData) return;
                 // Type assertion since we know the shape of the data
-                console.log(gridData)
-                setTerritories(gridData as Territory[]);
+                const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
+                    row.map((territory: any, colIndex: number) => ({
+                        ...territory,
+                        x: colIndex,
+                        y: rowIndex
+                    }))
+                );
+                setTerritories(newGridData as Territory[][]);
             } catch (error) {
                 console.error('Error fetching grid:', error);
                 toast({
@@ -73,7 +78,6 @@ export default function DiplomacyGame() {
 
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
         if (!territory) return [];
-        console.log('territory', territory)
         const adjacentTerritories: Territory[] = [];
         for (let i = 0; i < territories.length; i++) {
             for (let j = 0; j < territories[i].length; j++) {
@@ -89,6 +93,7 @@ export default function DiplomacyGame() {
     };
 
     const handleAction = async (targetTerritory: Territory) => {
+        console.log("TARGET TERRITORY", targetTerritory);
         if (!selectedTerritory || !address || turnComplete) {
             toast({
                 title: "Invalid Action",
@@ -108,8 +113,10 @@ export default function DiplomacyGame() {
                 units: moveStrength
             };
 
+            console.log("MOVE", move);
             // Validate move
-            const isValidMove = await validMove(move);
+            const isValidMove = await checkValidMove(move);
+            console.log("IS VALID MOVE", isValidMove);
             if (isValidMove === false) {
                 toast({
                     title: "Invalid Move",
@@ -203,6 +210,7 @@ export default function DiplomacyGame() {
                                                         onChange={(e) => setMoveStrength(parseInt(e.target.value))}
                                                         className="w-full"
                                                     />
+                                                    <Button onClick={() => setMoveStrength(selectedTerritory.units)}>Max</Button>
                                                 </div>
                                             </div>
 
@@ -216,7 +224,7 @@ export default function DiplomacyGame() {
                                                             onClick={() => handleAction(territory)}
                                                             disabled={!moveStrength || moveStrength <= 0}
                                                         >
-                                                            Move {moveStrength} units to {territory.isCastle ? 'castle' : 'land'}
+                                                            Move {moveStrength} units to {territory.x}, {territory.y}
                                                         </Button>
                                                     ))}
                                                 </div>
