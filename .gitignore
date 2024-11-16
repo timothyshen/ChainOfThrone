@@ -34,4 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+<<<<<<< HEAD
 hardhat/*
+=======
+
+# venv
+/.py3/
+>>>>>>> d84da82 (feat: ai bot)
