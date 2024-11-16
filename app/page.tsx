@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button"
 import HowToPlayButton from "@/components/home/HowToPlayButton"
-import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
+import LoginButton from "@/components/home/LoginButton";
 
 export default function HomePage() {
 
@@ -12,9 +11,7 @@ export default function HomePage() {
 
         <div className="space-x-4">
           <HowToPlayButton />
-          <DynamicWidget innerButtonComponent={
-            <Button variant="secondary" size="sm">Connect</Button>
-          } />
+          <LoginButton />
         </div>
       </main>
     </div>
