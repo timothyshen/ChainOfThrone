@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/lib/hooks/useToast"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import ActionLog from './ActionLog'
+import ActionLog from '@/components/gamePlay/ActionLog'
 import { Input } from "@/components/ui/input"
-import { Star } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Territory, Unit, Player, Order, territories, initialUnits, initialPlayers } from '@/lib/types/game'
-import GameStatus from './GameStatus'
-import ExecutionLog from './ExecutionLog'
+import GameStatus from '@/components/gamePlay/GameStatus'
+import ExecutionLog from '@/components/gamePlay/ExecutionLog'
+import ChatSystem from '@/components/gamePlay/ChatSystem'
+import GameMap from '@/components/gamePlay/GameMap'
 
 export default function DiplomacyGame() {
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
@@ -197,7 +198,6 @@ export default function DiplomacyGame() {
     }
 
 
-    const winningPlayer = getWinningPlayer()
 
     return (
         <div className="flex flex-col h-screen">
@@ -209,77 +209,16 @@ export default function DiplomacyGame() {
                             <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger>
                         </TabsList>
                         <TabsContent value="map">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Diplomacy Game Map</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <svg viewBox="0 0 300 300" className="w-full h-full">
-                                        {territories.map((territory) => (
-                                            <g key={territory.id}>
-                                                <rect
-                                                    x={territory.x * 100}
-                                                    y={territory.y * 100}
-                                                    width="100"
-                                                    height="100"
-                                                    fill={territory.type === 'supply' ? '#FFFACD' : 'white'}
-                                                    stroke="black"
-                                                    strokeWidth="2"
-                                                    onClick={() => handleTerritoryClick(territory)}
-                                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                                />
-                                                <text
-                                                    x={territory.x * 100 + 50}
-                                                    y={territory.y * 100 + 40}
-                                                    textAnchor="middle"
-                                                    dominantBaseline="middle"
-                                                    fill="black"
-                                                    fontSize="12"
-                                                >
-                                                    {territory.name}
-                                                </text>
-                                                {territory.type === 'supply' && (
-                                                    <Star
-                                                        size={24}
-                                                        fill="gold"
-                                                        stroke="black"
-                                                        strokeWidth={1}
-                                                        x={territory.x * 100 + 38}
-                                                        y={territory.y * 100 + 60}
-                                                    />
-                                                )}
-                                                {units.filter(unit => unit.position === territory.id).map((unit, index) => (
-                                                    <g key={unit.id}>
-                                                        <circle
-                                                            cx={territory.x * 100 + 50 + index * 20 - 10}
-                                                            cy={territory.y * 100 + 80}
-                                                            r="8"
-                                                            fill={unit.type === 'army' ? 'black' : 'white'}
-                                                            stroke="black"
-                                                            strokeWidth="2"
-                                                        />
-                                                        <text
-                                                            x={territory.x * 100 + 50 + index * 20 - 10}
-                                                            y={territory.y * 100 + 95}
-                                                            textAnchor="middle"
-                                                            dominantBaseline="middle"
-                                                            fill="black"
-                                                            fontSize="10"
-                                                        >
-                                                            {unit.strength}
-                                                        </text>
-                                                    </g>
-                                                ))}
-                                            </g>
-                                        ))}
-                                    </svg>
-                                </CardContent>
-                            </Card>
+                            <GameMap
+                                territories={territories}
+                                units={units}
+                                onTerritoryClick={handleTerritoryClick}
+                            />
                         </TabsContent>
                         <TabsContent value="chat">
                             <ChatSystem
                                 players={players}
-                                currentPlayerId={players[currentPlayerIndex].id}
+                                currentPlayerId={currentPlayer?.id ?? ''}
                                 onSendMessage={handleSendMessage}
                             />
                         </TabsContent>
@@ -288,6 +227,7 @@ export default function DiplomacyGame() {
                 </div>
                 <div className="w-1/3 p-4 space-y-4">
                     <GameStatus currentPlayer={currentPlayer} players={players} />
+
                     <Card>
                         <CardHeader>
                             <CardTitle>Territory Information</CardTitle>

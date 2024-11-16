@@ -29,7 +29,48 @@ export default function GameMap({ territories, units, onTerritoryClick }: GameMa
                                 onClick={() => onTerritoryClick(territory)}
                                 className="cursor-pointer hover:opacity-80 transition-opacity"
                             />
-                            {/* ... rest of territory rendering logic */}
+                            <text
+                                x={territory.x * 100 + 50}
+                                y={territory.y * 100 + 40}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                fill="black"
+                                fontSize="12"
+                            >
+                                {territory.name}
+                            </text>
+                            {territory.type === 'supply' && (
+                                <Star
+                                    size={24}
+                                    fill="gold"
+                                    stroke="black"
+                                    strokeWidth={1}
+                                    x={territory.x * 100 + 38}
+                                    y={territory.y * 100 + 60}
+                                />
+                            )}
+                            {units.filter(unit => unit.position === territory.id).map((unit, index) => (
+                                <g key={unit.id}>
+                                    <circle
+                                        cx={territory.x * 100 + 50 + index * 20 - 10}
+                                        cy={territory.y * 100 + 80}
+                                        r="8"
+                                        fill={unit.type === 'army' ? 'black' : 'white'}
+                                        stroke="black"
+                                        strokeWidth="2"
+                                    />
+                                    <text
+                                        x={territory.x * 100 + 50 + index * 20 - 10}
+                                        y={territory.y * 100 + 95}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                        fill="black"
+                                        fontSize="10"
+                                    >
+                                        {unit.strength}
+                                    </text>
+                                </g>
+                            ))}
                         </g>
                     ))}
                 </svg>
