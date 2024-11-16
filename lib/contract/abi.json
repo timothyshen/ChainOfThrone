@@ -60,6 +60,45 @@
     },
     {
       "type": "function",
+      "name": "getGrid",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "cells",
+          "type": "tuple[9]",
+          "internalType": "struct Game.Cell[9]",
+          "components": [
+            {
+              "name": "pendingMoves",
+              "type": "tuple[]",
+              "internalType": "struct Game.Move[]",
+              "components": [
+                {
+                  "name": "player",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+                { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+                { "name": "toX", "type": "uint8", "internalType": "uint8" },
+                { "name": "toY", "type": "uint8", "internalType": "uint8" },
+                {
+                  "name": "units",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                }
+              ]
+            },
+            { "name": "player", "type": "address", "internalType": "address" },
+            { "name": "units", "type": "uint256", "internalType": "uint256" },
+            { "name": "isCastle", "type": "bool", "internalType": "bool" }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
       "name": "grid",
       "inputs": [
         { "name": "", "type": "uint256", "internalType": "uint256" },

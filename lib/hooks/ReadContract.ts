@@ -12,15 +12,6 @@ export const totalPlayers = async () => {
   return result;
 };
 
-export const getGrid = async () => {
-  const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
-    abi: abi.abi,
-    functionName: "getGrid",
-  });
-  return result;
-};
-
 export const idToAddress = async (id: number) => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
