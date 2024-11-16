@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import ActionLog from '@/components/gamePlay/ActionLog'
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Territory, Unit, Player, Order, territories, initialUnits, initialPlayers } from '@/lib/types/game'
+import { Territory, Unit, Player, Order, territories, initialUnits, InitialPlayers } from '@/lib/types/game'
 import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
@@ -20,12 +20,12 @@ export default function DiplomacyGame() {
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [units, setUnits] = useState<Unit[]>(initialUnits)
     const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
-    const [actionType, setActionType] = useState<'move' | 'split'>('move')
-    const [splitStrength, setSplitStrength] = useState<number>(0)
+    const [actionType, setActionType] = useState<string>('move')
+    const [moveStrength, setMoveStrength] = useState<number>(0)
     const [turnComplete, setTurnComplete] = useState<boolean>(false)
     const [actionLog, setActionLog] = useState<string[]>([])
-    const [players, setPlayers] = useState<Player[]>(initialPlayers)
-    const [currentPlayer, setCurrentPlayer] = useState<Player | null>(initialPlayers[0] || null)
+    const [players, setPlayers] = useState<Player[]>(InitialPlayers)
+    const [currentPlayer, setCurrentPlayer] = useState<Player | null>(InitialPlayers[0] || null)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const { toast } = useToast()
 
@@ -34,13 +34,13 @@ export default function DiplomacyGame() {
         setSelectedTerritory(territory)
         setSelectedUnit(null)
         setActionType('move')
-        setSplitStrength(0)
+        setMoveStrength(0)
     }
 
     const handleUnitSelect = (unitId: string) => {
         const unit = units.find(u => u.id === unitId)
         setSelectedUnit(unit || null)
-        setSplitStrength(0)
+        setMoveStrength(0)
     }
 
     const getAdjacentTerritories = (currentTerritory: Territory) => {
@@ -75,58 +75,43 @@ export default function DiplomacyGame() {
                 return
             }
 
-            const newOrder: Order = {
-                type: actionType,
-                unitId: selectedUnit.id,
-                from: selectedUnit.position,
-                to: targetTerritoryId,
-            }
-
-            if (actionType === 'split') {
-                if (splitStrength <= 0 || splitStrength >= selectedUnit.strength) {
-                    toast({
-                        title: "Invalid Split",
-                        description: "Split strength must be between 1 and the unit's current strength.",
-                        variant: "destructive",
-                    })
-                    return
-                }
-                newOrder.splitStrength = splitStrength
-            }
-
-
-            if (actionType === 'move') {
+            if (moveStrength <= 0 || moveStrength >= selectedUnit.strength) {
                 setUnits(prevUnits => prevUnits.map(u =>
                     u.id === selectedUnit.id ? { ...u, position: targetTerritoryId } : u
                 ))
-                setActionLog(prevLog => [...prevLog, `${selectedUnit.type} moved from ${currentTerritory.name} to ${targetTerritory.name}`])
-            } else if (actionType === 'split') {
+                setActionLog(prevLog => [...prevLog,
+                `${selectedUnit.type} moved all units from ${currentTerritory.name} to ${targetTerritory.name}`
+                ])
+            } else {
                 const newUnitId = `unit${units.length + 1}`
                 setUnits(prevUnits => [
                     ...prevUnits.map(u =>
-                        u.id === selectedUnit.id ? { ...u, strength: u.strength - splitStrength } : u
+                        u.id === selectedUnit.id ? { ...u, strength: u.strength - moveStrength } : u
                     ),
                     {
                         id: newUnitId,
                         type: selectedUnit.type,
                         countryId: selectedUnit.countryId,
                         position: targetTerritoryId,
-                        strength: splitStrength
+                        strength: moveStrength
                     }
                 ])
-                setActionLog(prevLog => [...prevLog, `${selectedUnit.type} split from ${currentTerritory.name} to ${targetTerritory.name} with strength ${splitStrength}`])
+                setActionLog(prevLog => [...prevLog,
+                `${selectedUnit.type} split ${moveStrength} units from ${currentTerritory.name} to ${targetTerritory.name}`
+                ])
             }
 
             toast({
-                title: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Order Issued`,
-                description: `${selectedUnit.type} ${actionType} from ${selectedUnit.position} to ${targetTerritoryId}`,
+                title: "Move Order Issued",
+                description: `${selectedUnit.type} moved from ${currentTerritory.name} to ${targetTerritory.name}${moveStrength > 0 ? ` with strength ${moveStrength}` : ''
+                    }`,
             })
 
             setSelectedUnit(null)
             setTurnComplete(true)
 
             // Update supply centers
-            if (targetTerritory.type === 'supply') {
+            if (targetTerritory.type === 'castle') {
                 const otherPlayerId = currentPlayer?.id === 'player1' ? 'player2' : 'player1'
                 setPlayers(prevPlayers => prevPlayers.map(p => {
                     if (p.id === currentPlayer?.id) {
@@ -222,7 +207,7 @@ export default function DiplomacyGame() {
                             {selectedTerritory ? (
                                 <div>
                                     <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
-                                    <p className="mb-2">Type: {selectedTerritory.type === 'supply' ? 'Supply Center' : 'Land Territory'}</p>
+                                    <p className="mb-2">Type: {selectedTerritory.type === 'castle' ? 'castle' : 'land'}</p>
                                     <p className="mb-4">Units in this territory:</p>
                                     <Select onValueChange={handleUnitSelect} disabled={turnComplete}>
                                         <SelectTrigger className="w-full">
@@ -238,31 +223,29 @@ export default function DiplomacyGame() {
                                     </Select>
                                     {selectedUnit && !turnComplete && (
                                         <div className="mt-4">
-                                            <RadioGroup defaultValue="move" onValueChange={(value) => setActionType(value as 'move' | 'split')}>
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="move" id="move" />
-                                                    <Label htmlFor="move">Move</Label>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1">
+                                                    <Label htmlFor="moveStrength">Move Strength (optional):</Label>
+                                                    <div className="flex gap-2 mt-1">
+                                                        <Input
+                                                            id="moveStrength"
+                                                            type="number"
+                                                            min="1"
+                                                            max={selectedUnit.strength - 1}
+                                                            value={moveStrength}
+                                                            onChange={(e) => setMoveStrength(parseInt(e.target.value))}
+                                                        />
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setMoveStrength(selectedUnit.strength)}
+                                                        >
+                                                            Max ({selectedUnit.strength})
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="split" id="split" />
-                                                    <Label htmlFor="split">Split</Label>
-                                                </div>
-                                            </RadioGroup>
-                                            {actionType === 'split' && (
-                                                <div className="mt-2">
-                                                    <Label htmlFor="splitStrength">Split Strength:</Label>
-                                                    <Input
-                                                        id="splitStrength"
-                                                        type="number"
-                                                        min="1"
-                                                        max={selectedUnit.strength - 1}
-                                                        value={splitStrength}
-                                                        onChange={(e) => setSplitStrength(parseInt(e.target.value))}
-                                                        className="mt-1"
-                                                    />
-                                                </div>
-                                            )}
-                                            <p className="mt-2 mb-2">{actionType.charAt(0).toUpperCase() + actionType.slice(1)} {selectedUnit.type} to:</p>
+                                            </div>
+                                            <p className="mt-2 mb-2">Move {selectedUnit.type} to:</p>
                                             <div className="space-y-2">
                                                 {getAdjacentTerritories(selectedTerritory).map(territory => (
                                                     <Button
