@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/lib/hooks/useToast"
+import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
 
 type Player = {
   id: string
@@ -87,11 +88,11 @@ export function GameSetupComponent({ onGameStart }: { onGameStart: (players: Pla
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Diplomacy Game Setup</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Diplomacy Game Setup</DialogTitle>
+      </DialogHeader>
+      <div>
         <div className="mb-4">
           <Input
             placeholder="Player Name"
@@ -152,8 +153,7 @@ export function GameSetupComponent({ onGameStart }: { onGameStart: (players: Pla
           ))}
         </div>
         <Button onClick={handleStartGame}>Start Game</Button>
-      </CardContent>
-    </Card>
-
+      </div>
+    </DialogContent>
   )
 }

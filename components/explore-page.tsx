@@ -7,8 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Search, Plus } from 'lucide-react'
 import { useToast } from "@/lib/hooks/useToast"
-import { Dialog, DialogContent, DialogTrigger } from '@radix-ui/react-dialog'
-import GameSetup from '@/components/game-setup'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { GameSetupComponent } from '@/components/game-setup'
+import { useRouter } from 'next/navigation'
 
 type Game = {
   id: string
@@ -55,6 +56,9 @@ export function ExplorePageComponent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [games, setGames] = useState<Game[]>(mockGames)
   const [players, setPlayers] = useState<Player[]>(mockPlayers)
+  const [isRulesOpen, setIsRulesOpen] = useState(false)
+  const router = useRouter()
+
   const { toast } = useToast()
 
   const filteredGames = games.filter(game =>
@@ -79,6 +83,8 @@ export function ExplorePageComponent() {
       title: "Game Joined",
       description: "You have successfully joined the game.",
     })
+
+    router.push(`/play/${gameId}`)
   }
 
   return (
@@ -138,17 +144,13 @@ export function ExplorePageComponent() {
             <CardTitle>Game Actions & Rankings</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col flex-grow">
-            <Dialog>
+            <Dialog open={isRulesOpen} onOpenChange={setIsRulesOpen}>
               <DialogTrigger asChild>
                 <Button className="mb-6">
                   <Plus className="mr-2 h-4 w-4" /> Create New Game
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                  <div>
-                    test sdfsd
-                  </div>
-              </DialogContent>
+              <GameSetupComponent onGameStart={() => { }} />
             </Dialog>
 
             <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>

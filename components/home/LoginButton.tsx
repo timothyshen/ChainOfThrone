@@ -20,7 +20,7 @@ export default function LoginButton({ className }: LoginButtonProps) {
                         <Button
                             size="sm"
                         >
-                            Go to Trails
+                            Lets play
                         </Button>
                     </Link>
                 ) : (
