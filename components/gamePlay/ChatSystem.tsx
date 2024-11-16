@@ -51,7 +51,7 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
             }
 
             try {
-                const userAlice = await PushAPI.initialize(walletClient, {
+                const userAlice = await PushAPI.initialize(walletClient as any, {
                     env: CONSTANTS.ENV.STAGING,
                 });
 
@@ -157,7 +157,7 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
                         onChange={(e) => setMessageContent(e.target.value)}
                         className="flex-grow mr-2"
                     />
-                    <Button onClick={handleSendMessage} disabled={!selectedRecipient || !messageContent.trim()}>Send</Button>
+                    <Button onClick={handleSendMessage}>Send</Button>
                 </div>
             </CardContent>
         </Card>
