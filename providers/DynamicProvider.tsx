@@ -1,20 +1,18 @@
-"use client";
+'use client'
 
 import {
   DynamicContextProvider,
-  DynamicWidget,
 } from "@dynamic-labs/sdk-react-core";
 import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector";
-import { createConfig, WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { http } from "viem";
-import { mainnet } from "viem/chains";
+import {
+  createConfig,
+  WagmiProvider,
+} from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { http } from 'viem';
+import { mainnet } from 'viem/chains';
 
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
-
-const dynamicEnvironmentId =
-  process.env.NEXT_PUBLIC_DYNAMIC_LABS_ENVIRONMENT_ID || "";
-console.log(dynamicEnvironmentId);
 
 const config = createConfig({
   chains: [mainnet],
@@ -35,18 +33,17 @@ export default function DynamicProvider({
     <DynamicContextProvider
       settings={{
         // Find your environment id at https://app.dynamic.xyz/dashboard/developer
-        environmentId: dynamicEnvironmentId,
+        environmentId: "711895d2-a81c-462e-885e-409997a413f0",
         walletConnectors: [EthereumWalletConnectors],
       }}
     >
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>
-            <DynamicWidget />
             {children}
           </DynamicWagmiConnector>
         </QueryClientProvider>
       </WagmiProvider>
     </DynamicContextProvider>
   );
-}
+};
