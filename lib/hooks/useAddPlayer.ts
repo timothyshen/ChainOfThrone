@@ -30,7 +30,7 @@ export const useAddPlayer = () => {
       const resp = await contractsApi.callContractFunction(
         "ethereum",
         "chainofthronev21",
-        "chainofthronv2",
+        "chainofthronev2",
         "addPlayer",
         payload
       );

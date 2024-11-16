@@ -19,7 +19,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
     const { addPlayer, isLoading, error } = useAddPlayer();
 
     useEffect(() => {
-        const getGameStatus = async () => {
+        const getGameStatuses = async () => {
             const status = await getGameStatus();
             console.log("gameStatus", status);
         };
@@ -34,7 +34,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
             console.log("playerAddress", address);
         };
 
-        getGameStatus();
+        getGameStatuses();
         getTotalPlayers();
         getPlayerAddress();
     }, []);

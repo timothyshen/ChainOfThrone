@@ -30,3 +30,22 @@ export const getGameStatus = async () => {
   });
   return result;
 };
+
+export const getGrid = async () => {
+  const result = await contractClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: abi.abi,
+    functionName: "getGrid",
+  });
+  console.log("grid", result);
+  return result;
+};
+
+export const getMaxPlayer = async () => {
+  const result = await contractClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: abi.abi,
+    functionName: "MAX_PLAYERS",
+  });
+  return result;
+};
