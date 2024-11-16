@@ -86,6 +86,71 @@
     },
     {
       "type": "function",
+      "name": "get2dGrid",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "cells",
+          "type": "tuple[3][3]",
+          "internalType": "struct Game.Cell[3][3]",
+          "components": [
+            {
+              "name": "pendingMoves",
+              "type": "tuple[]",
+              "internalType": "struct Game.Move[]",
+              "components": [
+                {
+                  "name": "player",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+                { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+                { "name": "toX", "type": "uint8", "internalType": "uint8" },
+                { "name": "toY", "type": "uint8", "internalType": "uint8" },
+                {
+                  "name": "units",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                }
+              ]
+            },
+            {
+              "name": "pendingLoans",
+              "type": "tuple[]",
+              "internalType": "struct Game.Loan[]",
+              "components": [
+                {
+                  "name": "lender",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "borrower",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+                { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+                { "name": "toX", "type": "uint8", "internalType": "uint8" },
+                { "name": "toY", "type": "uint8", "internalType": "uint8" },
+                {
+                  "name": "units",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                }
+              ]
+            },
+            { "name": "player", "type": "address", "internalType": "address" },
+            { "name": "units", "type": "uint256", "internalType": "uint256" },
+            { "name": "isCastle", "type": "bool", "internalType": "bool" }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
       "name": "getGrid",
       "inputs": [],
       "outputs": [
@@ -216,6 +281,13 @@
       ],
       "outputs": [],
       "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "roundNumber",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+      "stateMutability": "view"
     },
     {
       "type": "function",

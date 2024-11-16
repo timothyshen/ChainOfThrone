@@ -3,59 +3,58 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/lib/hooks/useToast"
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useAccount } from 'wagmi'
+import { Player, Unit } from '@/lib/types/game'
 
-import { Player, Unit, InitialTerritories, AvailableCountries } from '@/lib/types/game'
+interface GameSetupProps {
+  onGameStart: (players: Player[], units: Unit[]) => void
+}
 
-
-
-
-
-export function GameSetupComponent({ onGameStart }: { onGameStart: (players: Player[], units: Unit[]) => void }) {
+export function GameSetupComponent({ onGameStart }: GameSetupProps) {
+  const { address } = useAccount()
   const [players, setPlayers] = useState<Player[]>([])
-  const [currentPlayer, setCurrentPlayer] = useState<Player>({
-    id: '',
-    name: '',
-    color: '',
-    country: '',
-    isReady: false,
-    supplyCenters: 0
-  })
   const [units, setUnits] = useState<Unit[]>([])
   const [selectedTerritory, setSelectedTerritory] = useState<string | null>(null)
 
-  const { address } = useAccount()
-
   const handleAddPlayer = () => {
-    if (currentPlayer.name && currentPlayer.country) {
-      const country = AvailableCountries.find(c => c.name === currentPlayer.country)
-      if (country) {
-        const newPlayer: Player = {
-          ...currentPlayer,
-          id: Date.now().toString(),
-          color: country.color
-        }
-        setPlayers([...players, newPlayer])
-        setCurrentPlayer({ id: '', name: '', color: '', country: '', isReady: false, supplyCenters: [] })
-      }
+    if (!address || players.some(player => player.id === address)) return
+
+    const newPlayer: Player = {
+      id: address,
+      name: address,
+      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`, // Random color
+      isReady: false,
+      supplyCenters: 0
     }
+
+    setPlayers([...players, newPlayer])
   }
 
-  const handleUnitPlacement = (type: 'army') => {
-    if (selectedTerritory && players.length > 0) {
-      const newUnit: Unit = {
-        id: Date.now().toString(),
-        type: type,
-        position: selectedTerritory,
-        strength: 10,
-        countryId: players.find(p => p.country === currentPlayer.country)?.id || ''
-      }
-      setUnits([...units, newUnit])
-      setSelectedTerritory(null)
+  const handleUnitPlacement = (type: 'army' | 'fleet') => {
+    if (!address || !selectedTerritory) return
+
+    const playerUnitCount = units.filter(unit => unit.player === address).length
+    if (playerUnitCount >= 3) {
+      toast({
+        title: "Unit Limit Reached",
+        description: "You can only place 3 units per player.",
+        variant: "destructive",
+      })
+      return
     }
+
+    const newUnit: Unit = {
+      id: `${address}-${Date.now()}`,
+      type,
+      position: selectedTerritory,
+      strength: 10,
+      player: address
+    }
+
+    setUnits([...units, newUnit])
+    setSelectedTerritory(null)
   }
 
   const handleStartGame = () => {
@@ -71,70 +70,52 @@ export function GameSetupComponent({ onGameStart }: { onGameStart: (players: Pla
   }
 
   return (
-    <DialogContent>
+    <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>Diplomacy Game Setup</DialogTitle>
       </DialogHeader>
-      <div>
-        <div className="mb-4">
-          <Input
-            placeholder="Player Name"
-            value={address}
-            onChange={(e) => setCurrentPlayer({ ...currentPlayer, name: e.target.value })}
-            className="mb-2"
-          />
-          <Select onValueChange={(value) => setCurrentPlayer({ ...currentPlayer, country: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a country" />
-            </SelectTrigger>
-            <SelectContent>
-              {AvailableCountries
-                .filter(country => !players.some(player => player.country === country.name))
-                .map(country => (
-                  <SelectItem key={country.name} value={country.name}>
-                    {country.name}
-                  </SelectItem>
-                ))
-              }
-            </SelectContent>
-          </Select>
-          <Button onClick={handleAddPlayer} className="mt-2">Add Player</Button>
-        </div>
-        <div className="mb-4">
-          <h3 className="text-lg font-bold mb-2">Players:</h3>
-          {players.map(player => (
-            <div key={player.id} className="mb-2">
-              {player.name} - {player.country}
-            </div>
-          ))}
-        </div>
-        <div className="mb-4">
-          <h3 className="text-lg font-bold mb-2">Unit Placement:</h3>
-          <Select onValueChange={setSelectedTerritory}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a territory" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(InitialTerritories).map(([id, territory]) => (
-                <SelectItem key={id} value={id}>
-                  {territory.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="mt-2">
-            <Button onClick={() => handleUnitPlacement('army')} className="mr-2">Place Army</Button>
+
+      <div className="grid gap-4 py-4">
+        <div className="space-y-4">
+          <div>
+            <Input
+              placeholder="Player Address"
+              value={address || ''}
+              disabled
+              className="mb-2"
+            />
+            <Button
+              onClick={handleAddPlayer}
+              disabled={!address || players.some(player => player.id === address)}
+            >
+              Join Game
+            </Button>
           </div>
-        </div>
-        <div className="mb-4">
-          <h3 className="text-lg font-bold mb-2">Placed Units:</h3>
-          {units.map(unit => (
-            <div key={unit.id} className="mb-2">
-              {unit.type} in {InitialTerritories[unit.position]?.name}
+
+          {players.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Players ({players.length}/7):</h3>
+              <div className="space-y-2">
+                {players.map(player => (
+                  <div key={player.id} className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: player.color }} />
+                    <span>{player.name}</span>
+                    <span className="ml-auto">
+                      {units.filter(unit => unit.player === player.id).length}/3 units
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          )}
         </div>
-        <Button onClick={handleStartGame}>Start Game</Button>
+
+        <Button
+          onClick={handleStartGame}
+          disabled={players.length < 2 || units.length !== players.length * 3}
+        >
+          Start Game
+        </Button>
       </div>
     </DialogContent>
   )

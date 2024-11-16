@@ -37,7 +37,24 @@ export const getGrid = async () => {
     abi: abi.abi,
     functionName: "getGrid",
   });
-  console.log("grid", result);
+  return result;
+};
+
+export const get2DGrid = async () => {
+  const result = await contractClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: abi.abi,
+    functionName: "get2dGrid",
+  });
+  return result;
+};
+
+export const getRoundNumber = async () => {
+  const result = await contractClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: abi.abi,
+    functionName: "roundNumber",
+  });
   return result;
 };
 

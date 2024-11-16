@@ -6,18 +6,22 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/lib/hooks/useToast"
 import { Label } from "@/components/ui/label"
-import ActionLog from '@/components/gamePlay/ActionLog'
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Territory, Unit, Player, Order, territories, initialUnits, InitialPlayers } from '@/lib/types/game'
+import { Territory, Unit, Player, initialUnits, InitialPlayers } from '@/lib/types/game'
 import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
-import { getGrid } from '@/lib/hooks/ReadContract'
+import { get2DGrid } from '@/lib/hooks/ReadContract'
+import { useAccount } from 'wagmi'
+import { Move } from '@/lib/types/game'
+import { useMakeMove } from '@/lib/hooks/useMakeMove'
+import { useValidMove } from '@/lib/hooks/useValidMove'
+
 
 export default function DiplomacyGame() {
-    const [grid, setGrid] = useState<Territory[]>(territories)
+    const [territories, setTerritories] = useState<any[]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [units, setUnits] = useState<Unit[]>(initialUnits)
     const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
@@ -29,15 +33,28 @@ export default function DiplomacyGame() {
     const [currentPlayer, setCurrentPlayer] = useState<Player | null>(InitialPlayers[0] || null)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const { toast } = useToast()
+    const { address } = useAccount()
+    const { makeMove } = useMakeMove()
+    const { validMove } = useValidMove()
 
     useEffect(() => {
         const getGrids = async () => {
-            const grid = await getGrid();
-            console.log("grid", grid);
+            try {
+                const gridData = await get2DGrid();
+                // Type assertion since we know the shape of the data
+                setTerritories(gridData as Territory[]);
+            } catch (error) {
+                console.error('Error fetching grid:', error);
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch game state",
+                    variant: "destructive",
+                });
+            }
         };
+
         getGrids();
     }, []);
-
 
     const handleTerritoryClick = (territory: Territory) => {
         setSelectedTerritory(territory)
@@ -59,111 +76,62 @@ export default function DiplomacyGame() {
         )
     }
 
-    const handleAction = (targetTerritoryId: string) => {
+    const handleAction = async (targetTerritoryId: string) => {
         if (selectedUnit && !turnComplete) {
             const currentTerritory = territories.find(t => t.id === selectedUnit.position)
             const targetTerritory = territories.find(t => t.id === targetTerritoryId)
 
-            if (!currentTerritory || !targetTerritory) {
+            if (!currentTerritory || !targetTerritory || !address) {
                 toast({
                     title: "Invalid Move",
-                    description: "Cannot determine the current or target territory.",
+                    description: "Cannot determine the territories or player address.",
                     variant: "destructive",
                 })
                 return
             }
 
-            const adjacentTerritories = getAdjacentTerritories(currentTerritory)
+            try {
+                const move: Move = {
+                    player: address,
+                    fromX: currentTerritory.x,
+                    fromY: currentTerritory.y,
+                    toX: targetTerritory.x,
+                    toY: targetTerritory.y,
+                    units: moveStrength || selectedUnit.strength
+                }
 
-            if (!adjacentTerritories.some(t => t.id === targetTerritoryId)) {
+                // Check if move is valid
+                const validMoveResult = await validMove(move)
+
+                // If the move is not valid, show an error toast and return
+                //@ts-ignore
+                if (!validMoveResult) {
+                    toast({
+                        title: "Invalid Move",
+                        description: "This move is not allowed by the game rules.",
+                        variant: "destructive",
+                    })
+                    return
+                }
+
+                // Make the move on-chain
+                await makeMove(move)
+
                 toast({
-                    title: "Invalid Move",
-                    description: "You can only move to adjacent territories (up, down, left, or right).",
+                    title: "Move Submitted",
+                    description: "Your move has been submitted to the blockchain",
+                })
+
+                setSelectedUnit(null)
+                setTurnComplete(true)
+
+            } catch (error) {
+                console.error('Error making move:', error)
+                toast({
+                    title: "Error",
+                    description: "Failed to submit move to the blockchain",
                     variant: "destructive",
                 })
-                return
-            }
-
-            if (moveStrength <= 0 || moveStrength >= selectedUnit.strength) {
-                setUnits(prevUnits => prevUnits.map(u =>
-                    u.id === selectedUnit.id ? { ...u, position: targetTerritoryId } : u
-                ))
-                setActionLog(prevLog => [...prevLog,
-                `${selectedUnit.type} moved all units from ${currentTerritory.name} to ${targetTerritory.name}`
-                ])
-            } else {
-                const newUnitId = `unit${units.length + 1}`
-                setUnits(prevUnits => [
-                    ...prevUnits.map(u =>
-                        u.id === selectedUnit.id ? { ...u, strength: u.strength - moveStrength } : u
-                    ),
-                    {
-                        id: newUnitId,
-                        type: selectedUnit.type,
-                        countryId: selectedUnit.countryId,
-                        position: targetTerritoryId,
-                        strength: moveStrength
-                    }
-                ])
-                setActionLog(prevLog => [...prevLog,
-                `${selectedUnit.type} split ${moveStrength} units from ${currentTerritory.name} to ${targetTerritory.name}`
-                ])
-            }
-
-            toast({
-                title: "Move Order Issued",
-                description: `${selectedUnit.type} moved from ${currentTerritory.name} to ${targetTerritory.name}${moveStrength > 0 ? ` with strength ${moveStrength}` : ''
-                    }`,
-            })
-
-            setSelectedUnit(null)
-            setTurnComplete(true)
-
-            // Update supply centers
-            if (targetTerritory.type === 'castle') {
-                const otherPlayerId = currentPlayer?.id === 'player1' ? 'player2' : 'player1'
-                setPlayers(prevPlayers => prevPlayers.map(p => {
-                    if (p.id === currentPlayer?.id) {
-                        return { ...p, supplyCenters: p.supplyCenters + 1 }
-                    } else if (p.id === otherPlayerId) {
-                        return { ...p, supplyCenters: Math.max(0, p.supplyCenters - 1) }
-                    }
-                    return p
-                }))
-            }
-        }
-    }
-
-    const handleReady = () => {
-        if (!turnComplete) {
-            setPlayers(prevPlayers =>
-                prevPlayers.map(p =>
-                    p.id === currentPlayer?.id ? { ...p, isReady: true } : p
-                )
-            )
-        } else {
-            const allPlayersReady = players.every(p => p.isReady)
-            if (allPlayersReady) {
-                // Both players are ready, execute orders
-                setExecutionRecord(prevRecord => [
-                    ...prevRecord,
-                    `${currentPlayer?.name}: ${actionLog.join(', ')}`
-                ])
-                setTurnComplete(false)
-                setActionLog([])
-                setPlayers(prevPlayers => prevPlayers.map(p => ({ ...p, isReady: false })))
-                setCurrentPlayer(prevPlayer => {
-                    const currentIndex = players.findIndex(p => p.id === prevPlayer?.id);
-                    const nextIndex = (currentIndex + 1) % players.length;
-                    return players[nextIndex] || null;
-                })
-            } else {
-                // Current player is ready
-                setPlayers(prevPlayers =>
-                    prevPlayers.map(p =>
-                        p.id === currentPlayer?.id ? { ...p, isReady: true } : p
-                    )
-                )
             }
         }
     }
@@ -274,12 +242,6 @@ export default function DiplomacyGame() {
                             )}
                         </CardContent>
                     </Card>
-                    <ActionLog actionLog={actionLog} />
-                    <div className="flex space-x-2">
-                        <Button className="flex-1" onClick={handleReady}>
-                            {turnComplete ? 'End Turn' : 'Ready'}
-                        </Button>
-                    </div>
                 </div>
             </div>
 
