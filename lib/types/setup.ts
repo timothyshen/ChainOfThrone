@@ -11,3 +11,11 @@ export type PlayerRank = {
   walletAddress: string;
   wins: number;
 };
+
+export type MakeMoveArgs = {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  units: number;
+};

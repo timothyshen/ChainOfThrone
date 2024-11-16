@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/lib/hooks/useToast"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import ActionLog from '@/components/gamePlay/ActionLog'
 import { Input } from "@/components/ui/input"
@@ -15,6 +14,7 @@ import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
+import { getGrid } from '@/lib/hooks/ReadContract'
 
 export default function DiplomacyGame() {
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
@@ -28,6 +28,15 @@ export default function DiplomacyGame() {
     const [currentPlayer, setCurrentPlayer] = useState<Player | null>(InitialPlayers[0] || null)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const { toast } = useToast()
+
+
+    useEffect(() => {
+        const getGrid = async () => {
+            const grid = await getGrid();
+            console.log("grid", grid);
+        };
+        getGrid();
+    }, []);
 
 
     const handleTerritoryClick = (territory: Territory) => {
