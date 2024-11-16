@@ -16,14 +16,21 @@ export const useMakeMove = (): UseMakeMoveReturn => {
   const { data: hash, error, isPending, writeContract } = useWriteContract();
 
   // Define the function to call the buy method on the Bodhi contract
-  const makeMove = async ({ fromX, fromY, toX, toY, units }: MakeMoveArgs) => {
+  const makeMove = async ({
+    player,
+    fromX,
+    fromY,
+    toX,
+    toY,
+    units,
+  }: MakeMoveArgs) => {
     try {
       // Call the writeContract method with the specified parameters
       await writeContract({
         address: CONTRACT_ADDRESS as `0x${string}`, // Cast BodhiAddress to the appropriate type
         abi: abi.abi, // ABI for the Bodhi contract
         functionName: "makeMove", // Function name to call
-        args: [fromX, fromY, toX, toY, units], // Arguments for the function
+        args: [{ player, fromX, fromY, toX, toY, units }], // Arguments for the function
       });
     } catch (err) {
       // Log any errors that occur
