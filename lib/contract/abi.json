@@ -1,0 +1,149 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "MAX_PLAYERS",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "addPlayer",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "addressToId",
+      "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "checkValidMove",
+      "inputs": [
+        {
+          "name": "_move",
+          "type": "tuple",
+          "internalType": "struct Game.Move",
+          "components": [
+            { "name": "player", "type": "address", "internalType": "address" },
+            { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+            { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+            { "name": "toX", "type": "uint8", "internalType": "uint8" },
+            { "name": "toY", "type": "uint8", "internalType": "uint8" },
+            { "name": "units", "type": "uint256", "internalType": "uint256" }
+          ]
+        }
+      ],
+      "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "executeRound",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "gameStatus",
+      "inputs": [],
+      "outputs": [
+        { "name": "", "type": "uint8", "internalType": "enum Game.GameStatus" }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "grid",
+      "inputs": [
+        { "name": "", "type": "uint256", "internalType": "uint256" },
+        { "name": "", "type": "uint256", "internalType": "uint256" }
+      ],
+      "outputs": [
+        { "name": "player", "type": "address", "internalType": "address" },
+        { "name": "units", "type": "uint256", "internalType": "uint256" },
+        { "name": "isCastle", "type": "bool", "internalType": "bool" }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "idToAddress",
+      "inputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
+      "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "makeMove",
+      "inputs": [
+        {
+          "name": "_move",
+          "type": "tuple",
+          "internalType": "struct Game.Move",
+          "components": [
+            { "name": "player", "type": "address", "internalType": "address" },
+            { "name": "fromX", "type": "uint8", "internalType": "uint8" },
+            { "name": "fromY", "type": "uint8", "internalType": "uint8" },
+            { "name": "toX", "type": "uint8", "internalType": "uint8" },
+            { "name": "toY", "type": "uint8", "internalType": "uint8" },
+            { "name": "units", "type": "uint256", "internalType": "uint256" }
+          ]
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "totalPlayers",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "event",
+      "name": "GameFinalized",
+      "inputs": [
+        {
+          "name": "winner",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "GameStarted",
+      "inputs": [],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "PlayerAdded",
+      "inputs": [
+        {
+          "name": "player",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "playerId",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "uint8"
+        }
+      ],
+      "anonymous": false
+    }
+  ]
+}
