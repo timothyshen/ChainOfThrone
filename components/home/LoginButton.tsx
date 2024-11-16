@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { useDynamicContext } from "@dynamic-labs/sdk-react-core"
+import { DynamicWidget, useDynamicContext } from "@dynamic-labs/sdk-react-core"
 import { useAccount } from "wagmi";
 import Link from "next/link";
 
@@ -12,13 +12,7 @@ export default function LoginButton() {
         <>
             {
                 isConnected ? (
-                    <Link href="/explore">
-                        <Button
-                            size="sm"
-                        >
-                            Lets play
-                        </Button>
-                    </Link>
+                    <DynamicWidget />
                 ) : (
                     <Button
                         size="sm"

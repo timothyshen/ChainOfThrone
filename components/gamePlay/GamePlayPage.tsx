@@ -23,12 +23,9 @@ import { useValidMove } from '@/lib/hooks/useValidMove'
 export default function DiplomacyGame() {
     const [territories, setTerritories] = useState<any[]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
-    const [units, setUnits] = useState<Unit[]>(initialUnits)
-    const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null)
     const [actionType, setActionType] = useState<string>('move')
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [turnComplete, setTurnComplete] = useState<boolean>(false)
-    const [actionLog, setActionLog] = useState<string[]>([])
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
     const [currentPlayer, setCurrentPlayer] = useState<Player | null>(InitialPlayers[0] || null)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
@@ -42,6 +39,7 @@ export default function DiplomacyGame() {
             try {
                 const gridData = await get2DGrid();
                 // Type assertion since we know the shape of the data
+                console.log(gridData)
                 setTerritories(gridData as Territory[]);
             } catch (error) {
                 console.error('Error fetching grid:', error);
@@ -57,84 +55,91 @@ export default function DiplomacyGame() {
     }, []);
 
     const handleTerritoryClick = (territory: Territory) => {
-        setSelectedTerritory(territory)
-        setSelectedUnit(null)
-        setActionType('move')
-        setMoveStrength(0)
+        // Check if territory belongs to current user
+        if (territory.player !== address) {
+            toast({
+                title: "Invalid Selection",
+                description: "You can only select territories that belong to you",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setSelectedTerritory(territory);
+        setActionType('move');
+        setMoveStrength(0);
     }
 
-    const handleUnitSelect = (unitId: string) => {
-        const unit = units.find(u => u.id === unitId)
-        setSelectedUnit(unit || null)
-        setMoveStrength(0)
-    }
 
-    const getAdjacentTerritories = (currentTerritory: Territory) => {
-        return territories.filter(t =>
-            (Math.abs(t.x - currentTerritory.x) === 1 && t.y === currentTerritory.y) ||
-            (Math.abs(t.y - currentTerritory.y) === 1 && t.x === currentTerritory.x)
-        )
-    }
-
-    const handleAction = async (targetTerritoryId: string) => {
-        if (selectedUnit && !turnComplete) {
-            const currentTerritory = territories.find(t => t.id === selectedUnit.position)
-            const targetTerritory = territories.find(t => t.id === targetTerritoryId)
-
-            if (!currentTerritory || !targetTerritory || !address) {
-                toast({
-                    title: "Invalid Move",
-                    description: "Cannot determine the territories or player address.",
-                    variant: "destructive",
-                })
-                return
-            }
-
-            try {
-                const move: Move = {
-                    player: address,
-                    fromX: currentTerritory.x,
-                    fromY: currentTerritory.y,
-                    toX: targetTerritory.x,
-                    toY: targetTerritory.y,
-                    units: moveStrength || selectedUnit.strength
+    const getAdjacentTerritories = (territory: Territory): Territory[] => {
+        if (!territory) return [];
+        console.log('territory', territory)
+        const adjacentTerritories: Territory[] = [];
+        for (let i = 0; i < territories.length; i++) {
+            for (let j = 0; j < territories[i].length; j++) {
+                const dx = Math.abs(territory.x - territories[i][j].x)
+                const dy = Math.abs(territory.y - territories[i][j].y)
+                if (dx + dy === 1) {
+                    adjacentTerritories.push(territories[i][j]);
                 }
-
-                // Check if move is valid
-                const validMoveResult = await validMove(move)
-
-                // If the move is not valid, show an error toast and return
-                //@ts-ignore
-                if (!validMoveResult) {
-                    toast({
-                        title: "Invalid Move",
-                        description: "This move is not allowed by the game rules.",
-                        variant: "destructive",
-                    })
-                    return
-                }
-
-                // Make the move on-chain
-                await makeMove(move)
-
-                toast({
-                    title: "Move Submitted",
-                    description: "Your move has been submitted to the blockchain",
-                })
-
-                setSelectedUnit(null)
-                setTurnComplete(true)
-
-            } catch (error) {
-                console.error('Error making move:', error)
-                toast({
-                    title: "Error",
-                    description: "Failed to submit move to the blockchain",
-                    variant: "destructive",
-                })
             }
         }
-    }
+
+        return adjacentTerritories;
+    };
+
+    const handleAction = async (targetTerritory: Territory) => {
+        if (!selectedTerritory || !address || turnComplete) {
+            toast({
+                title: "Invalid Action",
+                description: "Cannot perform this action at this time.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+            const move: Move = {
+                player: address,
+                fromX: selectedTerritory.x,
+                fromY: selectedTerritory.y,
+                toX: targetTerritory.x,
+                toY: targetTerritory.y,
+                units: moveStrength
+            };
+
+            // Validate move
+            const isValidMove = await validMove(move);
+            if (isValidMove === false) {
+                toast({
+                    title: "Invalid Move",
+                    description: "This move is not allowed by the game rules.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Make the move
+            await makeMove(move);
+
+            toast({
+                title: "Move Submitted",
+                description: "Your move has been submitted to the blockchain",
+            });
+
+            setSelectedTerritory(null);
+            setMoveStrength(0);
+            setTurnComplete(true);
+
+        } catch (error) {
+            console.error('Error making move:', error);
+            toast({
+                title: "Error",
+                description: "Failed to submit move to the blockchain",
+                variant: "destructive",
+            });
+        }
+    };
 
     const handleSendMessage = (recipientId: string, content: string) => {
         // In a real application, you would send this message to a server
@@ -159,7 +164,6 @@ export default function DiplomacyGame() {
                         <TabsContent value="map">
                             <GameMap
                                 territories={territories}
-                                units={units}
                                 onTerritoryClick={handleTerritoryClick}
                             />
                         </TabsContent>
@@ -184,61 +188,44 @@ export default function DiplomacyGame() {
                             {selectedTerritory ? (
                                 <div>
                                     <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
-                                    <p className="mb-2">Type: {selectedTerritory.type === 'castle' ? 'castle' : 'land'}</p>
-                                    <p className="mb-4">Units in this territory:</p>
-                                    <Select onValueChange={handleUnitSelect} disabled={turnComplete}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select a unit" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {units.filter(unit => unit.position === selectedTerritory.id).map(unit => (
-                                                <SelectItem key={unit.id} value={unit.id}>
-                                                    {unit.type} (Strength: {unit.strength})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {selectedUnit && !turnComplete && (
-                                        <div className="mt-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex-1">
-                                                    <Label htmlFor="moveStrength">Move Strength (optional):</Label>
-                                                    <div className="flex gap-2 mt-1">
-                                                        <Input
-                                                            id="moveStrength"
-                                                            type="number"
-                                                            min="1"
-                                                            max={selectedUnit.strength - 1}
-                                                            value={moveStrength}
-                                                            onChange={(e) => setMoveStrength(parseInt(e.target.value))}
-                                                        />
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => setMoveStrength(selectedUnit.strength)}
-                                                        >
-                                                            Max ({selectedUnit.strength})
-                                                        </Button>
-                                                    </div>
+                                    <p className="mb-2">Type: {selectedTerritory.isCastle ? 'castle' : 'land'}</p>
+                                    {!turnComplete && (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="moveStrength">Units to Move:</Label>
+                                                <div className="flex gap-2 mt-1">
+                                                    <Input
+                                                        id="moveStrength"
+                                                        type="number"
+                                                        min="1"
+                                                        max={selectedTerritory.units}
+                                                        value={moveStrength}
+                                                        onChange={(e) => setMoveStrength(parseInt(e.target.value))}
+                                                        className="w-full"
+                                                    />
                                                 </div>
                                             </div>
-                                            <p className="mt-2 mb-2">Move {selectedUnit.type} to:</p>
-                                            <div className="space-y-2">
-                                                {getAdjacentTerritories(selectedTerritory).map(territory => (
-                                                    <Button
-                                                        key={territory.id}
-                                                        className="w-full"
-                                                        onClick={() => handleAction(territory.id)}
-                                                    >
-                                                        {territory.name}
-                                                    </Button>
-                                                ))}
+
+                                            <div>
+                                                <Label>Select Destination:</Label>
+                                                <div className="grid gap-2 mt-1">
+                                                    {getAdjacentTerritories(selectedTerritory).map(territory => (
+                                                        <Button
+                                                            key={territory.id}
+                                                            className="w-full"
+                                                            onClick={() => handleAction(territory)}
+                                                            disabled={!moveStrength || moveStrength <= 0}
+                                                        >
+                                                            Move {moveStrength} units to {territory.isCastle ? 'castle' : 'land'}
+                                                        </Button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
                                 </div>
                             ) : (
-                                <p>Select a territory to view information and actions.</p>
+                                <p>Select a territory to view information and perform actions.</p>
                             )}
                         </CardContent>
                     </Card>
