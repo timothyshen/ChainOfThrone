@@ -161,12 +161,12 @@ contract Game {
     }
 
     function makeMove(Move memory _move) public onlyOngoing {
-        require(
-            !roundSubmitted[addressToId[msg.sender]],
-            "Already submitted move"
-        );
-        require(_move.player == msg.sender, "Invalid move (address)");
-        require(checkValidMove(_move), "Invalid move");
+        // require(
+        // !roundSubmitted[addressToId[msg.sender]],
+        // "Already submitted move"
+        // );
+        // require(_move.player == msg.sender, "Invalid move (address)");
+        // require(checkValidMove(_move), "Invalid move");
 
         (uint8 fromX, uint8 fromY, uint8 toX, uint8 toY, ) = (
             _move.fromX,
@@ -177,23 +177,23 @@ contract Game {
         );
 
         Cell storage fromCell = grid[fromX][fromY];
-        require(fromCell.player == msg.sender, "Invalid move");
+        // require(fromCell.player == msg.sender, "Invalid move");
 
         fromCell.pendingMoves.push(_move);
 
         Cell storage toCell = grid[toX][toY];
         toCell.pendingMoves.push(_move);
 
-        roundSubmitted[addressToId[msg.sender]] = true;
+        // roundSubmitted[addressToId[msg.sender]] = true;
 
-        if (_allMovesSubmitted()) {
-            executeRound();
-        }
+        // if (_allMovesSubmitted()) {
+        //     executeRound();
+        // }
     }
 
     function makeLoan(Loan memory _loan) public onlyOngoing {
-        require(_loan.lender == msg.sender, "Invalid loan (address)");
-        require(checkValidLoan(_loan), "Invalid loan");
+        // require(_loan.lender == msg.sender, "Invalid loan (address)");
+        // require(checkValidLoan(_loan), "Invalid loan");
 
         Cell storage toCell = grid[_loan.toX][_loan.toY];
         toCell.pendingLoans.push(_loan);
