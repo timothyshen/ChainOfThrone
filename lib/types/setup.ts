@@ -1,5 +1,6 @@
 export type Game = {
   name: string;
+  smartContract: string;
   players: string[];
   id: string;
   maxPlayers: number;

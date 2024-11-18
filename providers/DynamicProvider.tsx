@@ -10,15 +10,15 @@ import {
 } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
-import { sepolia } from 'viem/chains';
+import { sepolia, flowTestnet, scrollSepolia } from 'viem/chains';
 
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 
 const config = createConfig({
-  chains: [sepolia],
+  chains: [sepolia, flowTestnet, scrollSepolia],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [sepolia.id]: http(),
+    [scrollSepolia.id]: http(),
   },
 });
 

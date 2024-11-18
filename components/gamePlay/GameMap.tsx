@@ -16,6 +16,8 @@ export default function GameMap({ territories, onTerritoryClick }: GameMapProps)
     const gridWidth = gridSize.cols * cellSize
     const gridHeight = gridSize.rows * cellSize
 
+    console.log("gridSize", territories)
+
     return (
         <Card>
             <CardHeader>
@@ -75,22 +77,22 @@ export default function GameMap({ territories, onTerritoryClick }: GameMapProps)
                                             <circle
                                                 cx={x + cellSize / 2}
                                                 cy={y + 70}
-                                                r="15"
+                                                r="5"
                                                 fill={territory.player === "0x0000000000000000000000000000000000000000" ? "#ddd" : "#666"}
                                                 stroke="black"
                                                 strokeWidth="2"
                                             />
                                             <text
                                                 x={x + cellSize / 2}
-                                                y={y + 70}
+                                                y={y + 90}
                                                 textAnchor="middle"
-                                                dominantBaseline="middle"
-                                                fill="white"
-                                                fontSize="12"
+                                                className="text-sm font-medium"
+                                                fill="black"
                                             >
-                                                {territory.units}
+                                                {Number(territory.units)}
                                             </text>
                                         </g>
+
                                     )}
                                 </g>
                             )

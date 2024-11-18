@@ -1,4 +1,4 @@
-import { sepolia } from "viem/chains";
+import { sepolia, flowTestnet, scrollSepolia } from "viem/chains";
 import { CONTRACT_ADDRESS } from "../constants/contracts";
 import { abi } from "./abi.json";
 import * as MultiBaas from "@curvegrid/multibaas-sdk";
@@ -12,7 +12,7 @@ import {
 } from "viem";
 
 export const contractClient = createPublicClient({
-  chain: sepolia,
+  chain: scrollSepolia,
   transport: http(),
 });
 

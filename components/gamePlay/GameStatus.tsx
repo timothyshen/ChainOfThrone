@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { Player } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getGameStatus, totalPlayers, idToAddress } from "@/lib/hooks/ReadContract";
-import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
+// import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { Button } from "@/components/ui/button";
+import { useAddPlayer } from "@/lib/hooks/useAddPlayer copy";
 
 interface GameStatusProps {
     currentPlayer: Player | null
@@ -16,7 +17,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
 
     const [gameStatus, setGameStatus] = useState(null);
     const [totalPlayer, setTotalPlayer] = useState();
-    const { addPlayer, isLoading, error } = useAddPlayer();
+    const { addPlayer, isPending, error } = useAddPlayer();
 
     useEffect(() => {
         const getGameStatuses = async () => {
