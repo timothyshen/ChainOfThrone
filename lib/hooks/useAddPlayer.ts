@@ -1,14 +1,13 @@
 import * as MultiBaas from "@curvegrid/multibaas-sdk";
-import { isAxiosError } from "axios";
 import { useState, useCallback } from "react";
-import { useAccount, useSendTransaction } from "wagmi";
-import { CONTRACT_ADDRESS } from "../constants/contracts";
+import { useAccount, useSendTransaction, useWriteContract } from "wagmi";
 
-export const useAddPlayer = () => {
+export const useAddPlayer = (): UseAddPlayerReturn => {
   const { address } = useAccount();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { sendTransactionAsync } = useSendTransaction();
+  const { isConnected, data: hash, error: writeError, isPending, writeContract } = useWriteContract();
 
   const config = new MultiBaas.Configuration({
     basePath: "https://tfb7e5aj3bbtdifchq7lw2qbby.multibaas.com/api/v0",
@@ -27,28 +26,16 @@ export const useAddPlayer = () => {
     };
 
     try {
-      const resp = await contractsApi.callContractFunction(
-        "ethereum",
-        "chainofthronev21",
-        "chainofthronev2",
-        "addPlayer",
-        payload
-      );
-      //@ts-ignore
-      console.log("resp", resp.data.result.tx);
-      //@ts-ignore
-      const tx = resp.data.result.tx;
-      const result = await sendTransactionAsync(tx);
-      console.log("result", result);
-      return resp.data.result;
-    } catch (e) {
-      if (isAxiosError(e)) {
-        const errorMessage = `MultiBaas error with status '${e.response?.data.status}' and message: ${e.response?.data.message}`;
-        setError(errorMessage);
-      } else {
-        setError("An unexpected error occurred");
-      }
-      throw e;
+      if (!isConnected) throw new Error("Wallet not connected");
+      await writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: abi.abi,
+        functionName: "addPlayer",
+        args: [],
+      });
+    } catch (err) {
+      console.error("Error calling addPlayer:", err);
+      throw err;
     } finally {
       setIsLoading(false);
     }

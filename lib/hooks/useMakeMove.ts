@@ -49,7 +49,6 @@ export const useMakeMove = (): UseMakeMoveReturn => {
           },
         ],
       });
-      debugger;
       console.log("Transaction submitted:", result);
       return result;
     } catch (err) {

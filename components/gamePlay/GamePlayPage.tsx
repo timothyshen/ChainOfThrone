@@ -218,14 +218,17 @@ export default function DiplomacyGame() {
                                                 <Label>Select Destination:</Label>
                                                 <div className="grid gap-2 mt-1">
                                                     {getAdjacentTerritories(selectedTerritory).map(territory => (
-                                                        <Button
-                                                            key={territory.id}
-                                                            className="w-full"
-                                                            onClick={() => handleAction(territory)}
-                                                            disabled={!moveStrength || moveStrength <= 0}
-                                                        >
-                                                            Move {moveStrength} units to {territory.x}, {territory.y}
-                                                        </Button>
+                                                        <>
+                                                            <Button
+                                                                key={territory.id}
+                                                                className="w-full"
+                                                                onClick={() => handleAction(territory)}
+                                                                disabled={!moveStrength || moveStrength <= 0}
+                                                            >
+                                                                Move {moveStrength} units to {territory.y}, {territory.x}
+                                                            </Button>
+                                                            <Button >End Turn</Button>
+                                                        </>
                                                     ))}
                                                 </div>
                                             </div>
@@ -241,6 +244,6 @@ export default function DiplomacyGame() {
             </div>
 
             <ExecutionLog executionRecord={executionRecord} />
-        </div>
+        </div >
     )
 }
