@@ -1,6 +1,6 @@
 import { sepolia, flowTestnet, scrollSepolia } from "viem/chains";
 import { CONTRACT_ADDRESS } from "../constants/contracts";
-import { abi } from "./abi.json";
+import { abi } from "./abi";
 import * as MultiBaas from "@curvegrid/multibaas-sdk";
 
 import {
@@ -12,13 +12,13 @@ import {
 } from "viem";
 
 export const contractClient = createPublicClient({
-  chain: scrollSepolia,
+  chain: sepolia,
   transport: http(),
 });
 
 export const gameContract = getContract({
   address: CONTRACT_ADDRESS,
-  abi,
+  abi: abi,
   client: contractClient,
 });
 
@@ -30,8 +30,3 @@ export const config = new MultiBaas.Configuration({
 export const chain = "ethereum";
 export const deployedAddressOrLabel = "chainofthrone1";
 export const contractLabel = "chainofthrone";
-
-export const walletClient = createWalletClient({
-  chain: sepolia,
-  transport: custom(window.ethereum),
-});

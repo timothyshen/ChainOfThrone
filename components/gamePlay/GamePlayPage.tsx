@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/lib/hooks/useToast"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Territory, Unit, Player, initialUnits, InitialPlayers } from '@/lib/types/game'
+import { Territory, Player, InitialPlayers } from '@/lib/types/game'
 import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
@@ -22,15 +21,12 @@ import { useMakeMove } from '@/lib/hooks/useMakeMove'
 export default function DiplomacyGame() {
     const [territories, setTerritories] = useState<any[]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
-    const [actionType, setActionType] = useState<string>('move')
     const [moveStrength, setMoveStrength] = useState<number>(0)
-    const [turnComplete, setTurnComplete] = useState<boolean>(false)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
-    const [currentPlayer, setCurrentPlayer] = useState<Player | null>(InitialPlayers[0] || null)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const { toast } = useToast()
     const { address } = useAccount()
-    const { makeMove } = useMakeMove()
+    const { makeMove, isPending, error } = useMakeMove()
 
     useEffect(() => {
         const getGrids = async () => {
@@ -71,7 +67,6 @@ export default function DiplomacyGame() {
         }
 
         setSelectedTerritory(territory);
-        setActionType('move');
         setMoveStrength(0);
     }
 
@@ -93,8 +88,7 @@ export default function DiplomacyGame() {
     };
 
     const handleAction = async (targetTerritory: Territory) => {
-        console.log("TARGET TERRITORY", targetTerritory);
-        if (!selectedTerritory || !address || turnComplete) {
+        if (!selectedTerritory || !address) {
             toast({
                 title: "Invalid Action",
                 description: "Cannot perform this action at this time.",
@@ -105,26 +99,15 @@ export default function DiplomacyGame() {
 
         try {
             const move: Move = {
-                player: address,
                 fromX: selectedTerritory.x,
                 fromY: selectedTerritory.y,
+                player: address,
                 toX: targetTerritory.x,
                 toY: targetTerritory.y,
                 units: moveStrength
             };
 
             console.log("MOVE", move);
-            // Validate move
-            // const isValidMove = await checkValidMove(move);
-            // console.log("IS VALID MOVE", isValidMove);
-            // if (isValidMove === false) {
-            //     toast({
-            //         title: "Invalid Move",
-            //         description: "This move is not allowed by the game rules.",
-            //         variant: "destructive",
-            //     });
-            //     return;
-            // }
 
             // Make the move
             await makeMove(move);
@@ -134,19 +117,22 @@ export default function DiplomacyGame() {
                 description: "Your move has been submitted to the blockchain",
             });
 
-            setSelectedTerritory(null);
+            // setSelectedTerritory(null);
             setMoveStrength(0);
-            setTurnComplete(true);
 
         } catch (error) {
             console.error('Error making move:', error);
             toast({
                 title: "Error",
-                description: "Failed to submit move to the blockchain",
+                description: error instanceof Error ? error.message : "Failed to submit move to the blockchain",
                 variant: "destructive",
             });
         }
     };
+
+    if (error) {
+        console.error("Error making move:", error);
+    }
 
     const handleSendMessage = (recipientId: string, content: string) => {
         // In a real application, you would send this message to a server
@@ -170,6 +156,7 @@ export default function DiplomacyGame() {
                         </TabsList>
                         <TabsContent value="map">
                             <GameMap
+                                currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
                             />
@@ -177,7 +164,7 @@ export default function DiplomacyGame() {
                         <TabsContent value="chat">
                             <ChatSystem
                                 players={players}
-                                currentPlayerId={currentPlayer?.id ?? ''}
+                                currentPlayerId={address}
                                 onSendMessage={handleSendMessage}
                             />
                         </TabsContent>
@@ -185,7 +172,7 @@ export default function DiplomacyGame() {
 
                 </div>
                 <div className="w-1/3 p-4 space-y-4">
-                    <GameStatus currentPlayer={currentPlayer} players={players} />
+                    <GameStatus currentPlayer={address ?? ''} players={players} />
 
                     <Card>
                         <CardHeader>
@@ -196,44 +183,40 @@ export default function DiplomacyGame() {
                                 <div>
                                     <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
                                     <p className="mb-2">Type: {selectedTerritory.isCastle ? 'castle' : 'land'}</p>
-                                    {!turnComplete && (
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label htmlFor="moveStrength">Units to Move:</Label>
-                                                <div className="flex gap-2 mt-1">
-                                                    <Input
-                                                        id="moveStrength"
-                                                        type="number"
-                                                        min="1"
-                                                        max={selectedTerritory.units}
-                                                        value={moveStrength}
-                                                        onChange={(e) => setMoveStrength(parseInt(e.target.value))}
-                                                        className="w-full"
-                                                    />
-                                                    <Button onClick={() => setMoveStrength(selectedTerritory.units)}>Max</Button>
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <Label>Select Destination:</Label>
-                                                <div className="grid gap-2 mt-1">
-                                                    {getAdjacentTerritories(selectedTerritory).map(territory => (
-                                                        <>
-                                                            <Button
-                                                                key={territory.id}
-                                                                className="w-full"
-                                                                onClick={() => handleAction(territory)}
-                                                                disabled={!moveStrength || moveStrength <= 0}
-                                                            >
-                                                                Move {moveStrength} units to {territory.y}, {territory.x}
-                                                            </Button>
-                                                            <Button >End Turn</Button>
-                                                        </>
-                                                    ))}
-                                                </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="moveStrength">Units to Move:</Label>
+                                            <div className="flex gap-2 mt-1">
+                                                <Input
+                                                    id="moveStrength"
+                                                    type="number"
+                                                    min="1"
+                                                    max={selectedTerritory.units}
+                                                    value={moveStrength}
+                                                    onChange={(e) => setMoveStrength(parseInt(e.target.value))}
+                                                    className="w-full"
+                                                />
+                                                <Button onClick={() => setMoveStrength(selectedTerritory.units)}>Max</Button>
                                             </div>
                                         </div>
-                                    )}
+
+                                        <div>
+                                            <Label>Select Destination:</Label>
+                                            <div className="grid gap-2 mt-1">
+                                                {getAdjacentTerritories(selectedTerritory).map(territory => (
+                                                    <Button
+                                                        key={`${territory.x}-${territory.y}`}
+                                                        className="w-full"
+                                                        onClick={() => handleAction(territory)}
+                                                        disabled={!moveStrength || moveStrength <= 0}
+                                                    >
+                                                        Move {moveStrength} units to {territory.x}, {territory.y}
+                                                    </Button>
+                                                ))}
+                                                <Button>End Turn</Button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <p>Select a territory to view information and perform actions.</p>

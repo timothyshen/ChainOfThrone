@@ -4,11 +4,12 @@ import {
   useAccount,
 } from "wagmi";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
-import abi from "@/lib/contract/abi.json";
-import { MakeMoveArgs } from "@/lib/types/setup";
+import { abi } from "@/lib/contract/abi";
+import { Move } from "@/lib/types/game";
+import { parseEther } from "viem";
 
 interface UseMakeMoveReturn {
-  makeMove: (args: MakeMoveArgs) => Promise<void>;
+  makeMove: (move: Move) => Promise<void>;
   isPending: boolean;
   isConfirming: boolean;
   isConfirmed: boolean;
@@ -16,52 +17,42 @@ interface UseMakeMoveReturn {
 }
 
 export const useMakeMove = (): UseMakeMoveReturn => {
-  const { isConnected } = useAccount();
-
-  // Initialize the writeContract hook from wagmi
+  const { isConnected, address } = useAccount();
   const { data: hash, error, isPending, writeContract } = useWriteContract();
 
-  // Define the function to call the buy method on the Bodhi contract
-  const makeMove = async ({
-    player,
-    fromX,
-    fromY,
-    toX,
-    toY,
-    units,
-  }: MakeMoveArgs) => {
+  const makeMove = async (move: Move) => {
     if (!isConnected) throw new Error("Wallet not connected");
-    if (!writeContract) throw new Error("writeContract is not initialized");
-    console.log("fucking here");
+
+    console.log("move", move);
+
+    //check caller is the player
+    if (address !== move.player) throw new Error("Caller is not the player");
+
     try {
-      const result = await writeContract({
+      await writeContract({
         address: CONTRACT_ADDRESS,
-        abi: abi.abi,
+        abi: abi,
         functionName: "makeMove",
         args: [
           {
-            player: player,
-            fromX: fromX,
-            fromY: fromY,
-            toX: toX,
-            toY: toY,
-            units: units,
+            player: move.player,
+            fromX: move.fromX,
+            fromY: move.fromY,
+            toX: move.toX,
+            toY: move.toY,
+            units: BigInt(move.units),
           },
         ],
       });
-      console.log("Transaction submitted:", result);
-      return result;
     } catch (err) {
-      console.log("fucking here");
       console.error("Error calling makeMove:", err);
       throw err;
     }
   };
 
-  // Initialize the useWaitForTransactionReceipt hook to track transaction status
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
-      hash, // Transaction hash from the writeContract call
+      hash,
     });
 
   return {

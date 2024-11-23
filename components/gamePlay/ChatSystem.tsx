@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
 import { PushAPI, CONSTANTS } from '@pushprotocol/restapi';
-import { walletClient } from '@/lib/contract/client';
 
 
 type Player = {
@@ -25,7 +24,7 @@ type ChatMessage = {
     responded?: boolean
 }
 
-function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: string, onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
+function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}`, onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
     const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null)
     const [messageContent, setMessageContent] = useState('')
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -51,9 +50,7 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
             }
 
             try {
-                const userAlice = await PushAPI.initialize(walletClient as any, {
-                    env: CONSTANTS.ENV.STAGING,
-                });
+                const userAlice = await PushAPI.initialize(process.env.NEXT_PUBLIC_PUSH_API_KEY as string);
 
                 const recipientWallet = players.find(p => p.id === selectedRecipient)?.wallet
                 if (recipientWallet) {
