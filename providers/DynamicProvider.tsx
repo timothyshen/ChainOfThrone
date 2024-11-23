@@ -15,10 +15,10 @@ import { sepolia, flowTestnet, scrollSepolia } from 'viem/chains';
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 
 const config = createConfig({
-  chains: [sepolia, flowTestnet, scrollSepolia],
+  chains: [sepolia],
   multiInjectedProviderDiscovery: false,
   transports: {
-    [scrollSepolia.id]: http(),
+    [sepolia.id]: http(),
   },
 });
 

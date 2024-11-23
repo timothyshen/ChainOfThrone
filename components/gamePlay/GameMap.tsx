@@ -2,11 +2,12 @@ import { Territory } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface GameMapProps {
+    currentPlayer: string
     territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
 }
 
-export default function GameMap({ territories, onTerritoryClick }: GameMapProps) {
+export default function GameMap({ currentPlayer, territories, onTerritoryClick }: GameMapProps) {
     // Get grid dimensions from the 2D array
     const gridSize = {
         rows: territories.length,
@@ -16,7 +17,6 @@ export default function GameMap({ territories, onTerritoryClick }: GameMapProps)
     const gridWidth = gridSize.cols * cellSize
     const gridHeight = gridSize.rows * cellSize
 
-    console.log("gridSize", territories)
 
     return (
         <Card>
@@ -54,7 +54,7 @@ export default function GameMap({ territories, onTerritoryClick }: GameMapProps)
                                         textAnchor="middle"
                                         className="text-sm font-medium"
                                     >
-                                        {`Territory ${rowIndex}-${colIndex}`}
+                                        {territory.isCastle ? `Castle` : `Land`}
                                     </text>
 
                                     {/* Castle icon */}
@@ -78,7 +78,7 @@ export default function GameMap({ territories, onTerritoryClick }: GameMapProps)
                                                 cx={x + cellSize / 2}
                                                 cy={y + 70}
                                                 r="5"
-                                                fill={territory.player === "0x0000000000000000000000000000000000000000" ? "#ddd" : "#666"}
+                                                fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
                                                 stroke="black"
                                                 strokeWidth="2"
                                             />
