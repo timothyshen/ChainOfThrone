@@ -29,6 +29,7 @@ function RankingBoard() {
     }
 
     return (
+        
         <Card className="flex-1 flex flex-col">
             <CardHeader>
                 <CardTitle>Game Actions & Rankings</CardTitle>

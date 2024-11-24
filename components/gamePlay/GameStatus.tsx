@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Player } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer } from "@/lib/hooks/ReadContract";
+import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer } from "@/lib/hooks/ReadGameContract";
 import { Button } from "@/components/ui/button";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 

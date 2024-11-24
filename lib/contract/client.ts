@@ -1,6 +1,6 @@
 import { sepolia, flowTestnet, scrollSepolia } from "viem/chains";
 import { CONTRACT_ADDRESS } from "../constants/contracts";
-import { abi } from "./abi";
+import { gameAbi } from "./gameAbi";
 import * as MultiBaas from "@curvegrid/multibaas-sdk";
 
 import {
@@ -18,7 +18,7 @@ export const contractClient = createPublicClient({
 
 export const gameContract = getContract({
   address: CONTRACT_ADDRESS,
-  abi: abi,
+  abi: gameAbi,
   client: contractClient,
 });
 

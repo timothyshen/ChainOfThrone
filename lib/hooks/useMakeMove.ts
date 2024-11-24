@@ -4,7 +4,7 @@ import {
   useAccount,
 } from "wagmi";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
-import { abi } from "@/lib/contract/abi";
+import { gameAbi } from "@/lib/contract/gameAbi";
 import { Move } from "@/lib/types/game";
 import { parseEther } from "viem";
 
@@ -31,7 +31,7 @@ export const useMakeMove = (): UseMakeMoveReturn => {
     try {
       await writeContract({
         address: CONTRACT_ADDRESS,
-        abi: abi,
+        abi: gameAbi,
         functionName: "makeMove",
         args: [
           {

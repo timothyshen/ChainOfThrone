@@ -1,12 +1,12 @@
 import { contractClient } from "@/lib/contract/client";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
-import { abi } from "@/lib/contract/abi";
+import { gameAbi } from "@/lib/contract/gameAbi";
 import { MakeMoveArgs } from "../types/setup";
 
 export const totalPlayers = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "totalPlayers",
   });
   return result;
@@ -15,7 +15,7 @@ export const totalPlayers = async () => {
 export const idToAddress = async (id: number) => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "idToAddress",
     args: [id],
   });
@@ -25,7 +25,7 @@ export const idToAddress = async (id: number) => {
 export const getGameStatus = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "gameStatus",
   });
   return result;
@@ -34,7 +34,7 @@ export const getGameStatus = async () => {
 export const getGrid = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "getGrid",
   });
   return result;
@@ -43,7 +43,7 @@ export const getGrid = async () => {
 export const get2DGrid = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "get2dGrid",
   });
   return result;
@@ -52,7 +52,7 @@ export const get2DGrid = async () => {
 export const getRoundNumber = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "roundNumber",
   });
   return result;
@@ -61,7 +61,7 @@ export const getRoundNumber = async () => {
 export const getMaxPlayer = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "MAX_PLAYERS",
   });
   return result;
@@ -70,7 +70,7 @@ export const getMaxPlayer = async () => {
 export const checkValidMove = async (args: MakeMoveArgs) => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "checkValidMove",
     args: [
       {
@@ -89,7 +89,7 @@ export const checkValidMove = async (args: MakeMoveArgs) => {
 export const currentListPlayer = async () => {
   const result = await contractClient.readContract({
     address: CONTRACT_ADDRESS,
-    abi: abi,
+    abi: gameAbi,
     functionName: "currentListPlayer",
   });
   return result;
