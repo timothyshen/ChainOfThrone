@@ -4,7 +4,7 @@ import {
   useAccount,
 } from "wagmi";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
-import { abi } from "@/lib/contract/abi";
+import { gameAbi } from "@/lib/contract/gameAbi";
 import { MakeMoveArgs } from "@/lib/types/setup";
 
 type UseExecuteRoundReturn = {
@@ -29,7 +29,7 @@ export const useExecuteRound = (): UseExecuteRoundReturn => {
     try {
       const result = await writeContract({
         address: CONTRACT_ADDRESS,
-        abi: abi,
+        abi: gameAbi,
         functionName: "executeRound",
         args: [],
       });
