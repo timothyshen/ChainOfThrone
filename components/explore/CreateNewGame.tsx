@@ -30,8 +30,8 @@ function CreateNewGame() {
 
     return (
 
-        <Button className="mb-6" onClick={handleCreateGame} disabled={isConfirming}>
-            {isConfirming ? 'Creating Game...' : (<><Plus className="mr-2 h-4 w-4" />Create New Game</>)}
+        <Button className="mb-4 p-2 w-full font-bold" onClick={handleCreateGame} disabled={isConfirming}>
+            {isConfirming ? 'Creating Game...' : (<><Plus className="mr-2 h-4 w-4 font-extrabold" />Create New Game</>)}
         </Button>
     )
 

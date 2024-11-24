@@ -1,10 +1,15 @@
+interface GameStatus {
+  Open: "Open";
+  InProgress: "In Progress";
+  Completed: "Completed";
+}
+
 export type Game = {
-  name: string;
-  smartContract: string;
-  players: string[];
-  id: string;
+  gameAddress: `0x${string}`;
+  totalPlayers: number;
+  roundNumber: number;
   maxPlayers: number;
-  status: "Open" | "In Progress" | "Completed";
+  status: number;
 };
 
 export type PlayerRank = {
