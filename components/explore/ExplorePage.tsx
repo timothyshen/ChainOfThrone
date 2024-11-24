@@ -9,8 +9,11 @@ export function ExplorePageComponent() {
       <h1 className="text-3xl font-bold mb-6 text-center">Explore Diplomacy Games</h1>
       <div className="flex flex-col md:flex-row gap-6">
         <AvailableGameList />
-        <CreateNewGame />
-        <RankingBoard />
+        <div>
+          <CreateNewGame />
+
+          <RankingBoard />
+        </div>
       </div>
     </div>
   )

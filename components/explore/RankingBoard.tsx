@@ -29,15 +29,14 @@ function RankingBoard() {
     }
 
     return (
-        
+
         <Card className="flex-1 flex flex-col">
             <CardHeader>
-                <CardTitle>Game Actions & Rankings</CardTitle>
+                <CardTitle>Top 10 Players</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col flex-grow">
-                <CreateNewGame />
                 <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-                    <h3 className="text-lg font-semibold mb-2">Top 10 Players</h3>
+                    <h3 className="text-lg font-semibold mb-2"></h3>
                     <Table>
                         <TableHeader>
                             <TableRow>
