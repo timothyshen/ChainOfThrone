@@ -177,6 +177,8 @@ contract Game {
         );
 
         Cell storage fromCell = grid[fromX][fromY];
+        require(fromCell.player == msg.sender, "Invalid move");
+
         fromCell.pendingMoves.push(_move);
 
         Cell storage toCell = grid[toX][toY];
@@ -217,6 +219,11 @@ contract Game {
                     if (move.fromX == i && move.fromY == j) {
                         Cell storage toCell = grid[move.toX][move.toY];
                         cell.units -= move.units;
+                        for (uint256 l = 0; l < cell.pendingMoves.length; l++) {
+                            if (cell.pendingMoves[i].player == move.player) {
+                                cell.pendingMoves[i].units += move.units;
+                            }
+                        }
                         toCell.units += move.units;
 
                         if (cell.units == 0) {
@@ -299,7 +306,29 @@ contract Game {
         }
 
         Cell storage fromCell = grid[_move.fromX][_move.fromY];
-        if (fromCell.player == msg.sender && fromCell.units >= _move.units) {
+        if (fromCell.units >= _move.units) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function checkValidLoan(Loan memory _loan) public view returns (bool) {
+        if (
+            _loan.fromX >= 3 ||
+            _loan.fromY >= 3 ||
+            _loan.toX >= 3 ||
+            _loan.toY >= 3
+        ) {
+            return false;
+        }
+
+        if (!_isAdjacent(_loan.fromX, _loan.fromY, _loan.toX, _loan.toY)) {
+            return false;
+        }
+
+        Cell storage fromCell = grid[_loan.fromX][_loan.fromY];
+        if (fromCell.player == msg.sender && fromCell.units >= _loan.units) {
             return true;
         }
 
