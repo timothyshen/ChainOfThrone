@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/lib/hooks/useToast"
+import { useToast } from "@/hooks/use-toast"
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 

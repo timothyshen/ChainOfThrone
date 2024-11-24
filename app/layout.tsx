@@ -4,7 +4,7 @@ import "./globals.css";
 import DynamicProvider from "@/providers/DynamicProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
+import { Toaster } from "@/components/ui/toaster"
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -35,6 +35,7 @@ export default function RootLayout({
           <Header />
           {children}
           <Footer />
+          <Toaster />
         </DynamicProvider>
       </body>
     </html>
