@@ -1,27 +1,38 @@
 'use client'
 
-import { useState } from "react"
-
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { GameSetupComponent } from "@/components/explore/GameSetup"
-
+import { useGameCreate } from '@/lib/hooks/useGameCreate'
+import { toast } from '@/lib/hooks/useToast'
 
 function CreateNewGame() {
+    const { createGame, isPending, error, isConfirming, isConfirmed } = useGameCreate()
 
-    const [isRulesOpen, setIsRulesOpen] = useState(false)
+    const handleCreateGame = async () => {
+        await createGame()
 
+        if (isConfirmed) {
+            toast({
+                title: 'Game Created',
+                description: 'Game created successfully!',
+                variant: 'default',
+            })
+        }
+
+        if (error) {
+            toast({
+                title: 'Error',
+                description: error.message,
+                variant: 'destructive',
+            })
+        }
+    }
 
     return (
-        <Dialog open={isRulesOpen} onOpenChange={setIsRulesOpen}>
-            <DialogTrigger asChild>
-                <Button className="mb-6">
-                    <Plus className="mr-2 h-4 w-4" /> Create New Game
-                </Button>
-            </DialogTrigger>
-            <GameSetupComponent onGameStart={() => { }} />
-        </Dialog>
+
+        <Button className="mb-4 p-2 w-full font-bold" onClick={handleCreateGame} disabled={isConfirming}>
+            {isConfirming ? 'Creating Game...' : (<><Plus className="mr-2 h-4 w-4 font-extrabold" />Create New Game</>)}
+        </Button>
     )
 
 }

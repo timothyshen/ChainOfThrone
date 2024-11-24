@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -8,47 +8,63 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Game } from "@/lib/types/setup"
 import { useToast } from "@/lib/hooks/useToast"
 import { useRouter } from 'next/navigation'
+import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 
 
-const mockGames: Game[] = [
-    { id: '1', name: 'European Domination', players: ['0x1234...5678'], maxPlayers: 7, status: 'Open' },
-    { id: '2', name: 'World War Diplomacy', players: ['0xabcd...ef01', '0x2345...6789', '0x3456...7890'], maxPlayers: 7, status: 'In Progress' },
-    { id: '3', name: 'Allies vs Axis', players: ['0x4567...8901', '0x5678...9012', '0x6789...0123', '0x7890...1234', '0x8901...2345', '0x9012...3456'], maxPlayers: 6, status: 'Completed' },
-    { id: '4', name: 'Cold War Negotiations', players: ['0xa123...b456', '0xc789...d012'], maxPlayers: 5, status: 'Open' },
-    { id: '5', name: 'Mediterranean Conflict', players: ['0xe345...f678', '0xf901...2345', '0x0123...4567', '0x5678...9abc', '0xdef0...1234'], maxPlayers: 7, status: 'In Progress' },
-]
+
 
 function AvailableGameList() {
     const [searchTerm, setSearchTerm] = useState('')
-    const [games, setGames] = useState<Game[]>(mockGames)
+    const [games, setGames] = useState<Game[]>([])
     const router = useRouter()
 
     const { toast } = useToast()
 
-    const filteredGames = games.filter(game =>
-        game.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const getStatusText = (status: number): string => ({
+        0: "Open",
+        1: "In Progress",
+        2: "Completed"
+    }[status] ?? "Unknown")
+
+    const filteredGames = games?.filter(game =>
+        game.gameAddress.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    const handleJoinGame = (gameId: string) => {
-        setGames(prevGames => prevGames.map(game => {
-            if (game.id === gameId && game.players.length < game.maxPlayers) {
-                // In a real app, you'd use the actual logged-in user's wallet address
-                const newPlayerAddress = '0xnew...player'
-                return {
-                    ...game,
-                    players: [...game.players, newPlayerAddress],
-                    status: game.players.length + 1 === game.maxPlayers ? 'In Progress' : 'Open'
-                }
-            }
-            return game
-        }))
 
-        toast({
-            title: "Game Joined",
-            description: "You have successfully joined the game.",
-        })
+    const handleJoinGame = async (gameAddress: string) => {
+        try {
 
-        router.push(`/play/${gameId}`)
+
+            localStorage.setItem("gameAddress", gameAddress)
+
+            router.push(`/play/${gameAddress}`)
+            toast({
+                title: "Joining game...",
+                description: `Attempting to join game at ${gameAddress}`,
+            })
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to join game",
+                variant: "destructive",
+            })
+        }
     }
+
+    useEffect(() => {
+        const fetchGames = async () => {
+            try {
+                const gamesInfo = await getGamesInfo(0, 10)
+                setGames(gamesInfo as Game[])
+            } catch (error) {
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch games",
+                    variant: "destructive",
+                })
+            }
+        }
+        fetchGames()
+    }, [toast])
 
     return (
         <Card className="flex-1">
@@ -71,22 +87,22 @@ function AvailableGameList() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Name</TableHead>
+                                <TableHead>Smart Contract</TableHead>
                                 <TableHead>Players</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredGames.map((game) => (
-                                <TableRow key={game.id}>
-                                    <TableCell>{game.name}</TableCell>
-                                    <TableCell>{game.players.length} / {game.maxPlayers}</TableCell>
-                                    <TableCell>{game.status}</TableCell>
+                            {filteredGames?.map((game) => (
+                                <TableRow key={game.gameAddress}>
+                                    <TableCell>{game.gameAddress}</TableCell>
+                                    <TableCell>{game.totalPlayers} / {game.maxPlayers}</TableCell>
+                                    <TableCell>{getStatusText(game.status)}</TableCell>
                                     <TableCell>
                                         <Button
-                                            onClick={() => handleJoinGame(game.id)}
-                                            disabled={game.status !== 'Open' || game.players.length >= game.maxPlayers}
+                                            disabled={game.totalPlayers === game.maxPlayers}
+                                            onClick={() => handleJoinGame(game.gameAddress)}
                                         >
                                             Join
                                         </Button>

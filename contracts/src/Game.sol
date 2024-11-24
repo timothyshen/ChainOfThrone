@@ -335,6 +335,28 @@ contract Game {
         return false;
     }
 
+    function checkValidLoan(Loan memory _loan) public view returns (bool) {
+        if (
+            _loan.fromX >= 3 ||
+            _loan.fromY >= 3 ||
+            _loan.toX >= 3 ||
+            _loan.toY >= 3
+        ) {
+            return false;
+        }
+
+        if (!_isAdjacent(_loan.fromX, _loan.fromY, _loan.toX, _loan.toY)) {
+            return false;
+        }
+
+        Cell storage fromCell = grid[_loan.fromX][_loan.fromY];
+        if (fromCell.player == msg.sender && fromCell.units >= _loan.units) {
+            return true;
+        }
+
+        return false;
+    }
+
     function _isAdjacent(
         uint8 x1,
         uint8 y1,

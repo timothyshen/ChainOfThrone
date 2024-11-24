@@ -4,6 +4,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { cn } from "@/lib/utils"
+import { PushAPI, CONSTANTS } from '@pushprotocol/restapi';
+
 
 type Player = {
     id: string
@@ -17,9 +20,11 @@ type ChatMessage = {
     recipientId: string
     content: string
     timestamp: number
+    type?: 'negotiation'
+    responded?: boolean
 }
 
-function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: string, onSendMessage: (recipientId: string, content: string) => void }) {
+function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}`, onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
     const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null)
     const [messageContent, setMessageContent] = useState('')
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -31,17 +36,93 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
         }
     }, [chatMessages])
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (selectedRecipient && messageContent.trim()) {
-            onSendMessage(selectedRecipient, messageContent.trim())
-            setChatMessages(prev => [...prev, {
+            const content = messageContent.trim()
+            const isNegotiation = content.startsWith('/nego ')
+
+            const newMessage: ChatMessage = {
                 senderId: currentPlayerId,
                 recipientId: selectedRecipient,
-                content: messageContent.trim(),
-                timestamp: Date.now()
-            }])
-            setMessageContent('')
+                content: isNegotiation ? content.substring(6) : content,
+                timestamp: Date.now(),
+                ...(isNegotiation && { type: 'negotiation' })
+            }
+
+            try {
+                const userAlice = await PushAPI.initialize(process.env.NEXT_PUBLIC_PUSH_API_KEY as string);
+
+                const recipientWallet = players.find(p => p.id === selectedRecipient)?.wallet
+                if (recipientWallet) {
+                    await userAlice.chat.send(recipientWallet, {
+                        content: newMessage.content,
+                        type: 'Text'
+                    });
+                }
+
+                setChatMessages(prev => [...prev, newMessage])
+                onSendMessage(selectedRecipient, newMessage.content, isNegotiation ? 'negotiation' : undefined)
+                setMessageContent('')
+
+            } catch (error) {
+                console.error('Error sending message:', error)
+            }
         }
+    }
+
+    const renderMessage = (msg: ChatMessage, index: number) => {
+        const isCurrentUser = msg.senderId === currentPlayerId
+        const senderName = isCurrentUser ? 'You' : players.find(p => p.id === msg.senderId)?.name
+
+        return (
+            <div key={index} className={cn("mb-2", isCurrentUser ? "text-right" : "text-left")}>
+                {msg.type === 'negotiation' ? (
+                    <div className="inline-block bg-secondary p-3 rounded">
+                        <p className="mb-2">{msg.content}</p>
+                        {!msg.responded && !isCurrentUser && (
+                            <div className="flex gap-2 justify-end">
+                                <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => {
+                                        onSendMessage(msg.senderId, `Accepted: ${msg.content}`)
+                                        const updatedMessages = [...chatMessages]
+                                        if (updatedMessages[index] == null) return ""
+                                        updatedMessages[index] = {
+                                            ...updatedMessages[index],
+                                            responded: true
+                                        }
+                                        setChatMessages(updatedMessages)
+                                    }}
+                                >
+                                    Yes
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => {
+                                        onSendMessage(msg.senderId, `Declined: ${msg.content}`)
+                                        const updatedMessages = [...chatMessages]
+                                        if (updatedMessages[index] == null) return ""
+                                        updatedMessages[index].responded = true
+                                        setChatMessages(updatedMessages)
+                                    }}
+                                >
+                                    No
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <span className="inline-block bg-primary text-primary-foreground rounded px-2 py-1">
+                        {msg.content}
+                    </span>
+                )}
+                <div className="text-xs text-muted-foreground mt-1">
+                    {senderName} - {new Date(msg.timestamp).toLocaleTimeString()}
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -63,18 +144,7 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
                 <ScrollArea className="flex-grow mb-4 p-4 border rounded" ref={chatContainerRef}>
                     {chatMessages
                         .filter(msg => msg.senderId === currentPlayerId || msg.recipientId === currentPlayerId)
-                        .map((msg, index) => (
-                            <div key={index} className={`mb-2 ${msg.senderId === currentPlayerId ? 'text-right' : 'text-left'}`}>
-                                <span className="inline-block bg-primary text-primary-foreground rounded px-2 py-1">
-                                    {msg.content}
-                                </span>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                    {msg.senderId === currentPlayerId ? 'You' : players.find(p => p.id === msg.senderId)?.name}
-                                    {' - '}
-                                    {new Date(msg.timestamp).toLocaleTimeString()}
-                                </div>
-                            </div>
-                        ))}
+                        .map((msg, index) => renderMessage(msg, index))}
                 </ScrollArea>
                 <div className="flex">
                     <Input
@@ -84,7 +154,7 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
                         onChange={(e) => setMessageContent(e.target.value)}
                         className="flex-grow mr-2"
                     />
-                    <Button onClick={handleSendMessage} disabled={!selectedRecipient || !messageContent.trim()}>Send</Button>
+                    <Button onClick={handleSendMessage}>Send</Button>
                 </div>
             </CardContent>
         </Card>

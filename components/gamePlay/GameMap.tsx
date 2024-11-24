@@ -1,82 +1,102 @@
-import { Territory, Unit } from '@/lib/types/game'
+import { Territory } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import CastleIcon from '@/public/images/castle.svg'
-import Image from 'next/image'
 
 interface GameMapProps {
-    territories: Territory[]
-    units: Unit[]
+    currentPlayer: string
+    territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
 }
 
-export default function GameMap({ territories, units, onTerritoryClick }: GameMapProps) {
+export default function GameMap({ currentPlayer, territories, onTerritoryClick }: GameMapProps) {
+    // Get grid dimensions from the 2D array
+    const gridSize = {
+        rows: territories.length,
+        cols: territories[0]?.length || 0
+    }
+    const cellSize = 100
+    const gridWidth = gridSize.cols * cellSize
+    const gridHeight = gridSize.rows * cellSize
+
+
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Diplomacy Game Map</CardTitle>
             </CardHeader>
             <CardContent>
-                <svg viewBox="0 0 300 300" className="w-full h-full">
-                    {territories.map((territory) => (
-                        <g key={territory.id}>
-                            <rect
-                                x={territory.x * 100}
-                                y={territory.y * 100}
-                                width="100"
-                                height="100"
-                                fill={territory.type === 'castle' ? '#FFFACD' : 'white'}
-                                stroke="black"
-                                strokeWidth="2"
-                                onClick={() => onTerritoryClick(territory)}
-                                className="cursor-pointer hover:opacity-80 transition-opacity"
-                            />
-                            <text
-                                x={territory.x * 100 + 50}
-                                y={territory.y * 100 + 40}
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                                fill="black"
-                                fontSize="10"
-                            >
-                                {territory.name}
-                            </text>
+                <svg
+                    viewBox={`0 0 ${gridWidth} ${gridHeight}`}
+                    className="w-full h-full border border-gray-300"
+                >
+                    {territories.map((row, rowIndex) => (
+                        row.map((territory, colIndex) => {
+                            const x = colIndex * cellSize
+                            const y = rowIndex * cellSize
 
-                            {territory.type === 'castle' && (
-                                // castle svg
-                                <svg
-                                    x={territory.x * 100 + 40}
-                                    y={territory.y * 100 + 45}
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                >
-                                    <path d="M12 2L2 8v14h20V8L12 2zm-2 17H6v-3h4v3zm8 0h-4v-3h4v3zm2-7H4v-5l8-4.5 8 4.5v5z" />
-                                </svg>
-                            )}
-                            {units.filter(unit => unit.position === territory.id).map((unit, index) => (
-                                <g key={unit.id}>
-                                    <circle
-                                        cx={territory.x * 100 + 50 + index * 20 - 10}
-                                        cy={territory.y * 100 + 80}
-                                        r="8"
-                                        fill='black'
+                            return (
+                                <g key={`${rowIndex}-${colIndex}`} onClick={() => onTerritoryClick(territory)}>
+                                    {/* Territory cell */}
+                                    <rect
+                                        x={x}
+                                        y={y}
+                                        width={cellSize}
+                                        height={cellSize}
+                                        fill={territory.isCastle ? '#FFFACD' : 'white'}
                                         stroke="black"
                                         strokeWidth="2"
+                                        className="cursor-pointer hover:opacity-80 transition-opacity"
                                     />
+
+                                    {/* Territory name */}
                                     <text
-                                        x={territory.x * 100 + 70 + index * 20 - 10}
-                                        y={territory.y * 100 + 81}
+                                        x={x + cellSize / 2}
+                                        y={y + 25}
                                         textAnchor="middle"
-                                        dominantBaseline="middle"
-                                        fill="black"
-                                        fontSize="10"
+                                        className="text-sm font-medium"
                                     >
-                                        {unit.strength}
+                                        {territory.isCastle ? `Castle` : `Land`}
                                     </text>
+
+                                    {/* Castle icon */}
+                                    {territory.isCastle && (
+                                        <svg
+                                            x={x + 40}
+                                            y={y + 35}
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                        >
+                                            <path d="M12 2L2 8v14h20V8L12 2zm-2 17H6v-3h4v3zm8 0h-4v-3h4v3zm2-7H4v-5l8-4.5 8 4.5v5z" />
+                                        </svg>
+                                    )}
+
+                                    {/* Units */}
+                                    {territory.units > 0 && (
+                                        <g>
+                                            <circle
+                                                cx={x + cellSize / 2}
+                                                cy={y + 70}
+                                                r="5"
+                                                fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
+                                                stroke="black"
+                                                strokeWidth="2"
+                                            />
+                                            <text
+                                                x={x + cellSize / 2}
+                                                y={y + 90}
+                                                textAnchor="middle"
+                                                className="text-sm font-medium"
+                                                fill="black"
+                                            >
+                                                {Number(territory.units)}
+                                            </text>
+                                        </g>
+
+                                    )}
                                 </g>
-                            ))}
-                        </g>
+                            )
+                        })
                     ))}
                 </svg>
             </CardContent>
