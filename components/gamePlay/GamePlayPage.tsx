@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/lib/hooks/useToast"
+import { useToast } from "@/hooks/use-toast"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,7 +12,7 @@ import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
-import { get2DGrid, checkValidMove } from '@/lib/hooks/ReadGameContract'
+import { get2DGrid } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { Move } from '@/lib/types/game'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
