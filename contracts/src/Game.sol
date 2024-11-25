@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-// Factory contract for game
-
 contract Game {
     uint8 public constant MAX_PLAYERS = 2;
 
     struct Cell {
-        Move[] pendingMoves;
-        Loan[] pendingLoans;
         address player;
-        uint256 units;
         bool isCastle;
+        uint256[MAX_PLAYERS] units;
     }
     Cell[3][3] public grid;
 
@@ -44,9 +40,11 @@ contract Game {
         uint8 toY;
         uint256 units;
     }
-    bool[MAX_PLAYERS] roundSubmitted;
+    bool[MAX_PLAYERS] public roundSubmitted;
+    Move[MAX_PLAYERS] public pendingMoves;
 
     uint256 public roundNumber;
+    address public winner;
 
     event GameStarted();
     event GameFinalized(address indexed winner);
@@ -89,8 +87,6 @@ contract Game {
         if (totalPlayers == MAX_PLAYERS) {
             _startGame();
         }
-
-        // handle USDC ??
     }
 
     function _startGame() internal onlyNotStarted {
@@ -103,24 +99,19 @@ contract Game {
         grid[2][2].isCastle = true;
 
         grid[0][1].player = idToAddress[0];
-        grid[0][1].units = 10;
+        grid[0][1].units[0] = 10;
         grid[0][1].isCastle = false;
 
         grid[1][0].player = idToAddress[1];
-        grid[1][0].units = 10;
+        grid[1][0].units[1] = 10;
         grid[1][0].isCastle = false;
-
-        if (MAX_PLAYERS == 3) {
-            grid[1][2].player = idToAddress[2];
-            grid[1][2].units = 10;
-            grid[1][2].isCastle = false;
-        }
 
         emit GameStarted();
     }
 
-    function _finalizeGame(address winner) internal onlyOngoing {
+    function _finalizeGame(address _winner) internal onlyOngoing {
         gameStatus = GameStatus.Finished;
+        winner = _winner;
         // Handle payouts if necessary
         emit GameFinalized(winner);
     }
@@ -129,19 +120,24 @@ contract Game {
         uint8[] memory winnerCheck = new uint8[](totalPlayers);
         uint256[] memory unitCheck = new uint256[](totalPlayers);
 
+        uint256[] memory totalUnits = new uint256[](totalPlayers);
+
         for (uint8 i = 0; i < 3; i++) {
             for (uint8 j = 0; j < 3; j++) {
                 Cell memory cell = grid[i][j];
                 if (cell.isCastle && cell.player != address(0)) {
                     winnerCheck[addressToId[cell.player]]++;
-                    unitCheck[addressToId[cell.player]] += cell.units;
                 }
+                totalUnits[addressToId[cell.player]] += cell.units[
+                    addressToId[cell.player]
+                ];
             }
         }
 
         bool tie = true;
+
         for (uint8 i = 0; i < totalPlayers; i++) {
-            if (unitCheck[i] > 2) {
+            if (totalUnits[i] > 2) {
                 tie = false;
                 break;
             }
@@ -168,22 +164,12 @@ contract Game {
         require(_move.player == msg.sender, "Invalid move (address)");
         require(checkValidMove(_move), "Invalid move");
 
-        (uint8 fromX, uint8 fromY, uint8 toX, uint8 toY, ) = (
-            _move.fromX,
-            _move.fromY,
-            _move.toX,
-            _move.toY,
-            _move.units
-        );
+        (uint8 fromX, uint8 fromY) = (_move.fromX, _move.fromY);
 
         Cell storage fromCell = grid[fromX][fromY];
         require(fromCell.player == msg.sender, "Invalid move");
 
-        fromCell.pendingMoves.push(_move);
-
-        Cell storage toCell = grid[toX][toY];
-        toCell.pendingMoves.push(_move);
-
+        pendingMoves[addressToId[msg.sender]] = _move;
         roundSubmitted[addressToId[msg.sender]] = true;
 
         if (_allMovesSubmitted()) {
@@ -191,13 +177,7 @@ contract Game {
         }
     }
 
-    function makeLoan(Loan memory _loan) public onlyOngoing {
-        require(_loan.lender == msg.sender, "Invalid loan (address)");
-        require(checkValidLoan(_loan), "Invalid loan");
-
-        Cell storage toCell = grid[_loan.toX][_loan.toY];
-        toCell.pendingLoans.push(_loan);
-    }
+    function makeLoan(Loan memory _loan) public onlyOngoing {}
 
     function _allMovesSubmitted() internal view returns (bool) {
         for (uint8 i = 0; i < totalPlayers; i++) {
@@ -208,70 +188,69 @@ contract Game {
         return true;
     }
 
+    function _handlePendingMoves() internal {
+        for (uint i = 0; i < totalPlayers; i++) {
+            Move memory currentMove = pendingMoves[i];
+            Cell storage fromCell = grid[currentMove.fromX][currentMove.fromY];
+            Cell storage toCell = grid[currentMove.toX][currentMove.toY];
+
+            uint8 playerId = addressToId[currentMove.player];
+            fromCell.units[playerId] -= currentMove.units;
+            toCell.units[playerId] += currentMove.units;
+        }
+    }
+
+    function _determineCellWinner(
+        Cell memory _cell
+    )
+        internal
+        view
+        returns (
+            uint256 winnerUnits,
+            uint8 winnerId,
+            uint256 totalUnits,
+            bool tie
+        )
+    {
+        winnerUnits = 0;
+        totalUnits = 0;
+        winnerId = MAX_PLAYERS;
+        for (uint8 i = 0; i < totalPlayers; i++) {
+            if (_cell.units[i] > winnerUnits) {
+                winnerUnits = _cell.units[i];
+                winnerId = i;
+                tie = false;
+            } else if (_cell.units[i] == winnerUnits) {
+                tie = true;
+            }
+            totalUnits += _cell.units[i];
+        }
+    }
+
     function executeRound() public onlyOngoing {
-        // first move from current cell to new cell
+        _handlePendingMoves();
         for (uint8 i = 0; i < 3; i++) {
             for (uint8 j = 0; j < 3; j++) {
                 Cell storage cell = grid[i][j];
-                for (uint256 k = 0; k < cell.pendingMoves.length; k++) {
-                    Move storage move = cell.pendingMoves[k];
-                    // remove from unit first
-                    if (move.fromX == i && move.fromY == j) {
-                        Cell storage toCell = grid[move.toX][move.toY];
-                        cell.units -= move.units;
-                        for (uint256 l = 0; l < cell.pendingMoves.length; l++) {
-                            if (cell.pendingMoves[i].player == move.player) {
-                                cell.pendingMoves[i].units += move.units;
-                            }
-                        }
-                        toCell.units += move.units;
+                (
+                    uint256 winnerUnits,
+                    uint8 winnerId,
+                    uint256 totalUnits,
+                    bool tie
+                ) = _determineCellWinner(cell);
 
-                        if (cell.units == 0) {
-                            cell.player = address(0);
-                        }
-                    }
-                }
-
-                // manage loans
-                for (uint256 k = 0; k < cell.pendingLoans.length; k++) {
-                    Loan storage loan = cell.pendingLoans[k];
-                    // look for pending Move such that the loan borrower = pending move
-                    for (uint256 l = 0; l < cell.pendingMoves.length; l++) {
-                        if (loan.borrower == cell.pendingMoves[l].player) {
-                            cell.pendingMoves[l].units += loan.units;
-                            break;
-                        }
-                    }
-                }
-
-                address largestAddress = cell.player;
-                uint256 largest = cell.units;
-                uint256 secondLargest = 0;
-                for (uint256 k = 0; k < cell.pendingMoves.length; k++) {
-                    Move storage move = cell.pendingMoves[k];
-                    if (move.toX == i && move.toY == j) {
-                        if (move.units >= largest) {
-                            secondLargest = largest;
-                            largest = move.units;
-                            largestAddress = move.player;
-                        }
-                    }
-                }
-                cell.units = largest - secondLargest;
-                if (cell.units == 0) {
+                delete cell.units;
+                if (tie || totalUnits == 0 || winnerId == MAX_PLAYERS) {
                     cell.player = address(0);
                 } else {
-                    cell.player = largestAddress;
+                    // hacky way of getting winner - loser (in case of 2 players)
+                    cell.units[winnerId] = 2 * winnerUnits - totalUnits;
+                    cell.player = idToAddress[winnerId];
                 }
-                delete cell.pendingMoves;
-                delete cell.pendingLoans;
             }
         }
-        // start new round
         roundNumber++;
-        for (uint i = 0; i < MAX_PLAYERS; i++) {
-            roundSubmitted[i] = false;
-        }
+        delete roundSubmitted;
         _checkGameStatus();
     }
 
@@ -306,51 +285,7 @@ contract Game {
         }
 
         Cell storage fromCell = grid[_move.fromX][_move.fromY];
-        if (fromCell.units >= _move.units) {
-            return true;
-        }
-
-        return false;
-    }
-
-    function checkValidLoan(Loan memory _loan) public view returns (bool) {
-        if (
-            _loan.fromX >= 3 ||
-            _loan.fromY >= 3 ||
-            _loan.toX >= 3 ||
-            _loan.toY >= 3
-        ) {
-            return false;
-        }
-
-        if (!_isAdjacent(_loan.fromX, _loan.fromY, _loan.toX, _loan.toY)) {
-            return false;
-        }
-
-        Cell storage fromCell = grid[_loan.fromX][_loan.fromY];
-        if (fromCell.player == msg.sender && fromCell.units >= _loan.units) {
-            return true;
-        }
-
-        return false;
-    }
-
-    function checkValidLoan(Loan memory _loan) public view returns (bool) {
-        if (
-            _loan.fromX >= 3 ||
-            _loan.fromY >= 3 ||
-            _loan.toX >= 3 ||
-            _loan.toY >= 3
-        ) {
-            return false;
-        }
-
-        if (!_isAdjacent(_loan.fromX, _loan.fromY, _loan.toX, _loan.toY)) {
-            return false;
-        }
-
-        Cell storage fromCell = grid[_loan.fromX][_loan.fromY];
-        if (fromCell.player == msg.sender && fromCell.units >= _loan.units) {
+        if (fromCell.units[addressToId[_move.player]] >= _move.units) {
             return true;
         }
 
