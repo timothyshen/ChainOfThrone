@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { useGameCreate } from '@/lib/hooks/useGameCreate'
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@lib/hooks/use-toast"
 
 function CreateNewGame() {
     const { createGame, isPending, error, isConfirming, isConfirmed } = useGameCreate()

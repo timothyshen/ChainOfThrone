@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Game } from "@/lib/types/setup"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/lib/hooks/use-toast"
 import { useRouter } from 'next/navigation'
 import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 

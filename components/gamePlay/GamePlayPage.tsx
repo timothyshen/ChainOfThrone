@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/lib/hooks/use-toast"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -164,7 +164,7 @@ export default function DiplomacyGame() {
                         <TabsContent value="chat">
                             <ChatSystem
                                 players={players}
-                                currentPlayerId={address}
+                                currentPlayerId={address ?? ''}
                                 onSendMessage={handleSendMessage}
                             />
                         </TabsContent>

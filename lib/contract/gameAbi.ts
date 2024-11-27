@@ -38,12 +38,6 @@ export const gameAbi = [
     type: "event",
   },
   {
-    anonymous: false,
-    inputs: [],
-    name: "RoundExecuted",
-    type: "event",
-  },
-  {
     inputs: [],
     name: "MAX_PLAYERS",
     outputs: [
@@ -77,62 +71,6 @@ export const gameAbi = [
         internalType: "uint8",
         name: "",
         type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "lender",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "borrower",
-            type: "address",
-          },
-          {
-            internalType: "uint8",
-            name: "fromX",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "fromY",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "toX",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "toY",
-            type: "uint8",
-          },
-          {
-            internalType: "uint256",
-            name: "units",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct Game.Loan",
-        name: "_loan",
-        type: "tuple",
-      },
-    ],
-    name: "checkValidLoan",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
       },
     ],
     stateMutability: "view",
@@ -191,19 +129,6 @@ export const gameAbi = [
   },
   {
     inputs: [],
-    name: "currentListPlayer",
-    outputs: [
-      {
-        internalType: "address[]",
-        name: "",
-        type: "address[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "executeRound",
     outputs: [],
     stateMutability: "nonpayable",
@@ -229,98 +154,19 @@ export const gameAbi = [
       {
         components: [
           {
-            components: [
-              {
-                internalType: "address",
-                name: "player",
-                type: "address",
-              },
-              {
-                internalType: "uint8",
-                name: "fromX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "fromY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint256",
-                name: "units",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct Game.Move[]",
-            name: "pendingMoves",
-            type: "tuple[]",
-          },
-          {
-            components: [
-              {
-                internalType: "address",
-                name: "lender",
-                type: "address",
-              },
-              {
-                internalType: "address",
-                name: "borrower",
-                type: "address",
-              },
-              {
-                internalType: "uint8",
-                name: "fromX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "fromY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint256",
-                name: "units",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct Game.Loan[]",
-            name: "pendingLoans",
-            type: "tuple[]",
-          },
-          {
             internalType: "address",
             name: "player",
             type: "address",
           },
           {
-            internalType: "uint256",
-            name: "units",
-            type: "uint256",
-          },
-          {
             internalType: "bool",
             name: "isCastle",
             type: "bool",
+          },
+          {
+            internalType: "uint256[2]",
+            name: "units",
+            type: "uint256[2]",
           },
         ],
         internalType: "struct Game.Cell[3][3]",
@@ -338,98 +184,19 @@ export const gameAbi = [
       {
         components: [
           {
-            components: [
-              {
-                internalType: "address",
-                name: "player",
-                type: "address",
-              },
-              {
-                internalType: "uint8",
-                name: "fromX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "fromY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint256",
-                name: "units",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct Game.Move[]",
-            name: "pendingMoves",
-            type: "tuple[]",
-          },
-          {
-            components: [
-              {
-                internalType: "address",
-                name: "lender",
-                type: "address",
-              },
-              {
-                internalType: "address",
-                name: "borrower",
-                type: "address",
-              },
-              {
-                internalType: "uint8",
-                name: "fromX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "fromY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toX",
-                type: "uint8",
-              },
-              {
-                internalType: "uint8",
-                name: "toY",
-                type: "uint8",
-              },
-              {
-                internalType: "uint256",
-                name: "units",
-                type: "uint256",
-              },
-            ],
-            internalType: "struct Game.Loan[]",
-            name: "pendingLoans",
-            type: "tuple[]",
-          },
-          {
             internalType: "address",
             name: "player",
             type: "address",
           },
           {
-            internalType: "uint256",
-            name: "units",
-            type: "uint256",
-          },
-          {
             internalType: "bool",
             name: "isCastle",
             type: "bool",
+          },
+          {
+            internalType: "uint256[2]",
+            name: "units",
+            type: "uint256[2]",
           },
         ],
         internalType: "struct Game.Cell[9]",
@@ -459,11 +226,6 @@ export const gameAbi = [
         internalType: "address",
         name: "player",
         type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "units",
-        type: "uint256",
       },
       {
         internalType: "bool",
@@ -589,6 +351,50 @@ export const gameAbi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "pendingMoves",
+    outputs: [
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+      {
+        internalType: "uint8",
+        name: "fromX",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "fromY",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "toX",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "toY",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "units",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "roundNumber",
     outputs: [
@@ -602,6 +408,25 @@ export const gameAbi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "roundSubmitted",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "totalPlayers",
     outputs: [
@@ -609,6 +434,19 @@ export const gameAbi = [
         internalType: "uint8",
         name: "",
         type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "winner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
