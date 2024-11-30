@@ -24,7 +24,7 @@ type ChatMessage = {
     responded?: boolean
 }
 
-function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}`, onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
+function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}` | undefined, onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
     const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null)
     const [messageContent, setMessageContent] = useState('')
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])

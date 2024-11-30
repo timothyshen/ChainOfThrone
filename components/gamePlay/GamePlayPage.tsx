@@ -12,7 +12,7 @@ import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
-import { get2DGrid } from '@/lib/hooks/ReadGameContract'
+import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { Move } from '@/lib/types/game'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
@@ -24,6 +24,7 @@ export default function DiplomacyGame() {
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
+    const [playerId, setPlayerId] = useState<string | null>(null)
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove, isPending, error } = useMakeMove()
@@ -41,6 +42,7 @@ export default function DiplomacyGame() {
                         y: rowIndex
                     }))
                 );
+                console.log("newGridData", newGridData);
                 setTerritories(newGridData as Territory[][]);
             } catch (error) {
                 console.error('Error fetching grid:', error);
@@ -52,7 +54,13 @@ export default function DiplomacyGame() {
             }
         };
 
+        const getPlayerId = async () => {
+            const playerId = await addressToId(address);
+            setPlayerId(playerId);
+        }
+
         getGrids();
+        getPlayerId();
     }, []);
 
     const handleTerritoryClick = (territory: Territory) => {
@@ -98,14 +106,15 @@ export default function DiplomacyGame() {
         }
 
         try {
-            const move: Move = {
-                fromX: selectedTerritory.x,
-                fromY: selectedTerritory.y,
-                player: address,
-                toX: targetTerritory.x,
-                toY: targetTerritory.y,
-                units: moveStrength
-            };
+            type Move = readonly [number, number, string, number, number, number];
+            const move: Move = [
+                selectedTerritory.x,
+                selectedTerritory.y,
+                address,
+                targetTerritory.x,
+                targetTerritory.y,
+                moveStrength
+            ] as const;
 
             console.log("MOVE", move);
 
@@ -156,6 +165,7 @@ export default function DiplomacyGame() {
                         </TabsList>
                         <TabsContent value="map">
                             <GameMap
+                                currentPlayerId={playerId}
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}

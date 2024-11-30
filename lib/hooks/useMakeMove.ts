@@ -5,8 +5,8 @@ import {
 } from "wagmi";
 import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { gameAbi } from "@/lib/contract/gameAbi";
-import { Move } from "@/lib/types/game";
-import { parseEther } from "viem";
+
+type Move = readonly [number, number, string, number, number, number];
 
 interface UseMakeMoveReturn {
   makeMove: (move: Move) => Promise<void>;

@@ -3,15 +3,16 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/lib/hooks/use-toast"
+import { useAccount } from "wagmi"
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useGameCreate } from "@/lib/hooks/useGameCreate"
 
 
-interface GameSetupProps {
-  onGameStart: (players: Player[], units: Unit[]) => void
-}
 
-export function GameSetupComponent({ onGameStart }: GameSetupProps) {
+
+export function GameSetupComponent() {
   const { address } = useAccount()
+  const { toast } = useToast();
 
   const { createGame, isPending, error, isConfirming, isConfirmed } = useGameCreate()
 

@@ -2,12 +2,13 @@ import { Territory } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface GameMapProps {
+    currentPlayerId: string
     currentPlayer: string
     territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
 }
 
-export default function GameMap({ currentPlayer, territories, onTerritoryClick }: GameMapProps) {
+export default function GameMap({ currentPlayerId, currentPlayer, territories, onTerritoryClick }: GameMapProps) {
     // Get grid dimensions from the 2D array
     const gridSize = {
         rows: territories.length,
@@ -72,28 +73,30 @@ export default function GameMap({ currentPlayer, territories, onTerritoryClick }
                                     )}
 
                                     {/* Units */}
-                                    {territory.units > 0 && (
-                                        <g>
-                                            <circle
-                                                cx={x + cellSize / 2}
-                                                cy={y + 70}
-                                                r="5"
-                                                fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
-                                                stroke="black"
-                                                strokeWidth="2"
-                                            />
-                                            <text
-                                                x={x + cellSize / 2}
-                                                y={y + 90}
-                                                textAnchor="middle"
-                                                className="text-sm font-medium"
-                                                fill="black"
-                                            >
-                                                {Number(territory.units)}
-                                            </text>
-                                        </g>
 
-                                    )}
+                                    {territory.units.map((unit, index) => (
+                                        Number(unit) > 0 && (
+                                            <g key={index}>
+                                                <circle
+                                                    cx={x + cellSize / 2}
+                                                    cy={y + 70}
+                                                    r="5"
+                                                    fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
+                                                    stroke="black"
+                                                    strokeWidth="2"
+                                                />
+                                                <text
+                                                    x={x + cellSize / 2}
+                                                    y={y + 90}
+                                                    textAnchor="middle"
+                                                    className="text-sm font-medium"
+                                                    fill="black"
+                                                >
+                                                    {Number(unit)}
+                                                </text>
+                                            </g>
+                                        )
+                                    ))}
                                 </g>
                             )
                         })
