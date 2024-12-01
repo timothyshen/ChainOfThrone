@@ -2,21 +2,21 @@ import { Territory } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface GameMapProps {
+    currentPlayerId: string
     currentPlayer: string
     territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
 }
 
-export default function GameMap({ currentPlayer, territories, onTerritoryClick }: GameMapProps) {
-    // Get grid dimensions from the 2D array
+export default function GameMap({ currentPlayerId, currentPlayer, territories, onTerritoryClick }: GameMapProps) {
     const gridSize = {
         rows: territories.length,
         cols: territories[0]?.length || 0
     }
     const cellSize = 100
-    const gridWidth = gridSize.cols * cellSize
-    const gridHeight = gridSize.rows * cellSize
-
+    const padding = 20
+    const gridWidth = (gridSize.cols * cellSize) + (padding * 2)
+    const gridHeight = (gridSize.rows * cellSize) + (padding * 2)
 
     return (
         <Card>
@@ -30,8 +30,8 @@ export default function GameMap({ currentPlayer, territories, onTerritoryClick }
                 >
                     {territories.map((row, rowIndex) => (
                         row.map((territory, colIndex) => {
-                            const x = colIndex * cellSize
-                            const y = rowIndex * cellSize
+                            const x = (colIndex * cellSize) + padding
+                            const y = (rowIndex * cellSize) + padding
 
                             return (
                                 <g key={`${rowIndex}-${colIndex}`} onClick={() => onTerritoryClick(territory)}>
@@ -72,28 +72,30 @@ export default function GameMap({ currentPlayer, territories, onTerritoryClick }
                                     )}
 
                                     {/* Units */}
-                                    {territory.units > 0 && (
-                                        <g>
-                                            <circle
-                                                cx={x + cellSize / 2}
-                                                cy={y + 70}
-                                                r="5"
-                                                fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
-                                                stroke="black"
-                                                strokeWidth="2"
-                                            />
-                                            <text
-                                                x={x + cellSize / 2}
-                                                y={y + 90}
-                                                textAnchor="middle"
-                                                className="text-sm font-medium"
-                                                fill="black"
-                                            >
-                                                {Number(territory.units)}
-                                            </text>
-                                        </g>
 
-                                    )}
+                                    {territory.units.map((unit, index) => (
+                                        Number(unit) > 0 && (
+                                            <g key={index}>
+                                                <circle
+                                                    cx={x + cellSize / 2}
+                                                    cy={y + 70}
+                                                    r="5"
+                                                    fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
+                                                    stroke="black"
+                                                    strokeWidth="2"
+                                                />
+                                                <text
+                                                    x={x + cellSize / 2}
+                                                    y={y + 90}
+                                                    textAnchor="middle"
+                                                    className="text-sm font-medium"
+                                                    fill="black"
+                                                >
+                                                    {Number(unit)}
+                                                </text>
+                                            </g>
+                                        )
+                                    ))}
                                 </g>
                             )
                         })

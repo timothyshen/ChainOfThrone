@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/lib/hooks/useToast"
+import { useToast } from "@/lib/hooks/use-toast"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,7 +12,7 @@ import GameStatus from '@/components/gamePlay/GameStatus'
 import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
-import { get2DGrid, checkValidMove } from '@/lib/hooks/ReadGameContract'
+import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { Move } from '@/lib/types/game'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
@@ -24,6 +24,7 @@ export default function DiplomacyGame() {
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
+    const [playerId, setPlayerId] = useState<string | null>(null)
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove, isPending, error } = useMakeMove()
@@ -37,10 +38,11 @@ export default function DiplomacyGame() {
                 const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
                     row.map((territory: any, colIndex: number) => ({
                         ...territory,
-                        x: colIndex,
-                        y: rowIndex
+                        x: rowIndex,
+                        y: colIndex,
                     }))
                 );
+                console.log("newGridData", newGridData);
                 setTerritories(newGridData as Territory[][]);
             } catch (error) {
                 console.error('Error fetching grid:', error);
@@ -52,7 +54,13 @@ export default function DiplomacyGame() {
             }
         };
 
+        const getPlayerId = async () => {
+            const playerId = await addressToId(address);
+            setPlayerId(playerId);
+        }
+
         getGrids();
+        getPlayerId();
     }, []);
 
     const handleTerritoryClick = (territory: Territory) => {
@@ -98,14 +106,15 @@ export default function DiplomacyGame() {
         }
 
         try {
-            const move: Move = {
-                fromX: selectedTerritory.x,
-                fromY: selectedTerritory.y,
-                player: address,
-                toX: targetTerritory.x,
-                toY: targetTerritory.y,
-                units: moveStrength
-            };
+            type Move = readonly [number, number, string, number, number, number];
+            const move: Move = [
+                selectedTerritory.x,
+                selectedTerritory.y,
+                address,
+                targetTerritory.x,
+                targetTerritory.y,
+                moveStrength
+            ] as const;
 
             console.log("MOVE", move);
 
@@ -146,32 +155,32 @@ export default function DiplomacyGame() {
 
 
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex flex-1">
-                <div className="flex-1 p-4">
-                    <Tabs defaultValue="map" className="w-full">
+        <div className="flex flex-col min-h-screen">
+            <div className="flex flex-1 h-[calc(100vh-2rem)]">
+                <div className="flex-1 p-4 overflow-auto">
+                    <Tabs defaultValue="map" className="w-full h-full flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="map">Game Map</TabsTrigger>
                             <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="map">
+                        <TabsContent value="map" className="flex-1">
                             <GameMap
+                                currentPlayerId={playerId}
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
                             />
                         </TabsContent>
-                        <TabsContent value="chat">
+                        <TabsContent value="chat" className="flex-1">
                             <ChatSystem
                                 players={players}
-                                currentPlayerId={address}
+                                currentPlayerId={address ?? ''}
                                 onSendMessage={handleSendMessage}
                             />
                         </TabsContent>
                     </Tabs>
-
                 </div>
-                <div className="w-1/3 p-4 space-y-4">
+                <div className="w-1/3 p-4 space-y-4 overflow-auto">
                     <GameStatus currentPlayer={address ?? ''} players={players} />
 
                     <Card>
@@ -202,6 +211,9 @@ export default function DiplomacyGame() {
 
                                         <div>
                                             <Label>Select Destination:</Label>
+                                            <p className="text-sm text-muted-foreground mb-2">
+                                                Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
+                                            </p>
                                             <div className="grid gap-2 mt-1">
                                                 {getAdjacentTerritories(selectedTerritory).map(territory => (
                                                     <Button
@@ -212,9 +224,7 @@ export default function DiplomacyGame() {
                                                     >
                                                         Move {moveStrength} units to {territory.x}, {territory.y}
                                                     </Button>
-                                                ))}
-                                                <Button>End Turn</Button>
-                                            </div>
+                                                ))}                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -226,7 +236,7 @@ export default function DiplomacyGame() {
                 </div>
             </div>
 
-            <ExecutionLog executionRecord={executionRecord} />
+            {/* <ExecutionLog executionRecord={executionRecord} /> */}
         </div >
     )
 }

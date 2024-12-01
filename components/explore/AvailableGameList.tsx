@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Game } from "@/lib/types/setup"
-import { useToast } from "@/lib/hooks/useToast"
+import { useToast } from "@/lib/hooks/use-toast"
 import { useRouter } from 'next/navigation'
 import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 
@@ -35,11 +35,11 @@ function AvailableGameList() {
 
 
             localStorage.setItem("gameAddress", gameAddress)
-
+            console.log("set")
             router.push(`/play/${gameAddress}`)
             toast({
-                title: "Joining game...",
-                description: `Attempting to join game at ${gameAddress}`,
+                title: "Scheduled: Catch up ",
+                description: "Friday, February 10, 2023 at 5:57 PM",
             })
         } catch (error) {
             toast({

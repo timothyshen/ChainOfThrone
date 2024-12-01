@@ -4,7 +4,7 @@ export type Territory = {
   x: number;
   y: number;
   player: `0x${string}`;
-  units: number;
+  units: bigint[];
   isCastle: boolean;
 };
 
