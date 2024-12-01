@@ -38,8 +38,8 @@ export default function DiplomacyGame() {
                 const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
                     row.map((territory: any, colIndex: number) => ({
                         ...territory,
-                        x: colIndex,
-                        y: rowIndex
+                        x: rowIndex,
+                        y: colIndex,
                     }))
                 );
                 console.log("newGridData", newGridData);
@@ -155,7 +155,7 @@ export default function DiplomacyGame() {
 
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col h-max">
             <div className="flex flex-1">
                 <div className="flex-1 p-4">
                     <Tabs defaultValue="map" className="w-full">
@@ -212,6 +212,9 @@ export default function DiplomacyGame() {
 
                                         <div>
                                             <Label>Select Destination:</Label>
+                                            <p className="text-sm text-muted-foreground mb-2">
+                                                Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
+                                            </p>
                                             <div className="grid gap-2 mt-1">
                                                 {getAdjacentTerritories(selectedTerritory).map(territory => (
                                                     <Button
@@ -222,9 +225,7 @@ export default function DiplomacyGame() {
                                                     >
                                                         Move {moveStrength} units to {territory.x}, {territory.y}
                                                     </Button>
-                                                ))}
-                                                <Button>End Turn</Button>
-                                            </div>
+                                                ))}                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -236,7 +237,7 @@ export default function DiplomacyGame() {
                 </div>
             </div>
 
-            <ExecutionLog executionRecord={executionRecord} />
+            {/* <ExecutionLog executionRecord={executionRecord} /> */}
         </div >
     )
 }

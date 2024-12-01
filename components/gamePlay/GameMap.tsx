@@ -9,15 +9,14 @@ interface GameMapProps {
 }
 
 export default function GameMap({ currentPlayerId, currentPlayer, territories, onTerritoryClick }: GameMapProps) {
-    // Get grid dimensions from the 2D array
     const gridSize = {
         rows: territories.length,
         cols: territories[0]?.length || 0
     }
     const cellSize = 100
-    const gridWidth = gridSize.cols * cellSize
-    const gridHeight = gridSize.rows * cellSize
-
+    const padding = 20
+    const gridWidth = (gridSize.cols * cellSize) + (padding * 2)
+    const gridHeight = (gridSize.rows * cellSize) + (padding * 2)
 
     return (
         <Card>
@@ -31,8 +30,8 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
                 >
                     {territories.map((row, rowIndex) => (
                         row.map((territory, colIndex) => {
-                            const x = colIndex * cellSize
-                            const y = rowIndex * cellSize
+                            const x = (colIndex * cellSize) + padding
+                            const y = (rowIndex * cellSize) + padding
 
                             return (
                                 <g key={`${rowIndex}-${colIndex}`} onClick={() => onTerritoryClick(territory)}>
