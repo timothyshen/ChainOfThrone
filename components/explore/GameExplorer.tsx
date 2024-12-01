@@ -15,16 +15,15 @@ import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 import { Game } from "@/lib/types/setup"
 import { useToast } from "@/lib/hooks/use-toast"
 import { useRouter } from 'next/navigation'
-
+import { useAddPlayer } from '@/lib/hooks/useAddPlayer'
 export default function GameExplorer() {
-    const [selectedGame, setSelectedGame] = useState(null)
+    const [selectedGame, setSelectedGame] = useState<Game | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
-    const [isCreateGameOpen, setIsCreateGameOpen] = useState(false)
     const [games, setGames] = useState<Game[]>([])
     const { toast } = useToast()
     const router = useRouter()
-
+    const { addPlayer } = useAddPlayer()
     // Replace mock games with real data fetching
     useEffect(() => {
         const fetchGames = async () => {
@@ -51,6 +50,7 @@ export default function GameExplorer() {
     const handleJoinGame = async (gameAddress: string) => {
         try {
             localStorage.setItem("gameAddress", gameAddress)
+            // await addPlayer(gameAddress as `0x${string}`);
             router.push(`/play/${gameAddress}`)
             toast({
                 title: "Joining game",
@@ -107,55 +107,51 @@ export default function GameExplorer() {
                     <Table>
                         <TableHeader>
                             <TableRow className="border-gray-800 hover:bg-transparent">
-                                <TableHead className="text-gray-400">Smart Contract</TableHead>
-                                <TableHead className="text-gray-400 text-right">Players</TableHead>
-                                <TableHead className="text-gray-400 text-right">Status</TableHead>
-                                <TableHead className="text-gray-400 text-right">Action</TableHead>
+                                <TableHead>Smart Contract</TableHead>
+                                <TableHead className="text-right">Players</TableHead>
+                                <TableHead className="text-right">Status</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredGames?.map((game) => (
                                 <TableRow key={game.gameAddress} className="border-gray-800 hover:bg-white/5">
-                                    <TableCell className="font-mono text-gray-300">{game.gameAddress}</TableCell>
-                                    <TableCell className="text-right text-gray-300">
+                                    <TableCell className="font-mono">{game.gameAddress}</TableCell>
+                                    <TableCell className="text-righta">
                                         <div className="flex items-center justify-end gap-1">
                                             <Users className="h-4 w-4" />
                                             {game.totalPlayers} / {game.maxPlayers}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${game.status === 0 ? 'bg-green-900/30 text-green-400' :
-                                            game.status === 1 ? 'bg-yellow-900/30 text-yellow-400' :
-                                                'bg-red-900/30 text-red-400'
+                                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${game.status === 0 ? 'bg-black text-green-400' :
+                                            game.status === 1 ? 'bg-black/30 text-yellow-400' :
+                                                'bg-black/30 text-red-400'
                                             }`}>
                                             {getStatusText(game.status)}
                                         </span>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        size="sm"
-                                                        className=" hover:bg-gray-200 font-semibold mr-2"
-                                                        onClick={() => handleJoinGame(game.gameAddress)}
-                                                        disabled={game.totalPlayers === game.maxPlayers}
-                                                    >
-                                                        Quick Join
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>{game.totalPlayers < game.maxPlayers ? 'Instantly join this game' : 'This game is full'}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => setSelectedGame(game)}
-                                        >
-                                            <Info className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex flex-rol gap-2 items-end justify-end">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="w-max"
+                                                onClick={() => handleJoinGame(game.gameAddress)}
+                                                disabled={game.totalPlayers === game.maxPlayers}
+                                            >
+                                                Quick Join
+                                            </Button>
+
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="w-fit"
+                                                onClick={() => setSelectedGame(game)}
+                                            >
+                                                <Info className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}

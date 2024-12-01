@@ -48,21 +48,22 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
 
     useEffect(() => {
         const fetchGameData = async () => {
+            const gameAddress = localStorage.getItem("gameAddress");
             const [status, total, max] = await Promise.all([
-                getGameStatus(),
-                totalPlayers(),
-                getMaxPlayer()
+                getGameStatus(gameAddress as `0x${string}`),
+                totalPlayers(gameAddress as `0x${string}`),
+                getMaxPlayer(gameAddress as `0x${string}`)
             ]);
 
             setGameStatus(getGameStatusText(status as number));
             setTotalPlayer(total as number);
             setMaxPlayer(max as number);
 
-            const addresses = await Promise.all(
+            const addresses = (total === max) ? await Promise.all(
                 Array.from({ length: 2 }, (_, i) =>
-                    Promise.all([idToAddress(i), getRoundSubmitted(i)])
+                    Promise.all([idToAddress(gameAddress as `0x${string}`, i), getRoundSubmitted(gameAddress as `0x${string}`, i)])
                 )
-            );
+            ) : [];
 
             setPlayerAddresses(addresses.map(([address, roundSubmitted]) => ({
                 address: address as string,
@@ -74,8 +75,12 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
     }, []);
 
     const handlePlayerJoin = async () => {
-        await addPlayer();
-        const [status, total] = await Promise.all([getGameStatus(), totalPlayers()]);
+        const address = localStorage.getItem("address");
+        if (!address) return;
+        await addPlayer(address as `0x${string}`);
+
+        const gameAddress = localStorage.getItem("gameAddress");
+        const [status, total] = await Promise.all([getGameStatus(gameAddress as `0x${string}`), totalPlayers(gameAddress as `0x${string}`)]);
         setGameStatus(getGameStatusText(status as number));
         setTotalPlayer(total as number);
     };
@@ -129,13 +134,12 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
                     ) : (
                         <div className="grid gap-2">
                             {playerAddresses.map((player, index) => (
-                                <div 
-                                    key={index} 
-                                    className={`flex items-center justify-between p-2 rounded-md ${
-                                        player.address.toLowerCase() === currentPlayer.toLowerCase() 
-                                            ? 'bg-primary/20 border border-primary' 
-                                            : 'bg-muted'
-                                    }`}
+                                <div
+                                    key={index}
+                                    className={`flex items-center justify-between p-2 rounded-md ${player.address.toLowerCase() === currentPlayer.toLowerCase()
+                                        ? 'bg-primary/20 border border-primary'
+                                        : 'bg-muted'
+                                        }`}
                                 >
                                     <span className="text-sm font-medium">
                                         {player.address.toLowerCase() === currentPlayer.toLowerCase() && '👉 '}

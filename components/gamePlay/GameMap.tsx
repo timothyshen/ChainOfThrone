@@ -20,10 +20,7 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>Diplomacy Game Map</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 <svg
                     viewBox={`0 0 ${gridWidth} ${gridHeight}`}
                     className="w-full h-full border border-gray-300"

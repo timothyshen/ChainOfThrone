@@ -30,9 +30,12 @@ export default function DiplomacyGame() {
     const { makeMove, isPending, error } = useMakeMove()
 
     useEffect(() => {
+
+
         const getGrids = async () => {
             try {
-                const gridData = await get2DGrid();
+                const gameAddress = localStorage.getItem("gameAddress");
+                const gridData = await get2DGrid(gameAddress as `0x${string}`);
                 if (!gridData) return;
                 // Type assertion since we know the shape of the data
                 const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
@@ -55,9 +58,13 @@ export default function DiplomacyGame() {
         };
 
         const getPlayerId = async () => {
-            const playerId = await addressToId(address);
-            setPlayerId(playerId);
+            const gameAddress = localStorage.getItem("gameAddress");
+            if (!gameAddress || !address) return;
+            const playerId = await addressToId(gameAddress as `0x${string}`, address as `0x${string}`);
+            setPlayerId(playerId as string);
         }
+
+
 
         getGrids();
         getPlayerId();
@@ -119,7 +126,7 @@ export default function DiplomacyGame() {
             console.log("MOVE", move);
 
             // Make the move
-            await makeMove(move);
+            await makeMove(gameAddress, move);
 
             toast({
                 title: "Move Submitted",
