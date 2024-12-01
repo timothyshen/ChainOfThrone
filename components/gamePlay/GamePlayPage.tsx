@@ -27,7 +27,7 @@ export default function DiplomacyGame() {
     const [playerId, setPlayerId] = useState<string | null>(null)
     const { toast } = useToast()
     const { address } = useAccount()
-    const { makeMove, isPending, error } = useMakeMove()
+    const { makeMove, error } = useMakeMove()
 
     useEffect(() => {
 
@@ -112,6 +112,9 @@ export default function DiplomacyGame() {
             return;
         }
 
+        const gameAddress = localStorage.getItem("gameAddress");
+        if (!gameAddress) return;
+
         try {
             type Move = readonly [number, number, string, number, number, number];
             const move: Move = [
@@ -126,7 +129,7 @@ export default function DiplomacyGame() {
             console.log("MOVE", move);
 
             // Make the move
-            await makeMove(gameAddress, move);
+            await makeMove(gameAddress as `0x${string}`, move);
 
             toast({
                 title: "Move Submitted",
@@ -172,7 +175,7 @@ export default function DiplomacyGame() {
                         </TabsList>
                         <TabsContent value="map" className="flex-1">
                             <GameMap
-                                currentPlayerId={playerId}
+                                currentPlayerId={playerId ?? ''}
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
@@ -207,12 +210,11 @@ export default function DiplomacyGame() {
                                                     id="moveStrength"
                                                     type="number"
                                                     min="1"
-                                                    max={selectedTerritory.units}
                                                     value={moveStrength}
                                                     onChange={(e) => setMoveStrength(parseInt(e.target.value))}
                                                     className="w-full"
                                                 />
-                                                <Button onClick={() => setMoveStrength(selectedTerritory.units)}>Max</Button>
+                                                {/* <Button onClick={() => setMoveStrength(selectedTerritory.units)}>Max</Button> */}
                                             </div>
                                         </div>
 

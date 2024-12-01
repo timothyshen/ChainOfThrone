@@ -6,10 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Search, Sword, Trophy, Users, Info } from 'lucide-react'
-import { CreateGameModal } from './GameSetup'
-import { NotificationCenter } from './NotificationCenter'
+import { Search, Sword, Users, Info } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 import { Game } from "@/lib/types/setup"

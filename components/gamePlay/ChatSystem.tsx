@@ -24,7 +24,7 @@ type ChatMessage = {
     responded?: boolean
 }
 
-function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}` | undefined, onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
+function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}` | '', onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
     const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null)
     const [messageContent, setMessageContent] = useState('')
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -37,6 +37,7 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
     }, [chatMessages])
 
     const handleSendMessage = async () => {
+        if (!currentPlayerId) return;
         if (selectedRecipient && messageContent.trim()) {
             const content = messageContent.trim()
             const isNegotiation = content.startsWith('/nego ')
@@ -50,15 +51,15 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
             }
 
             try {
-                const userAlice = await PushAPI.initialize(process.env.NEXT_PUBLIC_PUSH_API_KEY as string);
+                // const userAlice = await PushAPI.initialize(process.env.NEXT_PUBLIC_PUSH_API_KEY as string);
 
-                const recipientWallet = players.find(p => p.id === selectedRecipient)?.wallet
-                if (recipientWallet) {
-                    await userAlice.chat.send(recipientWallet, {
-                        content: newMessage.content,
-                        type: 'Text'
-                    });
-                }
+                // const recipientWallet = players.find(p => p.id === selectedRecipient)?.wallet
+                // if (recipientWallet) {
+                // await userAlice.chat.send(recipientWallet, {
+                //     content: newMessage.content,
+                //     type: 'Text'
+                // });
+                // }
 
                 setChatMessages(prev => [...prev, newMessage])
                 onSendMessage(selectedRecipient, newMessage.content, isNegotiation ? 'negotiation' : undefined)

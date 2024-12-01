@@ -1,7 +1,6 @@
 import RankingBoard from '@/components/explore/RankingBoard'
 import GameExplorer from '@/components/explore/GameExplorer'
 import CreateNewGame from '@/components/explore/CreateNewGame'
-import { NotificationCenter } from '@/components/explore/NotificationCenter'
 
 export function ExplorePageComponent() {
 
@@ -19,7 +18,6 @@ export function ExplorePageComponent() {
           <RankingBoard />
         </div>
       </div>
-      <NotificationCenter />
     </div>
   )
 }
