@@ -1,13 +1,16 @@
 'use client'
-
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { useGameCreate } from '@/lib/hooks/useGameCreate'
-import { useToast } from "@lib/hooks/use-toast"
+import { useToast } from "@/lib/hooks/use-toast"
+import { CreateGameModal } from "./GameSetup"
 
 function CreateNewGame() {
     const { createGame, isPending, error, isConfirming, isConfirmed } = useGameCreate()
+    const [isCreateGameOpen, setIsCreateGameOpen] = useState(false)
 
+    const { toast } = useToast();
     const handleCreateGame = async () => {
         await createGame()
 
@@ -29,10 +32,15 @@ function CreateNewGame() {
     }
 
     return (
-
-        <Button className="mb-4 p-2 w-full font-bold" onClick={handleCreateGame} disabled={isConfirming}>
-            {isConfirming ? 'Creating Game...' : (<><Plus className="mr-2 h-4 w-4 font-extrabold" />Create New Game</>)}
-        </Button>
+        <>
+            <Button
+                className="w-full hover:bg-gray-200  font-semibold h-12 text-lg"
+                onClick={() => setIsCreateGameOpen(true)}
+            >
+                <Plus className="mr-2 h-4 w-4 font-extrabold" />Create New Battle
+            </Button>
+            <CreateGameModal isOpen={isCreateGameOpen} onClose={() => setIsCreateGameOpen(false)} />
+        </>
     )
 
 }

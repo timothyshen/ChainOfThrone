@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Toast, ToastProvider, ToastViewport } from "@/components/ui/toast"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/lib/hooks/use-toast"
 
 export function NotificationCenter() {
     const { toast } = useToast()
