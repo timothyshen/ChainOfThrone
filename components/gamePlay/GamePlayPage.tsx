@@ -155,15 +155,15 @@ export default function DiplomacyGame() {
 
 
     return (
-        <div className="flex flex-col h-max">
-            <div className="flex flex-1">
-                <div className="flex-1 p-4">
-                    <Tabs defaultValue="map" className="w-full">
+        <div className="flex flex-col min-h-screen">
+            <div className="flex flex-1 h-[calc(100vh-2rem)]">
+                <div className="flex-1 p-4 overflow-auto">
+                    <Tabs defaultValue="map" className="w-full h-full flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="map">Game Map</TabsTrigger>
                             <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="map">
+                        <TabsContent value="map" className="flex-1">
                             <GameMap
                                 currentPlayerId={playerId}
                                 currentPlayer={address ?? ''}
@@ -171,7 +171,7 @@ export default function DiplomacyGame() {
                                 onTerritoryClick={handleTerritoryClick}
                             />
                         </TabsContent>
-                        <TabsContent value="chat">
+                        <TabsContent value="chat" className="flex-1">
                             <ChatSystem
                                 players={players}
                                 currentPlayerId={address ?? ''}
@@ -179,9 +179,8 @@ export default function DiplomacyGame() {
                             />
                         </TabsContent>
                     </Tabs>
-
                 </div>
-                <div className="w-1/3 p-4 space-y-4">
+                <div className="w-1/3 p-4 space-y-4 overflow-auto">
                     <GameStatus currentPlayer={address ?? ''} players={players} />
 
                     <Card>
