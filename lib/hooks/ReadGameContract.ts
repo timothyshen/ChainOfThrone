@@ -1,21 +1,20 @@
 import { contractClient } from "@/lib/contract/client";
-import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { gameAbi } from "@/lib/contract/gameAbi";
 
 // View functions
 
-export const getGrid = async () => {
+export const getGrid = async (address: `0x${string}`) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "getGrid",
   });
   return result;
 };
 
-export const get2DGrid = async () => {
+export const get2DGrid = async (address: `0x${string}`) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "get2dGrid",
   });
@@ -24,18 +23,18 @@ export const get2DGrid = async () => {
 
 // Public view variables
 
-export const totalPlayers = async () => {
+export const totalPlayers = async (address: `0x${string}`) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "totalPlayers",
   });
   return result;
 };
 
-export const idToAddress = async (id: number) => {
+export const idToAddress = async (address: `0x${string}`, id: number) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "idToAddress",
     args: [id],
@@ -43,46 +42,49 @@ export const idToAddress = async (id: number) => {
   return result;
 };
 
-export const addressToId = async (address: string) => {
+export const addressToId = async (
+  address: `0x${string}`,
+  userAddress: `0x${string}`
+) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "addressToId",
-    args: [address],
+    args: [userAddress],
   });
   return result;
 };
 
-export const getGameStatus = async () => {
+export const getGameStatus = async (address: `0x${string}`) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "gameStatus",
   });
   return result;
 };
 
-export const getRoundNumber = async () => {
+export const getRoundNumber = async (address: `0x${string}`) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "roundNumber",
   });
   return result;
 };
 
-export const getMaxPlayer = async () => {
+export const getMaxPlayer = async (address: `0x${string}`) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "MAX_PLAYERS",
   });
   return result;
 };
 
-export const getRoundSubmitted = async (id: number) => {
+export const getRoundSubmitted = async (address: `0x${string}`, id: number) => {
   const result = await contractClient.readContract({
-    address: CONTRACT_ADDRESS,
+    address: address,
     abi: gameAbi,
     functionName: "roundSubmitted",
     args: [id],
@@ -90,8 +92,11 @@ export const getRoundSubmitted = async (id: number) => {
   return result;
 };
 
-export const getPlayerState = async (address: string) => {
-  const playerId = await addressToId(address);
-  const playerState = await getRoundSubmitted(playerId as string);
+export const getPlayerState = async (
+  address: `0x${string}`,
+  userAddress: `0x${string}`
+) => {
+  const playerId = await addressToId(address, userAddress);
+  const playerState = await getRoundSubmitted(address, playerId as number);
   return playerState;
 };

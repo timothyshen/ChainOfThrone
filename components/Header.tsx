@@ -13,6 +13,7 @@ function Header() {
                         <ul className="flex space-x-4">
                             <li><Link href="/explore" className="hover:underline">Explore</Link></li>
                             <li><Link href="/about" className="hover:underline">About</Link></li>
+                            <li><Link href="https://github.com/timothyshen/ChainOfThrone" className="hover:underline">Contact</Link></li>
                         </ul>
                     </nav>
                 </div>

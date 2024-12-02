@@ -5,6 +5,9 @@ import DynamicProvider from "@/providers/DynamicProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster"
+import AuthProvider from '@/components/providers/SessionProvider'
+
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -31,12 +34,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <DynamicProvider>
-          <Header />
-          {children}
-          <Footer />
-          <Toaster />
-        </DynamicProvider>
+        <AuthProvider>
+          <DynamicProvider>
+            <Header />
+            {children}
+            <Footer />
+            <Toaster />
+          </DynamicProvider>
+        </AuthProvider>
       </body>
     </html>
   );

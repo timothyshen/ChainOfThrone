@@ -4,13 +4,12 @@ import {
   useAccount,
   useReadContract,
 } from "wagmi";
-import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { gameAbi } from "@/lib/contract/gameAbi";
 
 type Move = readonly [number, number, string, number, number, number];
 
 interface UseMakeMoveReturn {
-  makeMove: (move: Move) => Promise<void>;
+  makeMove: (address: `0x${string}`, move: Move) => Promise<void>;
   isPending: boolean;
   isConfirming: boolean;
   isConfirmed: boolean;
@@ -20,13 +19,8 @@ interface UseMakeMoveReturn {
 export const useMakeMove = (): UseMakeMoveReturn => {
   const { isConnected, address } = useAccount();
   const { data: hash, error, isPending, writeContract } = useWriteContract();
-  // const { data: grid } = useReadContract({
-  //   address: CONTRACT_ADDRESS,
-  //   abi: gameAbi,
-  //   functionName: "get2dGrid",
-  // });
 
-  const makeMove = async (move: Move) => {
+  const makeMove = async (address: `0x${string}`, move: Move) => {
     if (!isConnected) throw new Error("Wallet not connected");
 
     console.log("move", move);
@@ -49,7 +43,7 @@ export const useMakeMove = (): UseMakeMoveReturn => {
       // console.log("Checking cell:", grid[move[0]][move[1]]);
 
       await writeContract({
-        address: CONTRACT_ADDRESS,
+        address: address,
         abi: gameAbi,
         functionName: "makeMove",
         args: [

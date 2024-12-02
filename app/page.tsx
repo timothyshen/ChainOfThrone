@@ -1,5 +1,5 @@
 import HowToPlayButton from "@/components/home/HowToPlayButton"
-import LoginButton from "@/components/home/LoginButton";
+import LoginButtonHome from "@/components/home/LoginButtonHome";
 
 export default function HomePage() {
 
@@ -18,7 +18,7 @@ export default function HomePage() {
         </p>
         <div className="space-x-4">
           <HowToPlayButton />
-          <LoginButton />
+          <LoginButtonHome />
         </div>
       </main>
     </div>
