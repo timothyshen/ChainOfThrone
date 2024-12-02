@@ -1,5 +1,5 @@
 import { Territory } from '@/lib/types/game'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface GameMapProps {
     currentPlayerId: string
@@ -32,7 +32,6 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
 
                             return (
                                 <g key={`${rowIndex}-${colIndex}`} onClick={() => onTerritoryClick(territory)}>
-                                    {/* Territory cell */}
                                     <rect
                                         x={x}
                                         y={y}
@@ -43,8 +42,6 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
                                         strokeWidth="2"
                                         className="cursor-pointer hover:opacity-80 transition-opacity"
                                     />
-
-                                    {/* Territory name */}
                                     <text
                                         x={x + cellSize / 2}
                                         y={y + 25}
@@ -53,8 +50,6 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
                                     >
                                         {territory.isCastle ? `Castle` : `Land`}
                                     </text>
-
-                                    {/* Castle icon */}
                                     {territory.isCastle && (
                                         <svg
                                             x={x + 40}
@@ -67,9 +62,6 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
                                             <path d="M12 2L2 8v14h20V8L12 2zm-2 17H6v-3h4v3zm8 0h-4v-3h4v3zm2-7H4v-5l8-4.5 8 4.5v5z" />
                                         </svg>
                                     )}
-
-                                    {/* Units */}
-
                                     {territory.units.map((unit, index) => (
                                         Number(unit) > 0 && (
                                             <g key={index}>

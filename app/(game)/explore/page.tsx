@@ -1,7 +1,12 @@
+'use client'
+
 import { ExplorePageComponent } from "@/components/explore/ExplorePage"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
 export default function ExplorePage() {
     return (
-        <ExplorePageComponent />
+        <ProtectedRoute>
+            <ExplorePageComponent />
+        </ProtectedRoute>
     )
 }

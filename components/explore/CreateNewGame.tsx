@@ -1,31 +1,32 @@
 'use client'
+
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { useGameCreate } from '@/lib/hooks/useGameCreate'
 import { useToast } from "@/lib/hooks/use-toast"
-import { CreateGameModal } from "./GameSetup"
 
-function CreateNewGame() {
-    const { createGame, isPending, error, isConfirming, isConfirmed } = useGameCreate()
-    const [isCreateGameOpen, setIsCreateGameOpen] = useState(false)
+const CreateNewGame = () => {
+    const { createGame, isPending, error, isConfirmed } = useGameCreate()
+    const [isCreateGameOpen, setIsCreateGameOpen] = useState<boolean>(false)
+    const { toast } = useToast()
 
-    const { toast } = useToast();
     const handleCreateGame = async () => {
-        await createGame()
+        try {
+            await createGame()
 
-        if (isConfirmed) {
-            toast({
-                title: 'Game Created',
-                description: 'Game created successfully!',
-                variant: 'default',
-            })
-        }
-
-        if (error) {
+            if (isConfirmed) {
+                toast({
+                    title: 'Game Created',
+                    description: 'Game created successfully!',
+                    variant: 'default',
+                })
+                setIsCreateGameOpen(false)
+            }
+        } catch (err) {
             toast({
                 title: 'Error',
-                description: error.message,
+                description: error?.message || 'Failed to create game',
                 variant: 'destructive',
             })
         }
@@ -34,15 +35,15 @@ function CreateNewGame() {
     return (
         <>
             <Button
-                className="w-full hover:bg-gray-200  font-semibold h-12 text-lg"
-                onClick={() => handleCreateGame()}
+                className="w-full hover:bg-gray-200 font-semibold h-12 text-lg"
+                onClick={() => setIsCreateGameOpen(true)}
+                disabled={isPending}
             >
-                <Plus className="mr-2 h-4 w-4 font-extrabold" />Create New Battle
+                <Plus className="mr-2 h-4 w-4 font-extrabold" />
+                {isPending ? 'Creating...' : 'Create New Battle'}
             </Button>
-            {/* <CreateGameModal isOpen={isCreateGameOpen} onClose={() => setIsCreateGameOpen(false)} /> */}
         </>
     )
-
 }
 
-export default CreateNewGame;
+export default CreateNewGame

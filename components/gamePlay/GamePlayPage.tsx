@@ -9,14 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Territory, Player, InitialPlayers } from '@/lib/types/game'
 import GameStatus from '@/components/gamePlay/GameStatus'
-import ExecutionLog from '@/components/gamePlay/ExecutionLog'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
 import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
-import { Move } from '@/lib/types/game'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
-
 
 export default function DiplomacyGame() {
     const [territories, setTerritories] = useState<any[]>([])
@@ -30,14 +27,11 @@ export default function DiplomacyGame() {
     const { makeMove, error } = useMakeMove()
 
     useEffect(() => {
-
-
         const getGrids = async () => {
             try {
                 const gameAddress = localStorage.getItem("gameAddress");
                 const gridData = await get2DGrid(gameAddress as `0x${string}`);
                 if (!gridData) return;
-                // Type assertion since we know the shape of the data
                 const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
                     row.map((territory: any, colIndex: number) => ({
                         ...territory,
@@ -45,7 +39,6 @@ export default function DiplomacyGame() {
                         y: colIndex,
                     }))
                 );
-                console.log("newGridData", newGridData);
                 setTerritories(newGridData as Territory[][]);
             } catch (error) {
                 console.error('Error fetching grid:', error);
@@ -64,14 +57,11 @@ export default function DiplomacyGame() {
             setPlayerId(playerId as string);
         }
 
-
-
         getGrids();
         getPlayerId();
-    }, []);
+    }, [address, toast]);
 
     const handleTerritoryClick = (territory: Territory) => {
-        // Check if territory belongs to current user
         if (territory.player !== address) {
             toast({
                 title: "Invalid Selection",
@@ -80,11 +70,9 @@ export default function DiplomacyGame() {
             });
             return;
         }
-
         setSelectedTerritory(territory);
         setMoveStrength(0);
     }
-
 
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
         if (!territory) return [];
@@ -98,7 +86,6 @@ export default function DiplomacyGame() {
                 }
             }
         }
-
         return adjacentTerritories;
     };
 
@@ -126,9 +113,6 @@ export default function DiplomacyGame() {
                 moveStrength
             ] as const;
 
-            console.log("MOVE", move);
-
-            // Make the move
             await makeMove(gameAddress as `0x${string}`, move);
 
             toast({
@@ -136,7 +120,6 @@ export default function DiplomacyGame() {
                 description: "Your move has been submitted to the blockchain",
             });
 
-            // setSelectedTerritory(null);
             setMoveStrength(0);
 
         } catch (error) {
@@ -154,15 +137,12 @@ export default function DiplomacyGame() {
     }
 
     const handleSendMessage = (recipientId: string, content: string) => {
-        // In a real application, you would send this message to a server
         console.log(`Message sent to ${recipientId}: ${content}`)
         toast({
             title: "Message Sent",
             description: `Your message has been sent to ${players.find(p => p.id === recipientId)?.name}.`,
         })
     }
-
-
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -214,7 +194,6 @@ export default function DiplomacyGame() {
                                                     onChange={(e) => setMoveStrength(parseInt(e.target.value))}
                                                     className="w-full"
                                                 />
-                                                {/* <Button onClick={() => setMoveStrength(selectedTerritory.units)}>Max</Button> */}
                                             </div>
                                         </div>
 
@@ -233,7 +212,8 @@ export default function DiplomacyGame() {
                                                     >
                                                         Move {moveStrength} units to {territory.x}, {territory.y}
                                                     </Button>
-                                                ))}                                            </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -244,8 +224,6 @@ export default function DiplomacyGame() {
                     </Card>
                 </div>
             </div>
-
-            {/* <ExecutionLog executionRecord={executionRecord} /> */}
-        </div >
+        </div>
     )
 }
