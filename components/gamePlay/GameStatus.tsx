@@ -9,6 +9,7 @@ import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { toast } from "@/lib/hooks/use-toast";
 
 interface GameStatusProps {
     currentPlayer: string
@@ -44,7 +45,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
-    const { addPlayer, isPending, error } = useAddPlayer();
+    const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
 
     useEffect(() => {
         const fetchGameData = async () => {
@@ -59,7 +60,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
             setTotalPlayer(total as number);
             setMaxPlayer(max as number);
 
-            const addresses = (total === max) ? await Promise.all(
+            const addresses = (total as number > 0) ? await Promise.all(
                 Array.from({ length: 2 }, (_, i) =>
                     Promise.all([idToAddress(gameAddress as `0x${string}`, i), getRoundSubmitted(gameAddress as `0x${string}`, i)])
                 )
@@ -75,14 +76,26 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
     }, []);
 
     const handlePlayerJoin = async () => {
-        const address = localStorage.getItem("address");
-        if (!address) return;
-        await addPlayer(address as `0x${string}`);
-
         const gameAddress = localStorage.getItem("gameAddress");
-        const [status, total] = await Promise.all([getGameStatus(gameAddress as `0x${string}`), totalPlayers(gameAddress as `0x${string}`)]);
-        setGameStatus(getGameStatusText(status as number));
-        setTotalPlayer(total as number);
+        console.log("address", gameAddress);
+        if (!gameAddress) return;
+        await addPlayer(gameAddress as `0x${string}`);
+        if (isPending) {
+            toast({
+                title: "Joining game",
+                description: "Redirecting to game room...",
+            })
+        }
+        if (isConfirmed) {
+            toast({
+                title: "Joined game",
+                description: "You have joined the game",
+            })
+            const [status, total] = await Promise.all([getGameStatus(gameAddress as `0x${string}`), totalPlayers(gameAddress as `0x${string}`)]);
+            setGameStatus(getGameStatusText(status as number));
+            setTotalPlayer(total as number);
+        }
+
     };
 
     const sliceAddress = (address: string) => {
