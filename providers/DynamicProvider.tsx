@@ -13,6 +13,8 @@ import { http } from 'viem';
 import { sepolia, flowTestnet, scrollSepolia } from 'viem/chains';
 
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import { SessionProvider } from "next-auth/react"
+
 
 const config = createConfig({
   chains: [sepolia],
@@ -40,7 +42,9 @@ export default function DynamicProvider({
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>
-            {children}
+            <SessionProvider>
+              {children}
+            </SessionProvider>
           </DynamicWagmiConnector>
         </QueryClientProvider>
       </WagmiProvider>

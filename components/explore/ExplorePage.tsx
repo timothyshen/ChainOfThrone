@@ -5,7 +5,7 @@ import CreateNewGame from '@/components/explore/CreateNewGame'
 export function ExplorePageComponent() {
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="min-h-screen container mx-auto p-4 mt-12">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-bold  mb-4 font-medieval">Explore Chain of Throne Games</h2>
         <p className="text-gray-400">Join a game room and prove your worth in the realm</p>
