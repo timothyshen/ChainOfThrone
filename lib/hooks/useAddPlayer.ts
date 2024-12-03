@@ -3,11 +3,10 @@ import {
   useWriteContract,
   useAccount,
 } from "wagmi";
-import { CONTRACT_ADDRESS } from "@/lib/constants/contracts";
 import { gameAbi } from "@/lib/contract/gameAbi";
 
 type UseAddPlayerReturn = {
-  addPlayer: () => `0x${string}` | undefined;
+  addPlayer: (address: `0x${string}`) => `0x${string}` | undefined;
   isPending: boolean;
   error: Error | null;
   isConfirming: boolean;
@@ -18,13 +17,12 @@ export const useAddPlayer = (): UseAddPlayerReturn => {
   const { isConnected } = useAccount();
   const { data: hash, error, isPending, writeContract } = useWriteContract();
 
-  const addPlayer = () => {
+  const addPlayer = (address: `0x${string}`) => {
     if (!isConnected) throw new Error("Wallet not connected");
 
-    console.log("writeContract", CONTRACT_ADDRESS);
     console.log("abi", gameAbi);
     writeContract({
-      address: CONTRACT_ADDRESS,
+      address: address,
       abi: gameAbi,
       functionName: "addPlayer",
       args: [],

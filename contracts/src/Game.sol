@@ -118,7 +118,6 @@ contract Game {
 
     function _checkGameStatus() internal {
         uint8[] memory winnerCheck = new uint8[](totalPlayers);
-        uint256[] memory unitCheck = new uint256[](totalPlayers);
 
         uint256[] memory totalUnits = new uint256[](totalPlayers);
 

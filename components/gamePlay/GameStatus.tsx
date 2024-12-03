@@ -1,30 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Player } from '@/lib/types/game'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted } from "@/lib/hooks/ReadGameContract";
 import { Button } from "@/components/ui/button";
-import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
-
-interface GameStatusProps {
-    currentPlayer: string
-    players: Player[]
-}
-
-enum GameStatusEnum {
-    NOT_STARTED = "Not Started",
-    ONGOING = "Ongoing",
-    COMPLETED = "Completed"
-}
-
-interface PlayerState {
-    address: string
-    roundSubmitted: boolean
-}
+import { toast } from "@/lib/hooks/use-toast";
+import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
+import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted } from "@/lib/hooks/ReadGameContract";
+import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
+import { useGameAddress } from '@/lib/hooks/useGameAddress';
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -39,49 +25,128 @@ const getGameStatusText = (status: number): GameStatusEnum => {
     }
 }
 
+const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], currentPlayer: string }) => {
+    const sliceAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+    if (players.length === 0) {
+        return <p className="text-sm text-muted-foreground">Waiting for players...</p>;
+    }
+
+    return (
+        <div className="grid gap-2">
+            {players.map((player, index) => (
+                <div
+                    key={index}
+                    className={`flex items-center justify-between p-2 rounded-md ${player.address.toLowerCase() === currentPlayer.toLowerCase()
+                        ? 'bg-primary/20 border border-primary'
+                        : 'bg-muted'
+                        }`}
+                >
+                    <span className="text-sm font-medium">
+                        {player.address.toLowerCase() === currentPlayer.toLowerCase() && '👉 '}
+                        Player {index + 1}: {sliceAddress(player.address)}
+                    </span>
+                    {player.roundSubmitted ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+};
+
 export default function GameStatus({ currentPlayer, players }: GameStatusProps) {
+    const { gameAddress } = useGameAddress();
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
-    const { addPlayer, isPending, error } = useAddPlayer();
+    const [isLoading, setIsLoading] = useState(true);
+    const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
 
     useEffect(() => {
         const fetchGameData = async () => {
-            const [status, total, max] = await Promise.all([
-                getGameStatus(),
-                totalPlayers(),
-                getMaxPlayer()
-            ]);
+            try {
+                if (!gameAddress) return;
 
-            setGameStatus(getGameStatusText(status as number));
-            setTotalPlayer(total as number);
-            setMaxPlayer(max as number);
+                const [status, total, max] = await Promise.all([
+                    getGameStatus(gameAddress),
+                    totalPlayers(gameAddress),
+                    getMaxPlayer(gameAddress)
+                ]);
 
-            const addresses = await Promise.all(
-                Array.from({ length: 2 }, (_, i) =>
-                    Promise.all([idToAddress(i), getRoundSubmitted(i)])
-                )
-            );
+                setGameStatus(getGameStatusText(status as number));
+                setTotalPlayer(total as number);
+                setMaxPlayer(max as number);
 
-            setPlayerAddresses(addresses.map(([address, roundSubmitted]) => ({
-                address: address as string,
-                roundSubmitted: roundSubmitted as boolean
-            })));
+                if (total as number > 0) {
+                    const addresses = await Promise.all(
+                        Array.from({ length: 2 }, (_, i) =>
+                            Promise.all([
+                                idToAddress(gameAddress, i),
+                                getRoundSubmitted(gameAddress, i)
+                            ])
+                        )
+                    );
+
+                    setPlayerAddresses(addresses.map(([address, roundSubmitted]) => ({
+                        address: address as string,
+                        roundSubmitted: roundSubmitted as boolean
+                    })));
+                }
+            } catch (error) {
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch game data",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         fetchGameData();
-    }, []);
+    }, [gameAddress]);
 
     const handlePlayerJoin = async () => {
-        await addPlayer();
-        const [status, total] = await Promise.all([getGameStatus(), totalPlayers()]);
-        setGameStatus(getGameStatusText(status as number));
-        setTotalPlayer(total as number);
+        if (!gameAddress) return;
+
+        try {
+            await addPlayer(gameAddress);
+
+            if (isConfirmed) {
+                const [status, total] = await Promise.all([
+                    getGameStatus(gameAddress),
+                    totalPlayers(gameAddress)
+                ]);
+
+                setGameStatus(getGameStatusText(status as number));
+                setTotalPlayer(total as number);
+
+                toast({
+                    title: "Joined game",
+                    description: "You have successfully joined the game",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to join game",
+                variant: "destructive",
+            });
+        }
     };
 
-    const sliceAddress = (address: string) => {
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    if (isLoading) {
+        return (
+            <Card className="w-full max-w-2xl mx-auto">
+                <CardContent className="flex items-center justify-center py-10">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                </CardContent>
+            </Card>
+        );
     }
 
     const getStatusColor = (status: GameStatusEnum) => {
@@ -124,32 +189,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
 
                 <div>
                     <p className="text-sm font-medium text-muted-foreground mb-2">Players</p>
-                    {playerAddresses.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Waiting for players...</p>
-                    ) : (
-                        <div className="grid gap-2">
-                            {playerAddresses.map((player, index) => (
-                                <div 
-                                    key={index} 
-                                    className={`flex items-center justify-between p-2 rounded-md ${
-                                        player.address.toLowerCase() === currentPlayer.toLowerCase() 
-                                            ? 'bg-primary/20 border border-primary' 
-                                            : 'bg-muted'
-                                    }`}
-                                >
-                                    <span className="text-sm font-medium">
-                                        {player.address.toLowerCase() === currentPlayer.toLowerCase() && '👉 '}
-                                        Player {index + 1}: {sliceAddress(player.address)}
-                                    </span>
-                                    {player.roundSubmitted ? (
-                                        <CheckCircle className="h-5 w-5 text-green-500" />
-                                    ) : (
-                                        <XCircle className="h-5 w-5 text-red-500" />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <PlayerList players={playerAddresses} currentPlayer={currentPlayer} />
                 </div>
 
                 <Button

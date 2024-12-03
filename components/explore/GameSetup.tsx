@@ -6,12 +6,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export function CreateGameModal({ isOpen, onClose }) {
+
+interface CreateGameModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+
+export function CreateGameModal({ isOpen, onClose }: CreateGameModalProps) {
   const [gameName, setGameName] = useState('')
   const [playerCount, setPlayerCount] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     // Here you would typically send this data to your backend
     console.log('Creating game:', { gameName, playerCount, password })
