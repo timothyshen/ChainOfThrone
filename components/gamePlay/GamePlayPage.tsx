@@ -26,7 +26,7 @@ export default function DiplomacyGame() {
     const [playerId, setPlayerId] = useState<string | null>(null)
     const { toast } = useToast()
     const { address } = useAccount()
-    const { makeMove, error } = useMakeMove()
+    const { makeMove, error, isConfirmed, isConfirming } = useMakeMove()
 
     useEffect(() => {
         const getGrids = async () => {
@@ -60,7 +60,7 @@ export default function DiplomacyGame() {
 
         getGrids();
         getPlayerId();
-    }, [address, gameAddress, toast]);
+    }, [address, gameAddress, toast, isConfirmed]);
 
     const handleTerritoryClick = (territory: Territory) => {
         if (territory.player !== address) {
@@ -149,7 +149,7 @@ export default function DiplomacyGame() {
                     <Tabs defaultValue="map" className="w-full h-full flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="map">Game Map</TabsTrigger>
-                            <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger>
+                            {/* <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger> */}
                         </TabsList>
                         <TabsContent value="map" className="flex-1">
                             <GameMap
@@ -169,7 +169,7 @@ export default function DiplomacyGame() {
                     </Tabs>
                 </div>
                 <div className="w-1/3 p-4 space-y-4 overflow-auto">
-                    <GameStatus currentPlayer={address ?? ''} players={players} />
+                    <GameStatus currentPlayer={address ?? ''} players={players} moveAction={isConfirmed} />
 
                     <Card>
                         <CardHeader>
@@ -208,7 +208,8 @@ export default function DiplomacyGame() {
                                                         onClick={() => handleAction(territory)}
                                                         disabled={!moveStrength || moveStrength <= 0}
                                                     >
-                                                        Move {moveStrength} units to {territory.x}, {territory.y}
+                                                        {isConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
+                                                        {isConfirming && <span className="animate-pulse">...</span>}
                                                     </Button>
                                                 ))}
                                             </div>

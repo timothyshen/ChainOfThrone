@@ -20,11 +20,12 @@ export const useMakeMove = (): UseMakeMoveReturn => {
   const { isConnected, address } = useAccount();
   const { data: hash, error, isPending, writeContract } = useWriteContract();
 
-  const makeMove = async (address: `0x${string}`, move: Move) => {
+  const makeMove = async (gameAddress: `0x${string}`, move: Move) => {
     if (!isConnected) throw new Error("Wallet not connected");
 
     console.log("move", move);
     //check caller is the player
+    console.log("address", address);
     if (address !== move[2]) throw new Error("Caller is not the player");
 
     try {
@@ -43,7 +44,7 @@ export const useMakeMove = (): UseMakeMoveReturn => {
       // console.log("Checking cell:", grid[move[0]][move[1]]);
 
       await writeContract({
-        address: address,
+        address: gameAddress,
         abi: gameAbi,
         functionName: "makeMove",
         args: [

@@ -57,7 +57,7 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, players }: GameStatusProps) {
+export default function GameStatus({ currentPlayer, players, moveAction }: GameStatusProps) {
     const { gameAddress } = useGameAddress();
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
@@ -108,7 +108,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
         };
 
         fetchGameData();
-    }, [gameAddress]);
+    }, [gameAddress, isConfirmed, moveAction]);
 
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;

@@ -14,4 +14,5 @@ export interface PlayerState {
 export interface GameStatusProps {
   currentPlayer: string;
   players: Player[];
+  moveAction: boolean;
 }

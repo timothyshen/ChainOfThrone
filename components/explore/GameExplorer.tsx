@@ -158,7 +158,6 @@ export default function GameExplorer() {
                                                 variant="outline"
                                                 className="w-max"
                                                 onClick={() => handleJoinGame(game.gameAddress)}
-                                                disabled={game.totalPlayers === game.maxPlayers}
                                             >
                                                 Quick Join
                                             </Button>
