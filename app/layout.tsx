@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import DynamicProvider from "@/providers/DynamicProvider";
+import DynamicProvider from "@/lib/providers/DynamicProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster"
-import AuthProvider from '@/components/providers/SessionProvider'
+import { AuthProvider } from '@/lib/providers/AuthProvider'
 
 
 const geistSans = localFont({
@@ -34,15 +34,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <DynamicProvider>
+
+        <DynamicProvider>
+          <AuthProvider>
             <Header />
             {children}
             <Footer />
             <Toaster />
-          </DynamicProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </DynamicProvider>
       </body>
-    </html>
+    </html >
   );
 }

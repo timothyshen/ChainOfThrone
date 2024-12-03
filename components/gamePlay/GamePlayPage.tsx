@@ -15,10 +15,14 @@ import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
 import { useGameAddress } from '@/lib/hooks/useGameAddress'
+import { useGameStateUpdates } from '@/lib/hooks/useGameStateUpdates'
+import { useAuth } from '@/lib/providers/AuthProvider';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 
 export default function DiplomacyGame() {
     const { gameAddress } = useGameAddress();
-    const [territories, setTerritories] = useState<any[]>([])
+    const { refreshGameState } = useGameStateUpdates(gameAddress || undefined);
+    const [territories, setTerritories] = useState<Territory[][]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
@@ -27,6 +31,7 @@ export default function DiplomacyGame() {
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove, error, isConfirmed, isConfirming } = useMakeMove()
+    const { isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
         const getGrids = async () => {
@@ -78,15 +83,20 @@ export default function DiplomacyGame() {
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
         if (!territory) return [];
         const adjacentTerritories: Territory[] = [];
-        for (let i = 0; i < territories.length; i++) {
-            for (let j = 0; j < territories[i].length; j++) {
-                const dx = Math.abs(territory.x - territories[i][j].x)
-                const dy = Math.abs(territory.y - territories[i][j].y)
+        
+        territories.forEach((row, i) => {
+            if (!row) return;
+            row.forEach((currentTerritory, j) => {
+                if (!currentTerritory) return;
+
+                const dx = Math.abs(territory.x - currentTerritory.x);
+                const dy = Math.abs(territory.y - currentTerritory.y);
                 if (dx + dy === 1) {
-                    adjacentTerritories.push(territories[i][j]);
+                    adjacentTerritories.push(currentTerritory);
                 }
-            }
-        }
+            });
+        });
+        
         return adjacentTerritories;
     };
 
@@ -112,6 +122,10 @@ export default function DiplomacyGame() {
             ] as const;
 
             await makeMove(gameAddress, move);
+
+            if (isConfirmed) {
+                await refreshGameState(gameAddress);
+            }
 
             toast({
                 title: "Move Submitted",
@@ -140,6 +154,14 @@ export default function DiplomacyGame() {
             title: "Message Sent",
             description: `Your message has been sent to ${players.find(p => p.id === recipientId)?.name}.`,
         })
+    }
+
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
+
+    if (!isAuthenticated) {
+        return null;
     }
 
     return (

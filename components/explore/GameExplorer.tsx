@@ -73,7 +73,7 @@ export default function GameExplorer() {
         try {
             localStorage.setItem("gameAddress", gameAddress)
             // await addPlayer(gameAddress as `0x${string}`);
-            router.push(`/play/${gameAddress}`)
+            router.push(`/game/${gameAddress}`)
             toast({
                 title: "Joining game",
                 description: "Redirecting to game room...",
