@@ -10,6 +10,7 @@ import { toast } from "@/lib/hooks/use-toast";
 import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
 import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
+import { useGameAddress } from '@/lib/hooks/useGameAddress';
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -57,6 +58,7 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
 };
 
 export default function GameStatus({ currentPlayer, players }: GameStatusProps) {
+    const { gameAddress } = useGameAddress();
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
@@ -67,7 +69,6 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
     useEffect(() => {
         const fetchGameData = async () => {
             try {
-                const gameAddress = localStorage.getItem("gameAddress") as `0x${string}`;
                 if (!gameAddress) return;
 
                 const [status, total, max] = await Promise.all([
@@ -107,10 +108,9 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
         };
 
         fetchGameData();
-    }, []);
+    }, [gameAddress]);
 
     const handlePlayerJoin = async () => {
-        const gameAddress = localStorage.getItem("gameAddress") as `0x${string}`;
         if (!gameAddress) return;
 
         try {

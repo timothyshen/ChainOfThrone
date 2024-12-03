@@ -14,8 +14,10 @@ import GameMap from '@/components/gamePlay/GameMap'
 import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
+import { useGameAddress } from '@/lib/hooks/useGameAddress'
 
 export default function DiplomacyGame() {
+    const { gameAddress } = useGameAddress();
     const [territories, setTerritories] = useState<any[]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [moveStrength, setMoveStrength] = useState<number>(0)
@@ -29,8 +31,8 @@ export default function DiplomacyGame() {
     useEffect(() => {
         const getGrids = async () => {
             try {
-                const gameAddress = localStorage.getItem("gameAddress");
-                const gridData = await get2DGrid(gameAddress as `0x${string}`);
+                if (!gameAddress) return;
+                const gridData = await get2DGrid(gameAddress);
                 if (!gridData) return;
                 const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
                     row.map((territory: any, colIndex: number) => ({
@@ -51,15 +53,14 @@ export default function DiplomacyGame() {
         };
 
         const getPlayerId = async () => {
-            const gameAddress = localStorage.getItem("gameAddress");
             if (!gameAddress || !address) return;
-            const playerId = await addressToId(gameAddress as `0x${string}`, address as `0x${string}`);
+            const playerId = await addressToId(gameAddress, address);
             setPlayerId(playerId as string);
         }
 
         getGrids();
         getPlayerId();
-    }, [address, toast]);
+    }, [address, gameAddress, toast]);
 
     const handleTerritoryClick = (territory: Territory) => {
         if (territory.player !== address) {
@@ -90,7 +91,7 @@ export default function DiplomacyGame() {
     };
 
     const handleAction = async (targetTerritory: Territory) => {
-        if (!selectedTerritory || !address) {
+        if (!selectedTerritory || !address || !gameAddress) {
             toast({
                 title: "Invalid Action",
                 description: "Cannot perform this action at this time.",
@@ -98,9 +99,6 @@ export default function DiplomacyGame() {
             });
             return;
         }
-
-        const gameAddress = localStorage.getItem("gameAddress");
-        if (!gameAddress) return;
 
         try {
             type Move = readonly [number, number, string, number, number, number];
@@ -113,7 +111,7 @@ export default function DiplomacyGame() {
                 moveStrength
             ] as const;
 
-            await makeMove(gameAddress as `0x${string}`, move);
+            await makeMove(gameAddress, move);
 
             toast({
                 title: "Move Submitted",
