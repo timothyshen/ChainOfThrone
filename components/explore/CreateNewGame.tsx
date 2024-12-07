@@ -36,7 +36,7 @@ const CreateNewGame = () => {
         <>
             <Button
                 className="w-full hover:bg-gray-200 font-semibold h-12 text-lg"
-                onClick={() => setIsCreateGameOpen(true)}
+                onClick={() => handleCreateGame()}
                 disabled={isPending}
             >
                 <Plus className="mr-2 h-4 w-4 font-extrabold" />

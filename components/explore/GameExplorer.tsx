@@ -37,8 +37,8 @@ const getStatusStyles = (status: number): string => {
     const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
     const statusStyles = {
         0: 'bg-black text-green-400',
-        1: 'bg-black/30 text-yellow-400',
-        2: 'bg-black/30 text-red-400'
+        1: 'bg-black text-yellow-400',
+        2: 'bg-black text-red-400'
     }
     return `${baseStyles} ${statusStyles[status as GameStatus] ?? ''}`
 }

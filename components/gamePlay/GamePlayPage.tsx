@@ -156,13 +156,6 @@ export default function DiplomacyGame() {
         })
     }
 
-    if (isLoading) {
-        return <LoadingScreen />;
-    }
-
-    if (!isAuthenticated) {
-        return null;
-    }
 
     return (
         <div className="flex flex-col min-h-screen mt-12">

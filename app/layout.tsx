@@ -36,12 +36,10 @@ export default function RootLayout({
       >
 
         <DynamicProvider>
-          <AuthProvider>
-            <Header />
-            {children}
-            <Footer />
-            <Toaster />
-          </AuthProvider>
+          <Header />
+          {children}
+          <Footer />
+          <Toaster />
         </DynamicProvider>
       </body>
     </html >

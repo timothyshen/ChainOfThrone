@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!isConnecting) {
             setIsLoading(false);
         }
+
     }, [isConnecting]);
 
     const value = {

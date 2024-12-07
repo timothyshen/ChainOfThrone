@@ -3,26 +3,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AboutUs() {
     const teamMembers = [
-        { name: "Elara Stormborn", role: "Lead Strategist", icon: Shield },
-        { name: "Thorne Ironheart", role: "Blockchain Architect", icon: Sword },
-        { name: "Lyra Moonshadow", role: "UX Enchanter", icon: Scroll },
-        { name: "Zephyr Dawnbringer", role: "Smart Contract Sage", icon: Crown },
+        { name: "Chloe", role: "Lead Strategist", icon: Shield },
+        { name: "Bowennnn", role: "Blockchain Architect", icon: Sword },
+        { name: "Timtimtim", role: "UX Enchanter", icon: Scroll },
+        { name: "614", role: "The vibe master", icon: Crown },
     ]
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
+        <div className="min-h-screen bg-white">
             <div className="container mx-auto px-4 py-16">
                 <header className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-white font-medieval mb-4">About Chain of Throne</h1>
-                    <p className="text-xl text-gray-400">Forging the Future of Decentralized Diplomacy</p>
+                    <h1 className="text-4xl font-bold text-gray-900 font-medieval mb-4">About Chain of Throne</h1>
+                    <p className="text-xl text-gray-600">Forging the Future of Decentralized Diplomacy</p>
                 </header>
 
                 <div className="grid md:grid-cols-2 gap-8 mb-16">
-                    <Card className="bg-black/60 border-gray-800">
+                    <Card className="border-gray-200 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="text-2xl font-medieval text-white">Our Thesis</CardTitle>
+                            <CardTitle className="text-2xl font-medieval text-gray-900">Our Thesis</CardTitle>
                         </CardHeader>
-                        <CardContent className="text-gray-300">
+                        <CardContent className="text-gray-600">
                             <p className="mb-4">
                                 Chain of Throne stands at the intersection of blockchain technology and strategic gameplay. Our thesis is rooted in the belief that decentralized systems can revolutionize how we approach diplomacy, negotiation, and conflict resolution in virtual realms.
                             </p>
@@ -32,11 +32,11 @@ export default function AboutUs() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-black/60 border-gray-800">
+                    <Card className="border-gray-200 shadow-sm">
                         <CardHeader>
-                            <CardTitle className="text-2xl font-medieval text-white">Our Vision</CardTitle>
+                            <CardTitle className="text-2xl font-medieval text-gray-900">Our Vision</CardTitle>
                         </CardHeader>
-                        <CardContent className="text-gray-300">
+                        <CardContent className="text-gray-600">
                             <p className="mb-4">
                                 We envision a future where Chain of Throne becomes more than just a game – it becomes a platform for learning, collaboration, and innovation. Our goal is to create an immersive world where players can:
                             </p>
@@ -50,17 +50,17 @@ export default function AboutUs() {
                     </Card>
                 </div>
 
-                <h2 className="text-3xl font-bold text-white font-medieval mb-8 text-center">Meet Our Team</h2>
+                <h2 className="text-3xl font-bold text-gray-900 font-medieval mb-8 text-center">Meet Our Team</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {teamMembers.map((member, index) => (
-                        <Card key={index} className="bg-black/60 border-gray-800">
+                        <Card key={index} className="border-gray-200 shadow-sm">
                             <CardContent className="pt-6">
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="bg-gray-800 p-3 rounded-full mb-4">
-                                        <member.icon className="h-8 w-8 text-white" />
+                                    <div className="bg-gray-100 p-3 rounded-full mb-4">
+                                        <member.icon className="h-8 w-8 text-gray-700" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-white mb-2">{member.name}</h3>
-                                    <p className="text-gray-400">{member.role}</p>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                                    <p className="text-gray-600">{member.role}</p>
                                 </div>
                             </CardContent>
                         </Card>
