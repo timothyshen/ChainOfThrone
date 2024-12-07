@@ -74,6 +74,24 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     },
   });
 
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
+    eventName: "PlayerAdded",
+    onLogs() {
+      fetchGameState();
+    },
+  });
+
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
+    eventName: "RoundCompleted",
+    onLogs() {
+      fetchGameState();
+    },
+  });
+
   // Initial fetch and setup
   useEffect(() => {
     if (gameAddress) {

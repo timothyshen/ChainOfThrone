@@ -1,5 +1,6 @@
 import { Territory } from '@/lib/types/game'
 import { Card, CardContent } from "@/components/ui/card"
+import { Loader2 } from 'lucide-react'
 
 interface GameMapProps {
     currentPlayerId: string
@@ -17,6 +18,7 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
     const padding = 20
     const gridWidth = (gridSize.cols * cellSize) + (padding * 2)
     const gridHeight = (gridSize.rows * cellSize) + (padding * 2)
+
 
     return (
         <Card>
