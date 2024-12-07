@@ -80,6 +80,10 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     eventName: "PlayerAdded",
     onLogs() {
       fetchGameState();
+      toast({
+        title: "Player Added",
+        description: "A new player has joined the game",
+      });
     },
   });
 
@@ -89,6 +93,10 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     eventName: "RoundCompleted",
     onLogs() {
       fetchGameState();
+      toast({
+        title: "Round Completed",
+        description: "The round has been completed",
+      });
     },
   });
 

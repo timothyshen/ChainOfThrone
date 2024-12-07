@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Icons
-import { Search, Sword, Users, Info } from 'lucide-react'
+import { Search, Sword, Users, Info, Loader2 } from 'lucide-react'
 
 // Hooks and Utils
 import { useState, useEffect } from 'react'
