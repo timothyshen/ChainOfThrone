@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWatchContractEvent, usePublicClient } from "wagmi";
+import { watchContractEvent } from "wagmi/actions";
 import { gameAbi } from "@/lib/contract/gameAbi";
 import {
   getGameStatus,
@@ -34,46 +35,57 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const eventHandlers: Record<string, ContractEventConfig> = {
-    GameStarted: {
-      title: "Game Started",
-      description: "The game has begun!",
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
+    eventName: "GameStarted",
+    onLogs() {
+      fetchGameState(gameAddress);
+      toast({
+        title: "Game Started",
+        description: "The game has begun!",
+      });
     },
-    GameFinalized: {
-      title: "Game Finished",
-      description: (winner) => `Winner: ${winner}`,
-    },
-    PlayerAdded: {
-      title: "Player Added",
-      description: "A new player has joined the game",
-    },
-    RoundCompleted: {
-      title: "Round Completed",
-      description: (logs) =>
-        `Round ${logs[0]?.args?.roundNumber || "unknown"} has been completed`,
-    },
-  };
+  });
 
-  const setupContractEvent = (eventName: keyof typeof eventHandlers) => {
-    useWatchContractEvent({
-      address: gameAddress,
-      abi: gameAbi,
-      eventName,
-      onLogs(logs) {
-        fetchGameState(gameAddress);
-        const handler = eventHandlers[eventName];
-        if (handler) {
-          toast({
-            title: handler.title,
-            description:
-              typeof handler.description === "function"
-                ? handler.description(logs)
-                : handler.description,
-          });
-        }
-      },
-    });
-  };
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
+    eventName: "GameFinalized",
+    onLogs() {
+      fetchGameState(gameAddress);
+      toast({
+        title: "Game Finished",
+        description: `Winner`,
+      });
+    },
+  });
+
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
+    eventName: "PlayerAdded",
+    onLogs() {
+      fetchGameState(gameAddress);
+      toast({
+        title: "Player Added",
+        description: "A new player has joined the game",
+      });
+    },
+  });
+
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
+    eventName: "RoundCompleted",
+    onLogs(logs) {
+      fetchGameState(gameAddress);
+      toast({
+        title: "Round Completed",
+        description: `Round has been completed`,
+      });
+    },
+  });
 
   const fetchGameState = async (gameAddress?: `0x${string}`) => {
     if (!gameAddress) return;
@@ -112,11 +124,6 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
       setIsLoading(false);
     }
   };
-
-  // Setup all event listeners
-  Object.keys(eventHandlers).forEach((eventName) => {
-    setupContractEvent(eventName as keyof typeof eventHandlers);
-  });
 
   // Initial fetch and setup
   useEffect(() => {
