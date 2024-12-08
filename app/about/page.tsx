@@ -1,12 +1,12 @@
-import { Shield, Sword, Scroll, Crown } from 'lucide-react'
+import { Shield, Sword, Scroll, Crown, Twitter } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AboutUs() {
     const teamMembers = [
-        { name: "Chloe", role: "Lead Strategist", icon: Shield },
-        { name: "Bowennnn", role: "Blockchain Architect", icon: Sword },
-        { name: "Timtimtim", role: "UX Enchanter", icon: Scroll },
-        { name: "614", role: "The vibe master", icon: Crown },
+        { name: "Chloe", role: "Lead Strategist", icon: Shield, link: "https://x.com/Chloe_zhuX" },
+        { name: "Bowennnn", role: "Blockchain Architect", icon: Sword, link: "https://x.com/0xbyyou" },
+        { name: "Timtimtim", role: "UX Enchanter", icon: Scroll, link: "https://x.com/timtimtim_eth" },
+        { name: "614", role: "The vibe master", icon: Crown, link: "https://x.com/TheYisiLiu" },
     ]
 
     return (
@@ -61,6 +61,9 @@ export default function AboutUs() {
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
                                     <p className="text-gray-600">{member.role}</p>
+                                    <a href={member.link} className="text-blue-500 hover:underline">
+                                        <Twitter className="h-4 w-4" />
+                                    </a>
                                 </div>
                             </CardContent>
                         </Card>
