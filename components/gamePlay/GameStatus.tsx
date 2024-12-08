@@ -12,6 +12,7 @@ import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitt
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
+import GameCompleteModal from "./GameCompleteModal";
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -66,6 +67,7 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
+    const [showCompleteModal, setShowCompleteModal] = useState(false);
 
     useEffect(() => {
         const fetchGameData = async () => {
@@ -111,6 +113,12 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
         fetchGameData();
     }, [gameAddress, isConfirmed, moveAction]);
 
+    useEffect(() => {
+        if (gameStatus === GameStatusEnum.COMPLETED) {
+            setShowCompleteModal(true);
+        }
+    }, [gameStatus]);
+
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;
 
@@ -138,6 +146,10 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
                 variant: "destructive",
             });
         }
+    };
+
+    const handleCloseModal = () => {
+        setShowCompleteModal(false);
     };
 
     if (isLoading) {
@@ -218,6 +230,11 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
                     <p className="text-sm text-center text-red-500">Error: {error.message}</p>
                 )}
             </CardContent>
+
+            <GameCompleteModal 
+                isOpen={showCompleteModal} 
+                onClose={handleCloseModal} 
+            />
         </Card>
     )
 }

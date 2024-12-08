@@ -24,6 +24,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const { gameState, gameStatusLoading, error, refreshGameState } = useGameStateUpdates(gameAddressParam);
     const [territories, setTerritories] = useState<Territory[][]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
+    const [currentUnits, setCurrentUnits] = useState<number>(0)
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
@@ -93,8 +94,11 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
             });
             return;
         }
+        console.log("Territory clicked:", territory);
+
         setSelectedTerritory(territory);
         setMoveStrength(0);
+        setCurrentUnits(Number(territory.units[Number(playerId)]));
     }
 
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
@@ -220,8 +224,8 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                                                     id="moveStrength"
                                                     type="number"
                                                     min={1}
-                                                    value={moveStrength || ''}
-                                                    max={Number(selectedTerritory.units) || 10}
+                                                    value={moveStrength ?? ''}
+                                                    max={currentUnits}
                                                     onChange={(e) => setMoveStrength(Number(e.target.value))}
                                                     className="w-full"
                                                 />
