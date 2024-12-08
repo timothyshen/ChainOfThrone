@@ -5,7 +5,6 @@ import DynamicProvider from "@/lib/providers/DynamicProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from '@/lib/providers/AuthProvider'
 
 
 const geistSans = localFont({

@@ -16,12 +16,12 @@ import { useAccount } from 'wagmi'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
 import { useGameAddress } from '@/lib/hooks/useGameAddress'
 import { useGameStateUpdates } from '@/lib/hooks/useGameStateUpdates'
-import { useAuth } from '@/lib/providers/AuthProvider';
-import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { useWatchContractEvent } from "wagmi";
+import { gameAbi } from '@/lib/contract/gameAbi'
 
-export default function DiplomacyGame() {
+export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: `0x${string}` }) {
     const { gameAddress } = useGameAddress();
-    const { refreshGameState } = useGameStateUpdates(gameAddress || undefined);
+    const { gameState, gameStatusLoading, error, refreshGameState } = useGameStateUpdates(gameAddressParam);
     const [territories, setTerritories] = useState<Territory[][]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [moveStrength, setMoveStrength] = useState<number>(0)
@@ -29,44 +29,60 @@ export default function DiplomacyGame() {
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
     const [playerId, setPlayerId] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
     const { toast } = useToast()
     const { address } = useAccount()
-    const { makeMove, error, isConfirmed, isConfirming } = useMakeMove()
-    const { isAuthenticated, isLoading } = useAuth();
+    const { makeMove, error: makeMoveError, isConfirmed, isConfirming } = useMakeMove()
+
+    useWatchContractEvent({
+        address: gameAddressParam,
+        abi: gameAbi,
+        eventName: 'RoundCompleted',
+        onLogs: () => {
+            getGrids();
+            getPlayerId();
+            refreshGameState();
+        },
+    });
+
+    const getGrids = async () => {
+        setIsLoading(true)
+        try {
+            if (!gameAddress) return;
+            const gridData = await get2DGrid(gameAddress);
+            if (!gridData) return;
+            const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
+                row.map((territory: any, colIndex: number) => ({
+                    ...territory,
+                    x: rowIndex,
+                    y: colIndex,
+                }))
+            );
+            setTerritories(newGridData as Territory[][]);
+        } catch (error) {
+            console.error('Error fetching grid:', error);
+            toast({
+                title: "Error",
+                description: "Failed to fetch game state",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false)
+        }
+    };
+
+    const getPlayerId = async () => {
+        if (!gameAddress || !address) return;
+        const playerId = await addressToId(gameAddress, address);
+        setPlayerId(playerId as string);
+    }
+
 
     useEffect(() => {
-        const getGrids = async () => {
-            try {
-                if (!gameAddress) return;
-                const gridData = await get2DGrid(gameAddress);
-                if (!gridData) return;
-                const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
-                    row.map((territory: any, colIndex: number) => ({
-                        ...territory,
-                        x: rowIndex,
-                        y: colIndex,
-                    }))
-                );
-                setTerritories(newGridData as Territory[][]);
-            } catch (error) {
-                console.error('Error fetching grid:', error);
-                toast({
-                    title: "Error",
-                    description: "Failed to fetch game state",
-                    variant: "destructive",
-                });
-            }
-        };
-
-        const getPlayerId = async () => {
-            if (!gameAddress || !address) return;
-            const playerId = await addressToId(gameAddress, address);
-            setPlayerId(playerId as string);
-        }
-
         getGrids();
         getPlayerId();
     }, [address, gameAddress, toast, isConfirmed]);
+
 
     const handleTerritoryClick = (territory: Territory) => {
         if (territory.player !== address) {
@@ -125,7 +141,7 @@ export default function DiplomacyGame() {
             await makeMove(gameAddress, move);
 
             if (isConfirmed) {
-                await refreshGameState(gameAddress);
+                await refreshGameState();
                 setMoveSubmitted(true);
                 toast({
                     title: "Move Submitted",
@@ -133,9 +149,6 @@ export default function DiplomacyGame() {
                 });
                 setMoveStrength(0);
             }
-
-
-
 
         } catch (error) {
             console.error('Error making move:', error);
@@ -147,8 +160,8 @@ export default function DiplomacyGame() {
         }
     };
 
-    if (error) {
-        console.error("Error making move:", error);
+    if (makeMoveError) {
+        console.error("Error making move:", makeMoveError);
     }
 
     const handleSendMessage = (recipientId: string, content: string) => {
@@ -175,6 +188,7 @@ export default function DiplomacyGame() {
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
+                                isLoading={isLoading}
                             />
                         </TabsContent>
                         <TabsContent value="chat" className="flex-1">
