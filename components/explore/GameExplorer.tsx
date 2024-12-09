@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Icons
-import { Search, Sword, Users, Info } from 'lucide-react'
+import { Search, Sword, Users, Info, Loader2 } from 'lucide-react'
 
 // Hooks and Utils
 import { useState, useEffect } from 'react'
@@ -37,8 +37,8 @@ const getStatusStyles = (status: number): string => {
     const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
     const statusStyles = {
         0: 'bg-black text-green-400',
-        1: 'bg-black/30 text-yellow-400',
-        2: 'bg-black/30 text-red-400'
+        1: 'bg-black text-yellow-400',
+        2: 'bg-black text-red-400'
     }
     return `${baseStyles} ${statusStyles[status as GameStatus] ?? ''}`
 }
@@ -73,7 +73,7 @@ export default function GameExplorer() {
         try {
             localStorage.setItem("gameAddress", gameAddress)
             // await addPlayer(gameAddress as `0x${string}`);
-            router.push(`/play/${gameAddress}`)
+            router.push(`/game/${gameAddress}`)
             toast({
                 title: "Joining game",
                 description: "Redirecting to game room...",
@@ -158,7 +158,6 @@ export default function GameExplorer() {
                                                 variant="outline"
                                                 className="w-max"
                                                 onClick={() => handleJoinGame(game.gameAddress)}
-                                                disabled={game.totalPlayers === game.maxPlayers}
                                             >
                                                 Quick Join
                                             </Button>

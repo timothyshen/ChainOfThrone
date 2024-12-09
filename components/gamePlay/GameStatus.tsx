@@ -11,6 +11,8 @@ import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameSt
 import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
+import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
+import GameCompleteModal from "./GameCompleteModal";
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -57,7 +59,7 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, players }: GameStatusProps) {
+export default function GameStatus({ currentPlayer, players, moveAction }: GameStatusProps) {
     const { gameAddress } = useGameAddress();
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
@@ -65,6 +67,7 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
+    const [showCompleteModal, setShowCompleteModal] = useState(false);
 
     useEffect(() => {
         const fetchGameData = async () => {
@@ -108,7 +111,13 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
         };
 
         fetchGameData();
-    }, [gameAddress]);
+    }, [gameAddress, isConfirmed, moveAction]);
+
+    useEffect(() => {
+        if (gameStatus === GameStatusEnum.COMPLETED) {
+            setShowCompleteModal(true);
+        }
+    }, [gameStatus]);
 
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;
@@ -137,6 +146,10 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
                 variant: "destructive",
             });
         }
+    };
+
+    const handleCloseModal = () => {
+        setShowCompleteModal(false);
     };
 
     if (isLoading) {
@@ -217,6 +230,11 @@ export default function GameStatus({ currentPlayer, players }: GameStatusProps) 
                     <p className="text-sm text-center text-red-500">Error: {error.message}</p>
                 )}
             </CardContent>
+
+            <GameCompleteModal 
+                isOpen={showCompleteModal} 
+                onClose={handleCloseModal} 
+            />
         </Card>
     )
 }

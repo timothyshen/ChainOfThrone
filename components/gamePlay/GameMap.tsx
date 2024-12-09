@@ -1,14 +1,16 @@
 import { Territory } from '@/lib/types/game'
 import { Card, CardContent } from "@/components/ui/card"
+import { Loader2 } from 'lucide-react'
 
 interface GameMapProps {
     currentPlayerId: string
     currentPlayer: string
     territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
+    isLoading: boolean
 }
 
-export default function GameMap({ currentPlayerId, currentPlayer, territories, onTerritoryClick }: GameMapProps) {
+export default function GameMap({ currentPlayerId, currentPlayer, territories, onTerritoryClick, isLoading }: GameMapProps) {
     const gridSize = {
         rows: territories.length,
         cols: territories[0]?.length || 0
@@ -17,6 +19,12 @@ export default function GameMap({ currentPlayerId, currentPlayer, territories, o
     const padding = 20
     const gridWidth = (gridSize.cols * cellSize) + (padding * 2)
     const gridHeight = (gridSize.rows * cellSize) + (padding * 2)
+
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    }
 
     return (
         <Card>

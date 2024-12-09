@@ -30,11 +30,67 @@ export const gameAbi = [
       {
         indexed: false,
         internalType: "uint8",
+        name: "fromX",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "fromY",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "toX",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "toY",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "units",
+        type: "uint256",
+      },
+    ],
+    name: "MoveSubmitted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
         name: "playerId",
         type: "uint8",
       },
     ],
     name: "PlayerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "roundNumber",
+        type: "uint256",
+      },
+    ],
+    name: "RoundCompleted",
     type: "event",
   },
   {

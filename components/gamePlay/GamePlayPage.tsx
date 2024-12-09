@@ -15,52 +15,75 @@ import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
 import { useGameAddress } from '@/lib/hooks/useGameAddress'
+import { useGameStateUpdates } from '@/lib/hooks/useGameStateUpdates'
+import { useWatchContractEvent } from "wagmi";
+import { gameAbi } from '@/lib/contract/gameAbi'
 
-export default function DiplomacyGame() {
+export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: `0x${string}` }) {
     const { gameAddress } = useGameAddress();
-    const [territories, setTerritories] = useState<any[]>([])
+    const { gameState, gameStatusLoading, error, refreshGameState } = useGameStateUpdates(gameAddressParam);
+    const [territories, setTerritories] = useState<Territory[][]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
+    const [currentUnits, setCurrentUnits] = useState<number>(0)
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
+    const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
     const [playerId, setPlayerId] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
     const { toast } = useToast()
     const { address } = useAccount()
-    const { makeMove, error } = useMakeMove()
+    const { makeMove, error: makeMoveError, isConfirmed, isConfirming } = useMakeMove()
+
+    useWatchContractEvent({
+        address: gameAddressParam,
+        abi: gameAbi,
+        eventName: 'RoundCompleted',
+        onLogs: () => {
+            getGrids();
+            getPlayerId();
+            refreshGameState();
+        },
+    });
+
+    const getGrids = async () => {
+        setIsLoading(true)
+        try {
+            if (!gameAddress) return;
+            const gridData = await get2DGrid(gameAddress);
+            if (!gridData) return;
+            const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
+                row.map((territory: any, colIndex: number) => ({
+                    ...territory,
+                    x: rowIndex,
+                    y: colIndex,
+                }))
+            );
+            setTerritories(newGridData as Territory[][]);
+        } catch (error) {
+            console.error('Error fetching grid:', error);
+            toast({
+                title: "Error",
+                description: "Failed to fetch game state",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false)
+        }
+    };
+
+    const getPlayerId = async () => {
+        if (!gameAddress || !address) return;
+        const playerId = await addressToId(gameAddress, address);
+        setPlayerId(playerId as string);
+    }
+
 
     useEffect(() => {
-        const getGrids = async () => {
-            try {
-                if (!gameAddress) return;
-                const gridData = await get2DGrid(gameAddress);
-                if (!gridData) return;
-                const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
-                    row.map((territory: any, colIndex: number) => ({
-                        ...territory,
-                        x: rowIndex,
-                        y: colIndex,
-                    }))
-                );
-                setTerritories(newGridData as Territory[][]);
-            } catch (error) {
-                console.error('Error fetching grid:', error);
-                toast({
-                    title: "Error",
-                    description: "Failed to fetch game state",
-                    variant: "destructive",
-                });
-            }
-        };
-
-        const getPlayerId = async () => {
-            if (!gameAddress || !address) return;
-            const playerId = await addressToId(gameAddress, address);
-            setPlayerId(playerId as string);
-        }
-
         getGrids();
         getPlayerId();
-    }, [address, gameAddress, toast]);
+    }, [address, gameAddress, toast, isConfirmed]);
+
 
     const handleTerritoryClick = (territory: Territory) => {
         if (territory.player !== address) {
@@ -71,22 +94,30 @@ export default function DiplomacyGame() {
             });
             return;
         }
+        console.log("Territory clicked:", territory);
+
         setSelectedTerritory(territory);
         setMoveStrength(0);
+        setCurrentUnits(Number(territory.units[Number(playerId)]));
     }
 
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
         if (!territory) return [];
         const adjacentTerritories: Territory[] = [];
-        for (let i = 0; i < territories.length; i++) {
-            for (let j = 0; j < territories[i].length; j++) {
-                const dx = Math.abs(territory.x - territories[i][j].x)
-                const dy = Math.abs(territory.y - territories[i][j].y)
+
+        territories.forEach((row, i) => {
+            if (!row) return;
+            row.forEach((currentTerritory, j) => {
+                if (!currentTerritory) return;
+
+                const dx = Math.abs(territory.x - currentTerritory.x);
+                const dy = Math.abs(territory.y - currentTerritory.y);
                 if (dx + dy === 1) {
-                    adjacentTerritories.push(territories[i][j]);
+                    adjacentTerritories.push(currentTerritory);
                 }
-            }
-        }
+            });
+        });
+
         return adjacentTerritories;
     };
 
@@ -113,12 +144,15 @@ export default function DiplomacyGame() {
 
             await makeMove(gameAddress, move);
 
-            toast({
-                title: "Move Submitted",
-                description: "Your move has been submitted to the blockchain",
-            });
-
-            setMoveStrength(0);
+            if (isConfirmed) {
+                await refreshGameState();
+                setMoveSubmitted(true);
+                toast({
+                    title: "Move Submitted",
+                    description: "Your move has been submitted to the blockchain",
+                });
+                setMoveStrength(0);
+            }
 
         } catch (error) {
             console.error('Error making move:', error);
@@ -130,8 +164,8 @@ export default function DiplomacyGame() {
         }
     };
 
-    if (error) {
-        console.error("Error making move:", error);
+    if (makeMoveError) {
+        console.error("Error making move:", makeMoveError);
     }
 
     const handleSendMessage = (recipientId: string, content: string) => {
@@ -142,6 +176,7 @@ export default function DiplomacyGame() {
         })
     }
 
+
     return (
         <div className="flex flex-col min-h-screen mt-12">
             <div className="flex flex-1 h-[calc(100vh-2rem)]">
@@ -149,7 +184,7 @@ export default function DiplomacyGame() {
                     <Tabs defaultValue="map" className="w-full h-full flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="map">Game Map</TabsTrigger>
-                            <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger>
+                            {/* <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger> */}
                         </TabsList>
                         <TabsContent value="map" className="flex-1">
                             <GameMap
@@ -157,6 +192,7 @@ export default function DiplomacyGame() {
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
+                                isLoading={isLoading}
                             />
                         </TabsContent>
                         <TabsContent value="chat" className="flex-1">
@@ -169,7 +205,7 @@ export default function DiplomacyGame() {
                     </Tabs>
                 </div>
                 <div className="w-1/3 p-4 space-y-4 overflow-auto">
-                    <GameStatus currentPlayer={address ?? ''} players={players} />
+                    <GameStatus currentPlayer={address ?? ''} players={players} moveAction={isConfirmed} />
 
                     <Card>
                         <CardHeader>
@@ -187,9 +223,10 @@ export default function DiplomacyGame() {
                                                 <Input
                                                     id="moveStrength"
                                                     type="number"
-                                                    min="1"
-                                                    value={moveStrength}
-                                                    onChange={(e) => setMoveStrength(parseInt(e.target.value))}
+                                                    min={1}
+                                                    value={moveStrength ?? ''}
+                                                    max={currentUnits}
+                                                    onChange={(e) => setMoveStrength(Number(e.target.value))}
                                                     className="w-full"
                                                 />
                                             </div>
@@ -206,9 +243,11 @@ export default function DiplomacyGame() {
                                                         key={`${territory.x}-${territory.y}`}
                                                         className="w-full"
                                                         onClick={() => handleAction(territory)}
-                                                        disabled={!moveStrength || moveStrength <= 0}
+                                                        disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
+
                                                     >
-                                                        Move {moveStrength} units to {territory.x}, {territory.y}
+                                                        {isConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
+                                                        {isConfirming && <span className="animate-pulse">...</span>}
                                                     </Button>
                                                 ))}
                                             </div>

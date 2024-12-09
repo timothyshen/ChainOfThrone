@@ -49,6 +49,15 @@ contract Game {
     event GameStarted();
     event GameFinalized(address indexed winner);
     event PlayerAdded(address indexed player, uint8 playerId);
+    event MoveSubmitted(
+        address indexed player,
+        uint8 fromX,
+        uint8 fromY,
+        uint8 toX,
+        uint8 toY,
+        uint256 units
+    );
+    event RoundCompleted(uint256 indexed roundNumber);
 
     modifier onlyNotStarted() {
         require(gameStatus == GameStatus.NotStarted, "Game already started");
@@ -173,6 +182,7 @@ contract Game {
 
         if (_allMovesSubmitted()) {
             executeRound();
+            emit RoundCompleted(roundNumber);
         }
     }
 
