@@ -5,15 +5,37 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useGameCreate } from '@/lib/hooks/useGameCreate'
 import { useToast } from "@/lib/hooks/use-toast"
+import { Spinner } from "../ui/spinner"
 
 const CreateNewGame = () => {
-    const { createGame, isPending, error, isConfirmed } = useGameCreate()
+    const { createGame, isPending, isConfirming, error, isConfirmed } = useGameCreate()
     const [isCreateGameOpen, setIsCreateGameOpen] = useState<boolean>(false)
     const { toast } = useToast()
+
+    if (isConfirming) {
+        toast({
+            title: "Joining Game",
+            description: <div className="flex items-center">
+                <Spinner className="mr-2" />
+                Preparing for battle...
+            </div>,
+            duration: 3000,
+        })
+    }
+
 
     const handleCreateGame = async () => {
         try {
             await createGame()
+
+
+            if (isPending) {
+                toast({
+                    title: 'Creating Game',
+                    description: 'Game is being created',
+                    variant: 'default',
+                })
+            }
 
             if (isConfirmed) {
                 toast({

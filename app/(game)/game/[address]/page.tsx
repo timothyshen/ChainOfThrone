@@ -1,7 +1,10 @@
-import DiplomacyGame from '@/components/gamePlay/GamePlayPage';
+import { GameProvider } from '@/lib/providers/GameProvider'
+import GamePlayPage from '@/components/gamePlay/GamePlayPage'
 
 export default function GamePage({ params }: { params: { address: string } }) {
   return (
-    <DiplomacyGame gameAddressParam={params.address as `0x${string}`} />
-  );
+    <GameProvider gameAddressParam={params.address as `0x${string}`}>
+      <GamePlayPage />
+    </GameProvider>
+  )
 }

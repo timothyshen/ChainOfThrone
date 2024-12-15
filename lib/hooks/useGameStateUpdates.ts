@@ -77,8 +77,23 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
   useWatchContractEvent({
     address: gameAddress,
     abi: gameAbi,
+    eventName: "MoveSubmitted",
+    onLogs(logs) {
+      console.log("MoveSubmitted", logs);
+      fetchGameState(gameAddress);
+      toast({
+        title: "Move Submitted",
+        description: "A move has been submitted",
+      });
+    },
+  });
+
+  useWatchContractEvent({
+    address: gameAddress,
+    abi: gameAbi,
     eventName: "RoundCompleted",
     onLogs(logs) {
+      console.log("RoundCompleted", logs);
       fetchGameState(gameAddress);
       toast({
         title: "Round Completed",
