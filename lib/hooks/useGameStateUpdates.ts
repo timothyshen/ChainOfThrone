@@ -8,6 +8,8 @@ import {
   getRoundSubmitted,
   getRoundNumber,
   idToAddress,
+  totalPlayers,
+  getMaxPlayer,
 } from "@/lib/hooks/ReadGameContract";
 import { toast } from "@/lib/hooks/use-toast";
 
@@ -22,7 +24,8 @@ interface GameState {
   grid: number[][];
   roundSubmitted: boolean[];
   currentRound: number;
-  players: `0x${string}`[];
+  players: { address: string; roundSubmitted: boolean }[];
+  maxPlayers: number;
 }
 
 type ContractEventConfig = {
@@ -108,23 +111,45 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
 
     try {
       setIsLoading(true);
-      const [status, grid, roundSubmitted, currentRound] = await Promise.all([
+      const [
+        status,
+        grid,
+        roundSubmitted,
+        currentRound,
+        totalPlayerCount,
+        maxPlayer,
+      ] = await Promise.all([
         getGameStatus(gameAddress),
         get2DGrid(gameAddress),
         getRoundSubmitted(gameAddress, 0),
         getRoundNumber(gameAddress),
+        totalPlayers(gameAddress),
+        getMaxPlayer(gameAddress),
       ]);
-      const players = await Promise.all([
-        idToAddress(gameAddress, 0),
-        idToAddress(gameAddress, 1),
-      ]);
+
+      let addresses;
+      if ((totalPlayerCount as number) > 0) {
+        addresses = await Promise.all(
+          Array.from({ length: 2 }, (_, i) =>
+            Promise.all([
+              idToAddress(gameAddress, i),
+              getRoundSubmitted(gameAddress, i),
+            ])
+          )
+        );
+      }
 
       setGameState({
         status: Number(status),
         grid: grid as number[][],
         roundSubmitted: [roundSubmitted as boolean],
         currentRound: Number(currentRound),
-        players: players as `0x${string}`[],
+        players:
+          addresses?.map(([address, roundSubmitted]) => ({
+            address: address as string,
+            roundSubmitted: roundSubmitted as boolean,
+          })) ?? [],
+        maxPlayers: maxPlayer as number,
       });
     } catch (error) {
       const errorMessage =

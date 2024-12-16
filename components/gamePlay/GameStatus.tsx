@@ -59,7 +59,8 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, players, moveAction }: GameStatusProps) {
+export default function GameStatus({ currentPlayer, moveAction }: GameStatusProps) {
+    const { gameState, gameStatusLoading, error: statusError, refreshGameStatus } = useGameStateUpdates(gameAddress)
     const { gameAddress } = useGameAddress();
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
@@ -231,9 +232,9 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
                 )}
             </CardContent>
 
-            <GameCompleteModal 
-                isOpen={showCompleteModal} 
-                onClose={handleCloseModal} 
+            <GameCompleteModal
+                isOpen={showCompleteModal}
+                onClose={handleCloseModal}
             />
         </Card>
     )
