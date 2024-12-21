@@ -1,27 +1,41 @@
 'use client'
 
-import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useGameCreate } from '@/lib/hooks/useGameCreate'
 import { useToast } from "@/lib/hooks/use-toast"
+import { Spinner } from "../ui/spinner"
 
 const CreateNewGame = () => {
-    const { createGame, isPending, error, isConfirmed } = useGameCreate()
-    const [isCreateGameOpen, setIsCreateGameOpen] = useState<boolean>(false)
+    const { createGame, isPending, isConfirming, error, isConfirmed } = useGameCreate()
     const { toast } = useToast()
 
     const handleCreateGame = async () => {
         try {
+            toast({
+                title: "Creating Game",
+                description: (
+                    <div className="flex items-center">
+                        <Spinner className="mr-2" />
+                        Preparing for battle...
+                    </div>
+                ),
+            })
+
             await createGame()
 
             if (isConfirmed) {
                 toast({
                     title: 'Game Created',
-                    description: 'Game created successfully!',
+                    description: (
+                        <div>
+                            <p>Game created successfully!</p>
+                            <p>Game ID: tx</p>
+                            <Button>Join Game</Button>
+                        </div>
+                    ),
                     variant: 'default',
                 })
-                setIsCreateGameOpen(false)
             }
         } catch (err) {
             toast({
@@ -33,16 +47,14 @@ const CreateNewGame = () => {
     }
 
     return (
-        <>
-            <Button
-                className="w-full hover:bg-gray-200 font-semibold h-12 text-lg"
-                onClick={() => handleCreateGame()}
-                disabled={isPending}
-            >
-                <Plus className="mr-2 h-4 w-4 font-extrabold" />
-                {isPending ? 'Creating...' : 'Create New Battle'}
-            </Button>
-        </>
+        <Button
+            className="w-full hover:bg-gray-200 font-semibold h-12 text-lg"
+            onClick={handleCreateGame}
+            disabled={isPending}
+        >
+            <Plus className="mr-2 h-4 w-4 font-extrabold" />
+            {isPending ? 'Creating...' : 'Create New Battle'}
+        </Button>
     )
 }
 

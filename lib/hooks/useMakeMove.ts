@@ -29,20 +29,6 @@ export const useMakeMove = (): UseMakeMoveReturn => {
     if (address !== move[2]) throw new Error("Caller is not the player");
 
     try {
-      // console.log("Making move with:", {
-      //   player: move[2],
-      //   fromX: Number(move[0]),
-      //   fromY: Number(move[1]),
-      //   toX: Number(move[3]),
-      //   toY: Number(move[4]),
-      //   units: BigInt(move[5]),
-      // });
-
-      // // Add this to check the current game state
-
-      // console.log("Current grid state:", grid);
-      // console.log("Checking cell:", grid[move[0]][move[1]]);
-
       await writeContract({
         address: gameAddress,
         abi: gameAbi,

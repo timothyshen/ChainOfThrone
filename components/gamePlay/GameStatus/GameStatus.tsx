@@ -12,7 +12,8 @@ import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitt
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
-import GameCompleteModal from "./GameCompleteModal";
+import GameCompleteModal from "../GameCompleteModal";
+import { Spinner } from "@/components/ui/spinner";
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -59,65 +60,43 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, players, moveAction }: GameStatusProps) {
+export default function GameStatus({ isLoading, currentPlayer, gameStatus, totalPlayer, maxPlayer, playerAddresses, setGameStatus, setTotalPlayer, fetchGameData }: GameStatusProps) {
     const { gameAddress } = useGameAddress();
-    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
-    const [totalPlayer, setTotalPlayer] = useState<number>(0);
-    const [maxPlayer, setMaxPlayer] = useState<number>(0);
-    const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
+
+    const { addPlayer, isPending, isConfirming, error, isConfirmed } = useAddPlayer();
     const [showCompleteModal, setShowCompleteModal] = useState(false);
 
-    useEffect(() => {
-        const fetchGameData = async () => {
-            try {
-                if (!gameAddress) return;
-
-                const [status, total, max] = await Promise.all([
-                    getGameStatus(gameAddress),
-                    totalPlayers(gameAddress),
-                    getMaxPlayer(gameAddress)
-                ]);
-
-                setGameStatus(getGameStatusText(status as number));
-                setTotalPlayer(total as number);
-                setMaxPlayer(max as number);
-
-                if (total as number > 0) {
-                    const addresses = await Promise.all(
-                        Array.from({ length: 2 }, (_, i) =>
-                            Promise.all([
-                                idToAddress(gameAddress, i),
-                                getRoundSubmitted(gameAddress, i)
-                            ])
-                        )
-                    );
-
-                    setPlayerAddresses(addresses.map(([address, roundSubmitted]) => ({
-                        address: address as string,
-                        roundSubmitted: roundSubmitted as boolean
-                    })));
-                }
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "Failed to fetch game data",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchGameData();
-    }, [gameAddress, isConfirmed, moveAction]);
 
     useEffect(() => {
         if (gameStatus === GameStatusEnum.COMPLETED) {
             setShowCompleteModal(true);
         }
     }, [gameStatus]);
+
+    useEffect(() => {
+        if (isConfirming) {
+            toast({
+                title: "Joining Game",
+                description: (
+                    <div className="flex items-center">
+                        <Spinner className="mr-2" />
+                        Joining game...
+                    </div>
+                ),
+            })
+        }
+    }, [isConfirming]);
+
+    useEffect(() => {
+        if (isConfirmed) {
+            toast({
+                title: "Joined Game",
+                description: "You have successfully joined the game",
+            });
+            fetchGameData();
+        }
+
+    }, [fetchGameData, isConfirmed]);
 
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;
@@ -175,6 +154,8 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
         }
     }
 
+    // TODO: need two progress bars, one for player progress and one for round progress
+
     return (
         <Card className="w-full max-w-2xl mx-auto">
             <CardHeader>
@@ -188,8 +169,8 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
                         <p className="text-2xl font-bold">{totalPlayer} / {maxPlayer}</p>
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground">Game Status</p>
-                        <Badge className={`${getStatusColor(gameStatus)} text-white`}>
+                        <p className="text-sm font-medium text-muted-foreground ">Game Status</p>
+                        <Badge className={`${getStatusColor(gameStatus)} text-white w-max`}>
                             {gameStatus}
                         </Badge>
                     </div>
@@ -231,9 +212,9 @@ export default function GameStatus({ currentPlayer, players, moveAction }: GameS
                 )}
             </CardContent>
 
-            <GameCompleteModal 
-                isOpen={showCompleteModal} 
-                onClose={handleCloseModal} 
+            <GameCompleteModal
+                isOpen={showCompleteModal}
+                onClose={handleCloseModal}
             />
         </Card>
     )
