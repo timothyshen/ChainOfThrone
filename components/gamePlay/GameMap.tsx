@@ -3,14 +3,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Loader2 } from 'lucide-react'
 
 interface GameMapProps {
-    currentPlayerId: string
     currentPlayer: string
     territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
     isLoading: boolean
 }
 
-export default function GameMap({ currentPlayerId, currentPlayer, territories, onTerritoryClick, isLoading }: GameMapProps) {
+export default function GameMap({ currentPlayer, territories, onTerritoryClick, isLoading }: GameMapProps) {
     const gridSize = {
         rows: territories.length,
         cols: territories[0]?.length || 0

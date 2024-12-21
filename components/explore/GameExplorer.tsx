@@ -1,5 +1,10 @@
 'use client'
 
+import { useWatchContractEvent } from "wagmi"
+import { gameFactoryAbi } from "@/lib/contract/gameFactoryAbi"
+import { GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts";
+
+
 // UI Components
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Sword, Users, Info, Loader2 } from 'lucide-react'
 
 // Hooks and Utils
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from "@/lib/hooks/use-toast"
 import { useAddPlayer } from '@/lib/hooks/useAddPlayer'
@@ -48,26 +53,41 @@ export default function GameExplorer() {
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
     const [games, setGames] = useState<Game[]>([])
+    const [isLoading, setIsLoading] = useState(true);
+
 
     const { toast } = useToast()
     const router = useRouter()
     const { addPlayer } = useAddPlayer()
 
-    useEffect(() => {
-        const fetchGames = async () => {
-            try {
-                const gamesInfo = await getGamesInfo(0, 10)
-                setGames(gamesInfo as Game[])
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "Failed to fetch games",
-                    variant: "destructive",
-                })
-            }
+
+    useWatchContractEvent({
+        address: GAME_FACTORY_ADDRESS,
+        abi: gameFactoryAbi,
+        eventName: "GameCreated",
+        onLogs: () => {
+            fetchGames()
         }
-        fetchGames()
+    })
+
+    const fetchGames = useCallback(async () => {
+        try {
+            const gamesInfo = await getGamesInfo(0, 10)
+            setGames(gamesInfo as Game[])
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to fetch games",
+                variant: "destructive",
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }, [toast])
+
+    useEffect(() => {
+        fetchGames()
+    }, [fetchGames])
 
     const handleJoinGame = async (gameAddress: string) => {
         try {
@@ -91,6 +111,16 @@ export default function GameExplorer() {
         game.gameAddress.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (statusFilter === 'all' || getStatusText(game.status).toLowerCase() === statusFilter)
     )
+
+    if (isLoading) {
+        return (
+            <Card className="w-full max-w-2xl mx-auto">
+                <CardContent className="flex items-center justify-center py-10">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card className="flex-1">

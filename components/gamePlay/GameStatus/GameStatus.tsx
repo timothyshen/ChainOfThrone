@@ -12,7 +12,7 @@ import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitt
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
-import GameCompleteModal from "./GameCompleteModal";
+import GameCompleteModal from "../GameCompleteModal";
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -59,12 +59,9 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, moveAction }: GameStatusProps) {
-    const { gameState, gameStatusLoading, error: statusError, refreshGameStatus } = useGameStateUpdates(gameAddress)
-    const { gameAddress } = useGameAddress();
-    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
-    const [totalPlayer, setTotalPlayer] = useState<number>(0);
-    const [maxPlayer, setMaxPlayer] = useState<number>(0);
+export default function GameStatus({ currentPlayer, moveAction, gameStatus, totalPlayer, maxPlayer, playerAddresses }: GameStatusProps) {
+
+
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();

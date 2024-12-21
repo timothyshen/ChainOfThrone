@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/lib/hooks/use-toast"
@@ -8,20 +8,40 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Territory, Player, InitialPlayers } from '@/lib/types/game'
-import GameStatus from '@/components/gamePlay/GameStatus'
+import GameStatus from '@/components/gamePlay/GameStatus/GameStatus'
 import ChatSystem from '@/components/gamePlay/ChatSystem'
 import GameMap from '@/components/gamePlay/GameMap'
-import { get2DGrid, addressToId } from '@/lib/hooks/ReadGameContract'
+import { get2DGrid, addressToId, getMaxPlayer, totalPlayers, getGameStatus, getRoundSubmitted, idToAddress } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
 import { useMakeMove } from '@/lib/hooks/useMakeMove'
 import { useGameAddress } from '@/lib/hooks/useGameAddress'
 import { useGameStateUpdates } from '@/lib/hooks/useGameStateUpdates'
 import { useWatchContractEvent } from "wagmi";
 import { gameAbi } from '@/lib/contract/gameAbi'
+import { PlayerState } from '@/lib/types/gameStatus'
+import { GameStatusEnum } from '@/lib/types/gameStatus'
+
+const getGameStatusText = (status: number): GameStatusEnum => {
+    switch (status) {
+        case 0:
+            return GameStatusEnum.NOT_STARTED;
+        case 1:
+            return GameStatusEnum.ONGOING;
+        case 2:
+            return GameStatusEnum.COMPLETED;
+        default:
+            return GameStatusEnum.NOT_STARTED;
+    }
+}
+
 
 export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: `0x${string}` }) {
     const { gameAddress } = useGameAddress();
     const { gameState, gameStatusLoading, error, refreshGameState } = useGameStateUpdates(gameAddressParam);
+    const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
+    const [totalPlayer, setTotalPlayer] = useState<number>(0);
+    const [maxPlayer, setMaxPlayer] = useState<number>(0);
+    const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
     const [territories, setTerritories] = useState<Territory[][]>([])
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [currentUnits, setCurrentUnits] = useState<number>(0)
@@ -42,11 +62,30 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         onLogs: () => {
             getGrids();
             getPlayerId();
-            refreshGameState();
+            fetchGameData();
+            toast({
+                title: "Round Completed",
+                description: `Round has been completed`,
+            });
         },
     });
 
-    const getGrids = async () => {
+    useWatchContractEvent({
+        address: gameAddressParam,
+        abi: gameAbi,
+        eventName: "MoveSubmitted",
+        onLogs(logs) {
+            console.log("MoveSubmitted", logs);
+            fetchGameData();
+            toast({
+                title: "Move Submitted",
+                description: "A move has been submitted",
+            });
+        },
+    });
+
+
+    const getGrids = useCallback(async () => {
         setIsLoading(true)
         try {
             if (!gameAddress) return;
@@ -70,19 +109,58 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         } finally {
             setIsLoading(false)
         }
-    };
+    }, [gameAddress, toast]);
 
-    const getPlayerId = async () => {
+    const getPlayerId = useCallback(async () => {
         if (!gameAddress || !address) return;
         const playerId = await addressToId(gameAddress, address);
         setPlayerId(playerId as string);
-    }
+    }, [gameAddress, address]);
 
+    const fetchGameData = useCallback(async () => {
+        try {
+            if (!gameAddress) return;
+            const [status, total, max] = await Promise.all([
+                getGameStatus(gameAddress),
+                totalPlayers(gameAddress),
+                getMaxPlayer(gameAddress)
+            ]);
+
+            setGameStatus(getGameStatusText(status as number));
+            setTotalPlayer(total as number);
+            setMaxPlayer(max as number);
+
+            if (total as number > 0) {
+                const addresses = await Promise.all(
+                    Array.from({ length: 2 }, (_, i) =>
+                        Promise.all([
+                            idToAddress(gameAddress, i),
+                            getRoundSubmitted(gameAddress, i)
+                        ])
+                    )
+                );
+
+                setPlayerAddresses(addresses.map(([address, roundSubmitted]) => ({
+                    address: address as string,
+                    roundSubmitted: roundSubmitted as boolean
+                })));
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to fetch game data",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [gameAddress, toast]);
 
     useEffect(() => {
         getGrids();
         getPlayerId();
-    }, [address, gameAddress, toast, isConfirmed]);
+        fetchGameData();
+    }, [getGrids, getPlayerId, fetchGameData, isConfirmed]);
 
 
     const handleTerritoryClick = (territory: Territory) => {
@@ -188,7 +266,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         </TabsList>
                         <TabsContent value="map" className="flex-1">
                             <GameMap
-                                currentPlayerId={playerId ?? ''}
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
@@ -205,7 +282,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     </Tabs>
                 </div>
                 <div className="w-1/3 p-4 space-y-4 overflow-auto">
-                    <GameStatus currentPlayer={address ?? ''} moveAction={isConfirmed} />
+                    <GameStatus currentPlayer={address ?? ''} moveAction={isConfirmed} gameStatus={gameStatus} totalPlayer={totalPlayer} maxPlayer={maxPlayer} playerAddresses={playerAddresses} />
 
                     <Card>
                         <CardHeader>
