@@ -12,6 +12,7 @@ export interface PlayerState {
 }
 
 export interface GameStatusProps {
+  isLoading: boolean;
   currentPlayer: string;
   gameStatus: GameStatusEnum;
   totalPlayer: number;
@@ -19,4 +20,5 @@ export interface GameStatusProps {
   playerAddresses: PlayerState[];
   setGameStatus: (status: GameStatusEnum) => void;
   setTotalPlayer: (total: number) => void;
+  fetchGameData: () => void;
 }

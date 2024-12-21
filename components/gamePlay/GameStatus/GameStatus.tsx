@@ -13,6 +13,7 @@ import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
 import GameCompleteModal from "../GameCompleteModal";
+import { Spinner } from "@/components/ui/spinner";
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -59,11 +60,10 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, gameStatus, totalPlayer, maxPlayer, playerAddresses, setGameStatus, setTotalPlayer }: GameStatusProps) {
+export default function GameStatus({ isLoading, currentPlayer, gameStatus, totalPlayer, maxPlayer, playerAddresses, setGameStatus, setTotalPlayer, fetchGameData }: GameStatusProps) {
     const { gameAddress } = useGameAddress();
 
-    const [isLoading, setIsLoading] = useState(true);
-    const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
+    const { addPlayer, isPending, isConfirming, error, isConfirmed } = useAddPlayer();
     const [showCompleteModal, setShowCompleteModal] = useState(false);
 
 
@@ -72,6 +72,31 @@ export default function GameStatus({ currentPlayer, gameStatus, totalPlayer, max
             setShowCompleteModal(true);
         }
     }, [gameStatus]);
+
+    useEffect(() => {
+        if (isConfirming) {
+            toast({
+                title: "Joining Game",
+                description: (
+                    <div className="flex items-center">
+                        <Spinner className="mr-2" />
+                        Joining game...
+                    </div>
+                ),
+            })
+        }
+    }, [isConfirming]);
+
+    useEffect(() => {
+        if (isConfirmed) {
+            toast({
+                title: "Joined Game",
+                description: "You have successfully joined the game",
+            });
+            fetchGameData();
+        }
+
+    }, [fetchGameData, isConfirmed]);
 
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;
@@ -129,6 +154,8 @@ export default function GameStatus({ currentPlayer, gameStatus, totalPlayer, max
         }
     }
 
+    // TODO: need two progress bars, one for player progress and one for round progress
+
     return (
         <Card className="w-full max-w-2xl mx-auto">
             <CardHeader>
@@ -142,8 +169,8 @@ export default function GameStatus({ currentPlayer, gameStatus, totalPlayer, max
                         <p className="text-2xl font-bold">{totalPlayer} / {maxPlayer}</p>
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground">Game Status</p>
-                        <Badge className={`${getStatusColor(gameStatus)} text-white`}>
+                        <p className="text-sm font-medium text-muted-foreground ">Game Status</p>
+                        <Badge className={`${getStatusColor(gameStatus)} text-white w-max`}>
                             {gameStatus}
                         </Badge>
                     </div>

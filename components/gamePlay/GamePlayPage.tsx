@@ -50,7 +50,8 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
     const [playerId, setPlayerId] = useState<string | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
+    const [isGridLoading, setIsGridLoading] = useState(true)
+    const [isStatusLoading, setIsStatusLoading] = useState(true)
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove, error: makeMoveError, isConfirmed, isConfirming } = useMakeMove()
@@ -75,7 +76,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         abi: gameAbi,
         eventName: "MoveSubmitted",
         onLogs(logs) {
-            console.log("MoveSubmitted", logs);
             fetchGameData();
             toast({
                 title: "Move Submitted",
@@ -84,9 +84,32 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         },
     });
 
+    useWatchContractEvent({
+        address: gameAddressParam,
+        abi: gameAbi,
+        eventName: "PlayerAdded",
+        onLogs() {
+            fetchGameData();
+        },
+    });
+
+    useWatchContractEvent({
+        address: gameAddress,
+        abi: gameAbi,
+        eventName: "GameStarted",
+        onLogs() {
+            getGrids();
+            getPlayerId();
+            toast({
+                title: "Game Started",
+                description: "The game has begun!",
+            });
+        },
+    });
+
 
     const getGrids = useCallback(async () => {
-        setIsLoading(true)
+        setIsGridLoading(true)
         try {
             if (!gameAddress) return;
             const gridData = await get2DGrid(gameAddress);
@@ -107,7 +130,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 variant: "destructive",
             });
         } finally {
-            setIsLoading(false)
+            setIsGridLoading(false)
         }
     }, [gameAddress, toast]);
 
@@ -118,6 +141,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     }, [gameAddress, address]);
 
     const fetchGameData = useCallback(async () => {
+        setIsStatusLoading(true)
         try {
             if (!gameAddress) return;
             const [status, total, max] = await Promise.all([
@@ -145,6 +169,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     roundSubmitted: roundSubmitted as boolean
                 })));
             }
+            console.log(status, total, max);
         } catch (error) {
             toast({
                 title: "Error",
@@ -152,7 +177,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 variant: "destructive",
             });
         } finally {
-            setIsLoading(false);
+            setIsStatusLoading(false);
         }
     }, [gameAddress, toast]);
 
@@ -269,7 +294,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                                 currentPlayer={address ?? ''}
                                 territories={territories}
                                 onTerritoryClick={handleTerritoryClick}
-                                isLoading={isLoading}
+                                isLoading={isGridLoading}
                             />
                         </TabsContent>
                         <TabsContent value="chat" className="flex-1">
@@ -283,13 +308,15 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 </div>
                 <div className="w-1/3 p-4 space-y-4 overflow-auto">
                     <GameStatus
+                        isLoading={isStatusLoading}
                         currentPlayer={address ?? ''}
                         gameStatus={gameStatus}
                         totalPlayer={totalPlayer}
                         maxPlayer={maxPlayer}
                         playerAddresses={playerAddresses}
                         setGameStatus={setGameStatus}
-                        setTotalPlayer={setTotalPlayer} />
+                        setTotalPlayer={setTotalPlayer}
+                        fetchGameData={fetchGameData} />
 
                     <Card>
                         <CardHeader>
