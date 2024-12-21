@@ -20,6 +20,7 @@ import { useWatchContractEvent } from "wagmi";
 import { gameAbi } from '@/lib/contract/gameAbi'
 import { PlayerState } from '@/lib/types/gameStatus'
 import { GameStatusEnum } from '@/lib/types/gameStatus'
+import { Spinner } from '../ui/spinner'
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -52,9 +53,10 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [playerId, setPlayerId] = useState<string | null>(null)
     const [isGridLoading, setIsGridLoading] = useState(true)
     const [isStatusLoading, setIsStatusLoading] = useState(true)
+    const [moveAction, setMoveAction] = useState<Territory | null>(null)
     const { toast } = useToast()
     const { address } = useAccount()
-    const { makeMove, error: makeMoveError, isConfirmed, isConfirming } = useMakeMove()
+    const { makeMove, error: makeMoveError, isConfirmed: isMoveConfirmed, isConfirming: isMoveConfirming } = useMakeMove()
 
     useWatchContractEvent({
         address: gameAddressParam,
@@ -94,7 +96,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     });
 
     useWatchContractEvent({
-        address: gameAddress,
+        address: gameAddressParam,
         abi: gameAbi,
         eventName: "GameStarted",
         onLogs() {
@@ -185,7 +187,8 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         getGrids();
         getPlayerId();
         fetchGameData();
-    }, [getGrids, getPlayerId, fetchGameData, isConfirmed]);
+    }, [getGrids, getPlayerId, fetchGameData]);
+
 
 
     const handleTerritoryClick = (territory: Territory) => {
@@ -225,6 +228,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     };
 
     const handleAction = async (targetTerritory: Territory) => {
+        setMoveAction(targetTerritory)
         if (!selectedTerritory || !address || !gameAddress) {
             toast({
                 title: "Invalid Action",
@@ -247,8 +251,10 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
             await makeMove(gameAddress, move);
 
-            if (isConfirmed) {
-                await refreshGameState();
+            if (isMoveConfirmed) {
+                getGrids();
+                getPlayerId();
+                fetchGameData();
                 setMoveSubmitted(true);
                 toast({
                     title: "Move Submitted",
@@ -279,6 +285,17 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         })
     }
 
+
+    if (isMoveConfirming) {
+        toast({
+            title: "Move Submitting",
+            description:
+                <div className="flex items-center">
+                    <Spinner className="mr-2" />
+                    Moving units...
+                </div>,
+        });
+    }
 
     return (
         <div className="flex flex-col min-h-screen mt-12">
@@ -349,6 +366,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                                                 Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
                                             </p>
                                             <div className="grid gap-2 mt-1">
+
                                                 {getAdjacentTerritories(selectedTerritory).map(territory => (
                                                     <Button
                                                         key={`${territory.x}-${territory.y}`}
@@ -357,10 +375,12 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                                                         disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
 
                                                     >
-                                                        {isConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
-                                                        {isConfirming && <span className="animate-pulse">...</span>}
+                                                        {isMoveConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
+                                                        {isMoveConfirming && <span className="animate-pulse">...</span>}
                                                     </Button>
                                                 ))}
+                                                {isMoveConfirming && <Spinner className="animate-pulse" />}
+                                                {isMoveConfirmed && <Button>You have made the move to {moveAction?.x}, {moveAction?.y}</Button>}
                                             </div>
                                         </div>
                                     </div>
