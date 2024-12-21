@@ -32,14 +32,14 @@ type StatusFilter = 'all' | 'open' | 'in progress' | 'full'
 // Utils
 const STATUS_MAP: Record<GameStatus, string> = {
     0: "Open",
-    1: "In Progress",
+    1: "Progressing",
     2: "Completed"
 }
 
 const getStatusText = (status: number): string => STATUS_MAP[status as GameStatus] ?? "Unknown"
 
 const getStatusStyles = (status: number): string => {
-    const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
+    const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium w-full justify-center"
     const statusStyles = {
         0: 'bg-black text-green-400',
         1: 'bg-black text-yellow-400',
@@ -161,22 +161,22 @@ export default function GameExplorer() {
                         <TableHeader>
                             <TableRow className="border-gray-800 hover:bg-transparent">
                                 <TableHead>Smart Contract</TableHead>
-                                <TableHead className="text-right">Players</TableHead>
-                                <TableHead className="text-right">Status</TableHead>
+                                <TableHead className="text-center">Players</TableHead>
+                                <TableHead className="text-center">Status</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredGames?.map((game) => (
                                 <TableRow key={game.gameAddress} className="border-gray-800 hover:bg-white/5">
-                                    <TableCell className="font-mono">{game.gameAddress}</TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-1">
+                                    <TableCell className="font-mono">{game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}</TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex items-center justify-end gap-1 w-full">
                                             <Users className="h-4 w-4" />
-                                            {game.totalPlayers} / {game.maxPlayers}
+                                            <span className="text-sm w-full">{game.totalPlayers} / {game.maxPlayers}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-center">
                                         <span className={getStatusStyles(game.status)}>
                                             {getStatusText(game.status)}
                                         </span>

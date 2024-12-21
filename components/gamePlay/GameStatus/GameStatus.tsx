@@ -59,57 +59,13 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
     );
 };
 
-export default function GameStatus({ currentPlayer, moveAction, gameStatus, totalPlayer, maxPlayer, playerAddresses }: GameStatusProps) {
+export default function GameStatus({ currentPlayer, gameStatus, totalPlayer, maxPlayer, playerAddresses, setGameStatus, setTotalPlayer }: GameStatusProps) {
+    const { gameAddress } = useGameAddress();
 
-
-    const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { addPlayer, isPending, error, isConfirmed } = useAddPlayer();
     const [showCompleteModal, setShowCompleteModal] = useState(false);
 
-    useEffect(() => {
-        const fetchGameData = async () => {
-            try {
-                if (!gameAddress) return;
-
-                const [status, total, max] = await Promise.all([
-                    getGameStatus(gameAddress),
-                    totalPlayers(gameAddress),
-                    getMaxPlayer(gameAddress)
-                ]);
-
-                setGameStatus(getGameStatusText(status as number));
-                setTotalPlayer(total as number);
-                setMaxPlayer(max as number);
-
-                if (total as number > 0) {
-                    const addresses = await Promise.all(
-                        Array.from({ length: 2 }, (_, i) =>
-                            Promise.all([
-                                idToAddress(gameAddress, i),
-                                getRoundSubmitted(gameAddress, i)
-                            ])
-                        )
-                    );
-
-                    setPlayerAddresses(addresses.map(([address, roundSubmitted]) => ({
-                        address: address as string,
-                        roundSubmitted: roundSubmitted as boolean
-                    })));
-                }
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "Failed to fetch game data",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchGameData();
-    }, [gameAddress, isConfirmed, moveAction]);
 
     useEffect(() => {
         if (gameStatus === GameStatusEnum.COMPLETED) {

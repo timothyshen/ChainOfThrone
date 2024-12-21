@@ -282,7 +282,14 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     </Tabs>
                 </div>
                 <div className="w-1/3 p-4 space-y-4 overflow-auto">
-                    <GameStatus currentPlayer={address ?? ''} moveAction={isConfirmed} gameStatus={gameStatus} totalPlayer={totalPlayer} maxPlayer={maxPlayer} playerAddresses={playerAddresses} />
+                    <GameStatus
+                        currentPlayer={address ?? ''}
+                        gameStatus={gameStatus}
+                        totalPlayer={totalPlayer}
+                        maxPlayer={maxPlayer}
+                        playerAddresses={playerAddresses}
+                        setGameStatus={setGameStatus}
+                        setTotalPlayer={setTotalPlayer} />
 
                     <Card>
                         <CardHeader>
