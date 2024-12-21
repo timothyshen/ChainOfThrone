@@ -1,40 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chain of Thrones
 
-## Getting Started
+Current version: v0.2
 
-First, run the development server:
+Available on Sepolia Testnet
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+> Game Factory Contract Address: 0xff1d3212c99f79a9596986767cf8d5ca1a112db7
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Chain of Thrones is an onchain strategy pvp wargame that immerses players in a simplified geopolitics simulation. Designed for 2-3 players, each participant stakes 10 USDC as their starting armies and vies to control 3 of 5 key castles on a 3x3 grid. Players move armies, negotiate strategic loans, and resolve conflicts using a mix of deterministic logic and occasional randomness, simulating the unpredictability of real-world geopolitics. Fully autonomous AI can drive gameplay, making Chain of Thrones an engaging and tactical challenge for both human and automated competitors.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How to play
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a game
+2. Add players
+3. Make moves
+4. Win the game
 
-## Learn More
+## How to create a game
 
-To learn more about Next.js, take a look at the following resources:
+1. Go to the Explorer page
+2. Click on the "Create Game" button
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Game Rules
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Each player starts with 10 USDC
+- Each player can move their armies to an adjacent cell on the grid
+- Each player can declare war on an adjacent player
+- Each player can resolve a conflict with an adjacent player
+- The game ends when one player controls 3 of the 5 key castles
 
-## Deploy on Vercel
+For more details, please refer to the "How to Play" Button on the Home Page.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Game Status
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `0`: Game not started
+- `1`: Game started
+- `2`: Game ended
 
-flow: 0x93852386A82476917Ab24F57518aCeB466653df5 
-scroll: 0x2180B75E41E370E13CFD6EFc4aC97ca2753e42C5
-morph: 0x0d2854F6933dEe36a9584A0C756b887836805ED0
+## Roadmap
+
+### v0.3
+
+- Add more players
+- Improve game state sync in the frontend
+- Add staking design
+- Movement animation
+- Execution record
+
+### v0.4
+
+- Add chat & negotiation system
+- Reward pool design
+- Ranking system
+
+## How to contribute
+
+- Raise an issue
+- Submit a PR
+
+## How to run
+
+We suggest using [pnpm](https://pnpm.io/installation) to install the dependencies.
+
+1. `pnpm install`
+2. `pnpm run dev`
