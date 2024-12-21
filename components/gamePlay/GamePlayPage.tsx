@@ -77,7 +77,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         address: gameAddressParam,
         abi: gameAbi,
         eventName: "MoveSubmitted",
-        onLogs(logs) {
+        onLogs() {
             fetchGameData();
             toast({
                 title: "Move Submitted",
@@ -251,17 +251,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
             await makeMove(gameAddress, move);
 
-            if (isMoveConfirmed) {
-                getGrids();
-                getPlayerId();
-                fetchGameData();
-                setMoveSubmitted(true);
-                toast({
-                    title: "Move Submitted",
-                    description: "Your move has been submitted to the blockchain",
-                });
-                setMoveStrength(0);
-            }
 
         } catch (error) {
             console.error('Error making move:', error);
@@ -295,6 +284,18 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     Moving units...
                 </div>,
         });
+    }
+
+    if (isMoveConfirmed) {
+        getGrids();
+        getPlayerId();
+        fetchGameData();
+        setMoveSubmitted(true);
+        toast({
+            title: "Move Submitted",
+            description: "Your move has been submitted to the blockchain",
+        });
+        setMoveStrength(0);
     }
 
     return (
