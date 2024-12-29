@@ -5,6 +5,7 @@ import "./Game.sol";
 import "./interfaces/IGame.sol";
 import "./interfaces/IUSDC.sol";
 import {IGame} from "./interfaces/IGame.sol";
+import "./interfaces/IUSDC.sol";
 
 contract GameFactory {
     event GameCreated(address indexed gameAddress, address indexed creator);
@@ -32,6 +33,14 @@ contract GameFactory {
         uint256 roundNumber;
     }
 
+    // Add USDC address as immutable
+    IUSDC public immutable usdc;
+
+    // Add constructor to set USDC address
+    constructor(address _usdcAddress) {
+        usdc = IUSDC(_usdcAddress);
+    }
+
     function createGame() external returns (address) {
         Game game = new Game(address(usdc));
         address gameAddress = address(game);
@@ -43,6 +52,7 @@ contract GameFactory {
         // Creator must stake when creating game
         game.stake();
 
+        
         emit GameCreated(gameAddress, msg.sender);
 
         return gameAddress;
@@ -58,6 +68,11 @@ contract GameFactory {
         return gamesByCreator[creator];
     }
 
+    
+    function getGamesByCreator(address creator) external view returns (address[] memory) {
+        return gamesByCreator[creator];
+    }
+    
     function getGamesCount() external view returns (uint256) {
         return games.length;
     }
