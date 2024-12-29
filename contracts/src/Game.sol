@@ -1,27 +1,42 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
+import "./interfaces/IUSDC.sol";
 
+/// @title Game - A blockchain-based strategy game
+/// @notice This contract implements a 2-player strategy game on a 3x3 grid
+/// @dev Players can move units between cells and capture castles to win
 contract Game {
+    // --- Constants ---
     uint8 public constant MAX_PLAYERS = 2;
+    address public constant MULTISIG =
+        0xeeD33eFC5525C5869B2f989F29BFa8587Be6a07d;
+    uint256 public constant STAKE_AMOUNT = 10e6; // 10 USDC (6 decimals)
+    uint256 public constant WINNER_PERCENTAGE = 90; // 90% of total stakes
+    uint256 public constant PROTOCOL_PERCENTAGE = 10; // 10% of total stakes
 
+    // --- State Variables ---
+    IUSDC public immutable usdc;
+    GameStatus public gameStatus;
+    uint8 public totalPlayers;
+    uint256 public roundNumber;
+    address public winner;
+    Cell[3][3] public grid;
+    bool[MAX_PLAYERS] public roundSubmitted;
+    Move[MAX_PLAYERS] public pendingMoves;
+    MoveHistory[] public moveHistory;
+
+    // --- Mappings ---
+    mapping(uint8 => address) public idToAddress;
+    mapping(address => uint8) public addressToId;
+    mapping(address => bool) public hasStaked;
+    mapping(address => bool) public hasClaimed;
+
+    // --- Structs ---
     struct Cell {
         address player;
         bool isCastle;
         uint256[MAX_PLAYERS] units;
     }
-    Cell[3][3] public grid;
-
-    mapping(uint8 => address) public idToAddress;
-    mapping(address => uint8) public addressToId;
-
-    uint8 public totalPlayers;
-
-    enum GameStatus {
-        NotStarted,
-        Ongoing,
-        Finished
-    }
-    GameStatus public gameStatus;
 
     struct Move {
         address player;
@@ -31,6 +46,7 @@ contract Game {
         uint8 toY;
         uint256 units;
     }
+
     struct Loan {
         address lender;
         address borrower;
@@ -40,12 +56,26 @@ contract Game {
         uint8 toY;
         uint256 units;
     }
-    bool[MAX_PLAYERS] public roundSubmitted;
-    Move[MAX_PLAYERS] public pendingMoves;
 
-    uint256 public roundNumber;
-    address public winner;
+    struct MoveHistory {
+        address player;
+        uint8 fromX;
+        uint8 fromY;
+        uint8 toX;
+        uint8 toY;
+        uint256 units;
+        uint256 timestamp;
+        uint256 roundNumber;
+    }
 
+    // --- Enums ---
+    enum GameStatus {
+        NotStarted,
+        Ongoing,
+        Finished
+    }
+
+    // --- Events ---
     event GameStarted();
     event GameFinalized(address indexed winner);
     event PlayerAdded(address indexed player, uint8 playerId);
@@ -58,34 +88,59 @@ contract Game {
         uint256 units
     );
     event RoundCompleted(uint256 indexed roundNumber);
+    event MoveRecorded(
+        address indexed player,
+        uint8 fromX,
+        uint8 fromY,
+        uint8 toX,
+        uint8 toY,
+        uint256 units,
+        uint256 roundNumber
+    );
 
+    // --- Constructor ---
+    constructor(address _usdcAddress) {
+        usdc = IUSDC(_usdcAddress);
+    }
+
+    // --- Modifiers ---
     modifier onlyNotStarted() {
-        require(gameStatus == GameStatus.NotStarted, "Game already started");
+        require(
+            gameStatus == GameStatus.NotStarted,
+            "Game has already started or finished"
+        );
         _;
     }
 
     modifier onlyOngoing() {
-        require(gameStatus == GameStatus.Ongoing, "Game is not active");
+        require(
+            gameStatus == GameStatus.Ongoing,
+            "Game must be in ongoing state - current state: not started or finished"
+        );
         _;
     }
 
     modifier onlyPlayer() {
         require(
             addressToId[msg.sender] < totalPlayers,
-            "Not a registered player"
+            "Caller is not a registered player in this game"
         );
         _;
     }
 
+    // --- External/Public Functions ---
     function addPlayer() external onlyNotStarted {
-        require(totalPlayers < MAX_PLAYERS, "Max players reached");
+        require(hasStaked[msg.sender], "Must stake first");
+        require(
+            totalPlayers < MAX_PLAYERS,
+            "Maximum number of players (2) has been reached"
+        );
         require(
             addressToId[msg.sender] == 0 &&
                 (totalPlayers == 0 || idToAddress[0] != msg.sender),
-            "Player already added"
+            "Address is already registered as a player in this game"
         );
 
-        // Assign player ID
         uint8 playerId = totalPlayers;
         idToAddress[playerId] = msg.sender;
         addressToId[msg.sender] = playerId;
@@ -98,22 +153,158 @@ contract Game {
         }
     }
 
+    function makeMove(Move memory _move) public onlyOngoing {
+        require(
+            !roundSubmitted[addressToId[msg.sender]],
+            "Player has already submitted a move for this round"
+        );
+        require(
+            _move.player == msg.sender,
+            "Move player address does not match sender address"
+        );
+        require(
+            _checkValidMove(_move),
+            "Invalid move: out of bounds, not adjacent, or insufficient units"
+        );
+
+        Cell storage fromCell = grid[_move.fromX][_move.fromY];
+        require(
+            fromCell.player == msg.sender,
+            "Player does not control the source cell"
+        );
+
+        pendingMoves[addressToId[msg.sender]] = _move;
+        roundSubmitted[addressToId[msg.sender]] = true;
+
+        _recordMove(_move);
+
+        if (_allMovesSubmitted()) {
+            executeRound();
+            emit RoundCompleted(roundNumber);
+        }
+    }
+
+    function executeRound() public onlyOngoing {
+        _handlePendingMoves();
+        _resolveCombat();
+        roundNumber++;
+        delete roundSubmitted;
+        _checkGameStatus();
+    }
+
+    function stake() external {
+        require(!hasStaked[msg.sender], "Already staked");
+        require(
+            usdc.transferFrom(msg.sender, address(this), STAKE_AMOUNT),
+            "Stake transfer failed"
+        );
+        require(
+            usdc.transfer(MULTISIG, getProtocolFee() / MAX_PLAYERS),
+            "Protocol fee transfer failed"
+        );
+        hasStaked[msg.sender] = true;
+    }
+
+    function claimReward() external {
+        require(gameStatus == GameStatus.Finished, "Game not finished");
+        require(!hasClaimed[msg.sender], "Already claimed");
+        require(winner != address(0), "No winner");
+        require(msg.sender == winner, "Only winner can claim prize");
+
+        usdc.transfer(msg.sender, getWinnerAmount());
+        hasClaimed[msg.sender] = true;
+    }
+
+    // --- View Functions ---
+    function getWinnerAmount() public pure returns (uint256) {
+        return (STAKE_AMOUNT * MAX_PLAYERS * WINNER_PERCENTAGE) / 100;
+    }
+
+    function getProtocolFee() public pure returns (uint256) {
+        return (STAKE_AMOUNT * MAX_PLAYERS * PROTOCOL_PERCENTAGE) / 100;
+    }
+
+    function getGrid() public view returns (Cell[9] memory cells) {
+        for (uint8 i = 0; i < 3; i++) {
+            for (uint8 j = 0; j < 3; j++) {
+                cells[3 * i + j] = grid[i][j];
+            }
+        }
+    }
+
+    function get2dGrid() public view returns (Cell[3][3] memory cells) {
+        return grid;
+    }
+
+    function getWinner() public view returns (address) {
+        return winner;
+    }
+
+    function getMoveHistory() external view returns (MoveHistory[] memory) {
+        return moveHistory;
+    }
+
+    function getPlayerMoves(
+        address player
+    ) external view returns (MoveHistory[] memory) {
+        uint256 playerMoveCount = 0;
+        for (uint256 i = 0; i < moveHistory.length; i++) {
+            if (moveHistory[i].player == player) {
+                playerMoveCount++;
+            }
+        }
+
+        MoveHistory[] memory playerMoves = new MoveHistory[](playerMoveCount);
+        uint256 currentIndex = 0;
+        for (uint256 i = 0; i < moveHistory.length; i++) {
+            if (moveHistory[i].player == player) {
+                playerMoves[currentIndex] = moveHistory[i];
+                currentIndex++;
+            }
+        }
+
+        return playerMoves;
+    }
+
+    function getRoundMoves(
+        uint256 round
+    ) external view returns (MoveHistory[] memory) {
+        uint256 roundMoveCount = 0;
+        for (uint256 i = 0; i < moveHistory.length; i++) {
+            if (moveHistory[i].roundNumber == round) {
+                roundMoveCount++;
+            }
+        }
+
+        MoveHistory[] memory roundMoves = new MoveHistory[](roundMoveCount);
+        uint256 currentIndex = 0;
+        for (uint256 i = 0; i < moveHistory.length; i++) {
+            if (moveHistory[i].roundNumber == round) {
+                roundMoves[currentIndex] = moveHistory[i];
+                currentIndex++;
+            }
+        }
+
+        return roundMoves;
+    }
+
+    // --- Internal Functions ---
     function _startGame() internal onlyNotStarted {
         gameStatus = GameStatus.Ongoing;
 
+        // Set up castles
         grid[0][0].isCastle = true;
         grid[0][2].isCastle = true;
         grid[1][1].isCastle = true;
         grid[2][0].isCastle = true;
         grid[2][2].isCastle = true;
 
+        // Set up initial player positions
         grid[0][1].player = idToAddress[0];
         grid[0][1].units[0] = 10;
-        grid[0][1].isCastle = false;
 
         grid[1][0].player = idToAddress[1];
         grid[1][0].units[1] = 10;
-        grid[1][0].isCastle = false;
 
         emit GameStarted();
     }
@@ -121,13 +312,11 @@ contract Game {
     function _finalizeGame(address _winner) internal onlyOngoing {
         gameStatus = GameStatus.Finished;
         winner = _winner;
-        // Handle payouts if necessary
         emit GameFinalized(winner);
     }
 
     function _checkGameStatus() internal {
         uint8[] memory winnerCheck = new uint8[](totalPlayers);
-
         uint256[] memory totalUnits = new uint256[](totalPlayers);
 
         for (uint8 i = 0; i < 3; i++) {
@@ -142,16 +331,7 @@ contract Game {
             }
         }
 
-        bool tie = true;
-
-        for (uint8 i = 0; i < totalPlayers; i++) {
-            if (totalUnits[i] > 2) {
-                tie = false;
-                break;
-            }
-        }
-
-        if (tie) {
+        if (_checkTie(totalUnits)) {
             _finalizeGame(address(0));
             return;
         }
@@ -164,29 +344,41 @@ contract Game {
         }
     }
 
-    function makeMove(Move memory _move) public onlyOngoing {
-        require(
-            !roundSubmitted[addressToId[msg.sender]],
-            "Already submitted move"
-        );
-        require(_move.player == msg.sender, "Invalid move (address)");
-        require(checkValidMove(_move), "Invalid move");
-
-        (uint8 fromX, uint8 fromY) = (_move.fromX, _move.fromY);
-
-        Cell storage fromCell = grid[fromX][fromY];
-        require(fromCell.player == msg.sender, "Invalid move");
-
-        pendingMoves[addressToId[msg.sender]] = _move;
-        roundSubmitted[addressToId[msg.sender]] = true;
-
-        if (_allMovesSubmitted()) {
-            executeRound();
-            emit RoundCompleted(roundNumber);
+    function _checkTie(
+        uint256[] memory totalUnits
+    ) internal view returns (bool) {
+        for (uint8 i = 0; i < totalPlayers; i++) {
+            if (totalUnits[i] > 2) {
+                return false;
+            }
         }
+        return true;
     }
 
-    function makeLoan(Loan memory _loan) public onlyOngoing {}
+    function _recordMove(Move memory _move) internal {
+        moveHistory.push(
+            MoveHistory({
+                player: msg.sender,
+                fromX: _move.fromX,
+                fromY: _move.fromY,
+                toX: _move.toX,
+                toY: _move.toY,
+                units: _move.units,
+                timestamp: block.timestamp,
+                roundNumber: roundNumber
+            })
+        );
+
+        emit MoveRecorded(
+            msg.sender,
+            _move.fromX,
+            _move.fromY,
+            _move.toX,
+            _move.toY,
+            _move.units,
+            roundNumber
+        );
+    }
 
     function _allMovesSubmitted() internal view returns (bool) {
         for (uint8 i = 0; i < totalPlayers; i++) {
@@ -206,6 +398,28 @@ contract Game {
             uint8 playerId = addressToId[currentMove.player];
             fromCell.units[playerId] -= currentMove.units;
             toCell.units[playerId] += currentMove.units;
+        }
+    }
+
+    function _resolveCombat() internal {
+        for (uint8 i = 0; i < 3; i++) {
+            for (uint8 j = 0; j < 3; j++) {
+                Cell storage cell = grid[i][j];
+                (
+                    uint256 winnerUnits,
+                    uint8 winnerId,
+                    uint256 totalUnits,
+                    bool tie
+                ) = _determineCellWinner(cell);
+
+                delete cell.units;
+                if (tie || totalUnits == 0 || winnerId == MAX_PLAYERS) {
+                    cell.player = address(0);
+                } else {
+                    cell.units[winnerId] = 2 * winnerUnits - totalUnits;
+                    cell.player = idToAddress[winnerId];
+                }
+            }
         }
     }
 
@@ -236,69 +450,30 @@ contract Game {
         }
     }
 
-    function executeRound() public onlyOngoing {
-        _handlePendingMoves();
-        for (uint8 i = 0; i < 3; i++) {
-            for (uint8 j = 0; j < 3; j++) {
-                Cell storage cell = grid[i][j];
-                (
-                    uint256 winnerUnits,
-                    uint8 winnerId,
-                    uint256 totalUnits,
-                    bool tie
-                ) = _determineCellWinner(cell);
-
-                delete cell.units;
-                if (tie || totalUnits == 0 || winnerId == MAX_PLAYERS) {
-                    cell.player = address(0);
-                } else {
-                    // hacky way of getting winner - loser (in case of 2 players)
-                    cell.units[winnerId] = 2 * winnerUnits - totalUnits;
-                    cell.player = idToAddress[winnerId];
-                }
-            }
-        }
-        roundNumber++;
-        delete roundSubmitted;
-        _checkGameStatus();
-    }
-
-    function getGrid() public view returns (Cell[9] memory cells) {
-        for (uint8 i = 0; i < 3; i++) {
-            for (uint8 j = 0; j < 3; j++) {
-                cells[3 * i + j] = grid[i][j];
-            }
-        }
-    }
-
-    function get2dGrid() public view returns (Cell[3][3] memory cells) {
-        for (uint8 i = 0; i < 3; i++) {
-            for (uint8 j = 0; j < 3; j++) {
-                cells[i][j] = grid[i][j];
-            }
-        }
-    }
-
-    function checkValidMove(Move memory _move) public view returns (bool) {
+    function _checkValidMove(Move memory _move) internal view returns (bool) {
         if (
             _move.fromX >= 3 ||
             _move.fromY >= 3 ||
             _move.toX >= 3 ||
             _move.toY >= 3
         ) {
-            return false;
+            revert("Move coordinates must be within 0-2 range");
         }
 
         if (!_isAdjacent(_move.fromX, _move.fromY, _move.toX, _move.toY)) {
-            return false;
+            revert("Source and destination cells must be adjacent");
         }
 
         Cell storage fromCell = grid[_move.fromX][_move.fromY];
-        if (fromCell.units[addressToId[_move.player]] >= _move.units) {
-            return true;
+        if (fromCell.units[addressToId[_move.player]] < _move.units) {
+            revert("Insufficient units in source cell for this move");
         }
 
-        return false;
+        if (_move.units == 0) {
+            revert("Must move at least 1 unit");
+        }
+
+        return true;
     }
 
     function _isAdjacent(
@@ -309,25 +484,6 @@ contract Game {
     ) internal pure returns (bool) {
         uint8 dx = x1 > x2 ? x1 - x2 : x2 - x1;
         uint8 dy = y1 > y2 ? y1 - y2 : y2 - y1;
-
         return (dx + dy) == 1;
     }
 }
-
-// IERC20...
-
-// function resolveMove(fromX, fromY, toX, toY, units) {
-//     // check if player occupies cell
-//     // check if player has sufficient units
-//     // check if to cell is adjacent
-//     // logic to move units
-//    // call internal function
-// }
-
-// function commitMove(bytes ciphertext) {
-//
-// }
-
-// function revealMove() {}
-
-// internal function to resolve conflicts
