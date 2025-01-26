@@ -1,6 +1,7 @@
 import { Territory } from '@/lib/types/game'
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2 } from 'lucide-react'
+import { Swords, Castle, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface GameMapProps {
     currentPlayer: string
@@ -28,76 +29,47 @@ export default function GameMap({ currentPlayer, territories, onTerritoryClick, 
     return (
         <Card>
             <CardContent className="pt-6">
-                <svg
-                    viewBox={`0 0 ${gridWidth} ${gridHeight}`}
-                    className="w-full h-full border border-gray-300"
-                >
-                    {territories.map((row, rowIndex) => (
-                        row.map((territory, colIndex) => {
-                            const x = (colIndex * cellSize) + padding
-                            const y = (rowIndex * cellSize) + padding
-
-                            return (
-                                <g key={`${rowIndex}-${colIndex}`} onClick={() => onTerritoryClick(territory)}>
-                                    <rect
-                                        x={x}
-                                        y={y}
-                                        width={cellSize}
-                                        height={cellSize}
-                                        fill={territory.isCastle ? '#FFFACD' : 'white'}
-                                        stroke="black"
-                                        strokeWidth="2"
-                                        className="cursor-pointer hover:opacity-80 transition-opacity"
-                                    />
-                                    <text
-                                        x={x + cellSize / 2}
-                                        y={y + 25}
-                                        textAnchor="middle"
-                                        className="text-sm font-medium"
-                                    >
-                                        {territory.isCastle ? `Castle` : `Land`}
-                                    </text>
-                                    {territory.isCastle && (
-                                        <svg
-                                            x={x + 40}
-                                            y={y + 35}
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="currentColor"
-                                        >
-                                            <path d="M12 2L2 8v14h20V8L12 2zm-2 17H6v-3h4v3zm8 0h-4v-3h4v3zm2-7H4v-5l8-4.5 8 4.5v5z" />
-                                        </svg>
+                <div className="w-full max-w-3xl mx-auto p-4">
+                    <div className="grid grid-cols-3 gap-2 aspect-square">
+                        {territories.map((row, rowIndex) =>
+                            row.map((territory, colIndex) => (
+                                <div
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className={cn(
+                                        "relative border-2 border-gray-800 rounded-lg p-4 transition-all duration-200",
+                                        "hover:shadow-lg hover:scale-[1.02]",
+                                        "flex flex-col items-center justify-between",
+                                        territory.isCastle ? "bg-amber-50" : "bg-white",
                                     )}
+                                    onClick={() => onTerritoryClick(territory)}
+                                >
+                                    <div className="text-lg font-semibold mb-2">{territory.isCastle ? "Castle" : "Land"}</div>
+
+                                    {territory.isCastle && <Castle className="w-12 h-12 text-gray-800 mb-2" aria-label="Castle icon" />}
+
                                     {territory.units.map((unit, index) => (
                                         Number(unit) > 0 && (
-                                            <g key={index}>
-                                                <circle
-                                                    cx={x + cellSize / 2}
-                                                    cy={y + 70}
-                                                    r="5"
-                                                    fill={territory.player === currentPlayer ? "#FFFF00" : "#666"}
-                                                    stroke="black"
-                                                    strokeWidth="2"
-                                                />
-                                                <text
-                                                    x={x + cellSize / 2}
-                                                    y={y + 90}
-                                                    textAnchor="middle"
-                                                    className="text-sm font-medium"
-                                                    fill="black"
+                                            <div key={index} className="flex items-center gap-2">
+                                                <div
+                                                    className={cn(
+                                                        "rounded-full w-8 h-8 flex items-center justify-center",
+                                                        territory.player === currentPlayer ? "bg-yellow-400" : "bg-gray-600",
+                                                    )}
                                                 >
-                                                    {Number(unit)}
-                                                </text>
-                                            </g>
+                                                    <Swords className={cn("w-5 h-5", territory.player === currentPlayer ? "text-gray-800" : "text-white")} />
+                                                </div>
+                                                <p className="text-xl font-bold">{Number(unit)}</p>
+                                            </div>
                                         )
                                     ))}
-                                </g>
-                            )
-                        })
-                    ))}
-                </svg>
+                                </div>
+                            )),
+                        )}
+                    </div>
+                </div>
             </CardContent>
         </Card>
     )
-} 
+}
+
+
