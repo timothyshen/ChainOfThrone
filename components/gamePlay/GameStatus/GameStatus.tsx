@@ -11,7 +11,6 @@ import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameSt
 import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
-import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
 import GameCompleteModal from "../GameCompleteModal";
 import { Spinner } from "@/components/ui/spinner";
 

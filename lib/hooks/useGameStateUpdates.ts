@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useWatchContractEvent, usePublicClient } from "wagmi";
-import { watchContractEvent } from "wagmi/actions";
 import { gameAbi } from "@/lib/contract/gameAbi";
 import {
   getGameStatus,

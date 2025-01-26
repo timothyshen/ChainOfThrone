@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { MapPin, Flag, Users, ArrowRight, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/lib/hooks/use-toast"
@@ -21,6 +22,8 @@ import { gameAbi } from '@/lib/contract/gameAbi'
 import { PlayerState } from '@/lib/types/gameStatus'
 import { GameStatusEnum } from '@/lib/types/gameStatus'
 import { Spinner } from '../ui/spinner'
+import { motion, AnimatePresence } from "framer-motion"
+
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -338,56 +341,104 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Territory Information</CardTitle>
+                            <CardTitle className="flex items-center gap-2 text-2xl">
+                                <Flag className="h-6 w-6" />
+                                Territory Information
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             {selectedTerritory ? (
-                                <div>
-                                    <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
-                                    <p className="mb-2">Type: {selectedTerritory.isCastle ? 'castle' : 'land'}</p>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="moveStrength">Units to Move:</Label>
-                                            <div className="flex gap-2 mt-1">
-                                                <Input
-                                                    id="moveStrength"
-                                                    type="number"
-                                                    min={1}
-                                                    value={moveStrength ?? ''}
-                                                    max={currentUnits}
-                                                    onChange={(e) => setMoveStrength(Number(e.target.value))}
-                                                    className="w-full"
-                                                />
-                                            </div>
+                                <div className="space-y-4">
+                                    <div className="rounded-lg bg-muted p-4 space-y-3">
+                                        <p>Location: ({selectedTerritory.x}, {selectedTerritory.y})</p>                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                            <MapPin className="h-4 w-4" />
+                                            <span className="font-medium">Location:</span>
+                                            <span>({selectedTerritory.x}, {selectedTerritory.y})</span>
                                         </div>
-
-                                        <div>
-                                            <Label>Select Destination:</Label>
-                                            <p className="text-sm text-muted-foreground mb-2">
-                                                Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
-                                            </p>
-                                            <div className="grid gap-2 mt-1">
-
-                                                {getAdjacentTerritories(selectedTerritory).map(territory => (
-                                                    <Button
-                                                        key={`${territory.x}-${territory.y}`}
-                                                        className="w-full"
-                                                        onClick={() => handleAction(territory)}
-                                                        disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
-
-                                                    >
-                                                        {isMoveConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
-                                                        {isMoveConfirming && <span className="animate-pulse">...</span>}
-                                                    </Button>
-                                                ))}
-                                                {isMoveConfirming && <Spinner className="animate-pulse" />}
-                                                {isMoveConfirmed && <Button>You have made the move to {moveAction?.x}, {moveAction?.y}</Button>}
-                                            </div>
+                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                            <Flag className="h-4 w-4" />
+                                            <span className="font-medium">Type:</span>
+                                            <span className="flex items-center gap-1">
+                                                {selectedTerritory.isCastle ? '🏰 Castle' : '🗺️ Land'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-muted-foreground">
+                                            <Users className="h-4 w-4" />
+                                            <span className="font-medium">Current Units:</span>
+                                            <span>{currentUnits}</span>
                                         </div>
                                     </div>
+
+                                    {gameStatus === GameStatusEnum.ONGOING && !moveSubmitted ? (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="moveStrength">Units to Move:</Label>
+                                                <div className="flex gap-2 mt-1">
+                                                    <Input
+                                                        id="moveStrength"
+                                                        type="number"
+                                                        min={1}
+                                                        value={moveStrength}
+                                                        max={currentUnits}
+                                                        onChange={(e) => setMoveStrength(Number(e.target.value))}
+                                                        className="w-full"
+                                                        disabled={moveSubmitted}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <h3 className="text-md font-medium">Adjacent Territories</h3>
+                                                <AnimatePresence>
+                                                    {!isMoveConfirming ? (
+                                                        <motion.div
+                                                            className="space-y-2"
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: "auto" }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                        >
+                                                            {getAdjacentTerritories(selectedTerritory).map(territory => (
+                                                                <Button
+                                                                    key={`${territory.x}-${territory.y}`}
+                                                                    className={`w-full `}
+                                                                    onClick={() => handleAction(territory)}
+                                                                    disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
+                                                                >
+                                                                    Move to ({territory.x}, {territory.y})
+                                                                    {isMoveConfirming && <Spinner className="ml-2 h-4 w-4" />}
+                                                                </Button>
+                                                            ))}
+                                                        </motion.div>
+                                                    ) : (
+                                                        <motion.div
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 1 }}
+                                                            exit={{ opacity: 0 }}
+                                                            className="flex flex-col items-center justify-center gap-4 py-8"
+                                                        >
+                                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                                            <p className="text-sm text-muted-foreground">
+                                                                Moving {moveStrength} units to ({moveAction?.x}, {moveAction?.y})...
+                                                            </p>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 rounded-lg bg-muted">
+                                            {gameStatus !== GameStatusEnum.ONGOING ? (
+                                                <p>Game is not currently active</p>
+                                            ) : (
+                                                <p>You have already submitted your move for this round</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
-                                <p>Select a territory to view information and perform actions.</p>
+                                <div className="text-center p-4">
+                                    <p className="text-muted-foreground">Select a territory to view information and perform actions</p>
+                                </div>
                             )}
                         </CardContent>
                     </Card>
