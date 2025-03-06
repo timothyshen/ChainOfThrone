@@ -2,7 +2,7 @@
 
 import { useWatchContractEvent } from "wagmi"
 import { gameFactoryAbi } from "@/lib/contract/gameFactoryAbi"
-import { GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts";
+import { GAME_FACTORY_ADDRESS, MONAD_GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts";
 
 
 // UI Components
@@ -62,7 +62,7 @@ export default function GameExplorer() {
 
 
     useWatchContractEvent({
-        address: GAME_FACTORY_ADDRESS,
+        address: MONAD_GAME_FACTORY_ADDRESS,
         abi: gameFactoryAbi,
         eventName: "GameCreated",
         onLogs: () => {
