@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import "./Game.sol";
 import "./interfaces/IGame.sol";
 import "./interfaces/IUSDC.sol";
+import {IGame} from "./interfaces/IGame.sol";
 
 contract GameFactory {
     event GameCreated(address indexed gameAddress, address indexed creator);
@@ -23,6 +24,12 @@ contract GameFactory {
     // Add constructor to set USDC address
     constructor(address _usdcAddress) {
         usdc = IUSDC(_usdcAddress);
+    struct GameInfo {
+        address gameAddress;
+        IGame.GameStatus status;
+        uint8 totalPlayers;
+        uint8 maxPlayers;
+        uint256 roundNumber;
     }
 
     function createGame() external returns (address) {
@@ -59,5 +66,23 @@ contract GameFactory {
         address creator
     ) external view returns (uint256) {
         return gamesByCreator[creator].length;
+    function getGamesInfo() external view returns (GameInfo[] memory) {
+        uint256 length = games.length;
+        GameInfo[] memory infos = new GameInfo[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            address gameAddress = games[i];
+            IGame game = IGame(gameAddress);
+
+            infos[i] = GameInfo({
+                gameAddress: gameAddress,
+                status: game.gameStatus(),
+                totalPlayers: game.totalPlayers(),
+                maxPlayers: game.MAX_PLAYERS(),
+                roundNumber: game.roundNumber()
+            });
+        }
+
+        return infos;
     }
 }

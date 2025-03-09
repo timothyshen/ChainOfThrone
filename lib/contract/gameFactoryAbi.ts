@@ -99,33 +99,8 @@ export const gameFactoryAbi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-    ],
-    name: "getGamesByCreator",
-    outputs: [
-      {
-        internalType: "address[]",
-        name: "",
-        type: "address[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-    ],
-    name: "getGamesByCreatorCount",
+    inputs: [],
+    name: "getGamesCount",
     outputs: [
       {
         internalType: "uint256",
@@ -138,12 +113,39 @@ export const gameFactoryAbi = [
   },
   {
     inputs: [],
-    name: "getGamesCount",
+    name: "getGamesInfo",
     outputs: [
       {
-        internalType: "uint256",
+        components: [
+          {
+            internalType: "address",
+            name: "gameAddress",
+            type: "address",
+          },
+          {
+            internalType: "enum IGame.GameStatus",
+            name: "status",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "totalPlayers",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "maxPlayers",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "roundNumber",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct GameFactory.GameInfo[]",
         name: "",
-        type: "uint256",
+        type: "tuple[]",
       },
     ],
     stateMutability: "view",
