@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
-import "./interfaces/IUSDC.sol";
 
 /// @title Game - A blockchain-based strategy game
 /// @notice This contract implements a 2-player strategy game on a 3x3 grid
@@ -8,14 +7,12 @@ import "./interfaces/IUSDC.sol";
 contract Game {
     // --- Constants ---
     uint8 public constant MAX_PLAYERS = 2;
-    address public constant MULTISIG =
-        0xeeD33eFC5525C5869B2f989F29BFa8587Be6a07d;
-    uint256 public constant STAKE_AMOUNT = 10e6; // 10 USDC (6 decimals)
+    address public vault;
+    uint256 public constant STAKE_AMOUNT = 1e18; // 1 monad
     uint256 public constant WINNER_PERCENTAGE = 90; // 90% of total stakes
     uint256 public constant PROTOCOL_PERCENTAGE = 10; // 10% of total stakes
 
     // --- State Variables ---
-    IUSDC public immutable usdc;
     GameStatus public gameStatus;
     uint8 public totalPlayers;
     uint256 public roundNumber;
@@ -28,8 +25,6 @@ contract Game {
     // --- Mappings ---
     mapping(uint8 => address) public idToAddress;
     mapping(address => uint8) public addressToId;
-    mapping(address => bool) public hasStaked;
-    mapping(address => bool) public hasClaimed;
 
     // --- Structs ---
     struct Cell {
@@ -97,10 +92,17 @@ contract Game {
         uint256 units,
         uint256 roundNumber
     );
+    event RewardClaimed(
+        address indexed player,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event ProtocolFeeSent(address indexed vault, uint256 amount);
 
     // --- Constructor ---
-    constructor(address _usdcAddress) {
-        usdc = IUSDC(_usdcAddress);
+    constructor(address _vault) {
+        require(_vault != address(0), "Vault address cannot be zero");
+        vault = _vault;
     }
 
     // --- Modifiers ---
@@ -129,8 +131,9 @@ contract Game {
     }
 
     // --- External/Public Functions ---
-    function addPlayer() external onlyNotStarted {
-        require(hasStaked[msg.sender], "Must stake first");
+    function addPlayer() external payable onlyNotStarted {
+        uint256 protocolFee = (STAKE_AMOUNT * PROTOCOL_PERCENTAGE) / 100;
+        uint256 gameDeposit = (STAKE_AMOUNT * WINNER_PERCENTAGE) / 100;
         require(
             totalPlayers < MAX_PLAYERS,
             "Maximum number of players (2) has been reached"
@@ -140,6 +143,11 @@ contract Game {
                 (totalPlayers == 0 || idToAddress[0] != msg.sender),
             "Address is already registered as a player in this game"
         );
+        require(msg.value == protocolFee + gameDeposit, "Must stake 1 mon");
+
+        (bool success, ) = vault.call{value: protocolFee}("");
+        require(success, "Failed to send protocol fee");
+        emit ProtocolFeeSent(vault, protocolFee);
 
         uint8 playerId = totalPlayers;
         idToAddress[playerId] = msg.sender;
@@ -154,6 +162,10 @@ contract Game {
     }
 
     function makeMove(Move memory _move) public onlyOngoing {
+        require(
+            _move.player != address(0),
+            "Move player cannot be zero address"
+        );
         require(
             !roundSubmitted[addressToId[msg.sender]],
             "Player has already submitted a move for this round"
@@ -184,7 +196,7 @@ contract Game {
         }
     }
 
-    function executeRound() public onlyOngoing {
+    function executeRound() internal onlyOngoing {
         _handlePendingMoves();
         _resolveCombat();
         roundNumber++;
@@ -192,36 +204,45 @@ contract Game {
         _checkGameStatus();
     }
 
-    function stake() external {
-        require(!hasStaked[msg.sender], "Already staked");
-        require(
-            usdc.transferFrom(msg.sender, address(this), STAKE_AMOUNT),
-            "Stake transfer failed"
-        );
-        require(
-            usdc.transfer(MULTISIG, getProtocolFee() / MAX_PLAYERS),
-            "Protocol fee transfer failed"
-        );
-        hasStaked[msg.sender] = true;
-    }
-
     function claimReward() external {
         require(gameStatus == GameStatus.Finished, "Game not finished");
-        require(!hasClaimed[msg.sender], "Already claimed");
         require(winner != address(0), "No winner");
         require(msg.sender == winner, "Only winner can claim prize");
+        uint256 winnerAmount = (STAKE_AMOUNT * WINNER_PERCENTAGE) / 100;
 
-        usdc.transfer(msg.sender, getWinnerAmount());
-        hasClaimed[msg.sender] = true;
+        (bool sentWinner, ) = msg.sender.call{value: winnerAmount}("");
+        require(sentWinner, "Failed to send winner amount");
+
+        emit RewardClaimed(msg.sender, winnerAmount, block.timestamp);
     }
 
     // --- View Functions ---
     function getWinnerAmount() public pure returns (uint256) {
-        return (STAKE_AMOUNT * MAX_PLAYERS * WINNER_PERCENTAGE) / 100;
+        // Check for potential overflow in multiplication
+        require(
+            (STAKE_AMOUNT * MAX_PLAYERS) / MAX_PLAYERS == STAKE_AMOUNT,
+            "Overflow in stake calculation"
+        );
+        uint256 totalStake = STAKE_AMOUNT * MAX_PLAYERS;
+        require(
+            (totalStake * WINNER_PERCENTAGE) / 100 <= totalStake,
+            "Overflow in winner amount calculation"
+        );
+        return (totalStake * WINNER_PERCENTAGE) / 100;
     }
 
     function getProtocolFee() public pure returns (uint256) {
-        return (STAKE_AMOUNT * MAX_PLAYERS * PROTOCOL_PERCENTAGE) / 100;
+        // Check for potential overflow in multiplication
+        require(
+            (STAKE_AMOUNT * MAX_PLAYERS) / MAX_PLAYERS == STAKE_AMOUNT,
+            "Overflow in stake calculation"
+        );
+        uint256 totalStake = STAKE_AMOUNT * MAX_PLAYERS;
+        require(
+            (totalStake * PROTOCOL_PERCENTAGE) / 100 <= totalStake,
+            "Overflow in protocol fee calculation"
+        );
+        return (totalStake * PROTOCOL_PERCENTAGE) / 100;
     }
 
     function getGrid() public view returns (Cell[9] memory cells) {
@@ -416,7 +437,17 @@ contract Game {
                 if (tie || totalUnits == 0 || winnerId == MAX_PLAYERS) {
                     cell.player = address(0);
                 } else {
-                    cell.units[winnerId] = 2 * winnerUnits - totalUnits;
+                    // Add safety checks for unit calculations
+                    require(
+                        winnerUnits <= type(uint256).max / 2,
+                        "Winner units too large"
+                    );
+                    uint256 newUnits = 2 * winnerUnits;
+                    require(
+                        newUnits >= totalUnits,
+                        "Invalid combat resolution calculation"
+                    );
+                    cell.units[winnerId] = newUnits - totalUnits;
                     cell.player = idToAddress[winnerId];
                 }
             }
