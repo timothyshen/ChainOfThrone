@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
 import { sepolia, monadTestnet } from 'viem/chains';
 
+
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 
 
@@ -34,7 +35,7 @@ export default function DynamicProvider({
     <DynamicContextProvider
       settings={{
         // Find your environment id at https://app.dynamic.xyz/dashboard/developer
-        environmentId: "711895d2-a81c-462e-885e-409997a413f0",
+        environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID as string,
         walletConnectors: [EthereumWalletConnectors],
       }}
     >

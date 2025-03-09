@@ -41,9 +41,9 @@ const getStatusText = (status: number): string => STATUS_MAP[status as GameStatu
 const getStatusStyles = (status: number): string => {
     const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium w-full justify-center"
     const statusStyles = {
-        0: 'bg-black text-green-400',
-        1: 'bg-black text-yellow-400',
-        2: 'bg-black text-red-400'
+        0: 'bg-white text-green-400 border border-green-400',
+        1: 'bg-white text-yellow-400 border border-yellow-400',
+        2: 'bg-white text-red-400 border border-red-400'
     }
     return `${baseStyles} ${statusStyles[status as GameStatus] ?? ''}`
 }
@@ -171,9 +171,8 @@ export default function GameExplorer() {
                         <TableBody>
                             {games?.map((game) => (
                                 <TableRow key={game.gameAddress} className="border-gray-800 hover:bg-white/5">
-                                    <TableCell className="font-mono">{game.gameAddress}</TableCell>
-                                    {/* <TableCell className="font-mono">{game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}</TableCell> */}
-                                    {/* <TableCell className="text-center">
+                                    <TableCell className="font-mono">{game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}</TableCell>
+                                    <TableCell className="text-center">
                                         <div className="flex items-center justify-end gap-1 w-full">
                                             <Users className="h-4 w-4" />
                                             <span className="text-sm w-full">{game.totalPlayers} / {game.maxPlayers}</span>
@@ -183,7 +182,7 @@ export default function GameExplorer() {
                                         <span className={getStatusStyles(game.status)}>
                                             {getStatusText(game.status)}
                                         </span>
-                                    </TableCell> */}
+                                    </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex flex-row gap-2 items-end justify-end">
                                             <Button
@@ -194,14 +193,14 @@ export default function GameExplorer() {
                                             >
                                                 Quick Join
                                             </Button>
-                                            {/* <Button
+                                            <Button
                                                 size="sm"
                                                 variant="outline"
                                                 className="w-fit"
                                                 onClick={() => setSelectedGame(game)}
                                             >
                                                 <Info className="h-4 w-4" />
-                                            </Button> */}
+                                            </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
