@@ -14,14 +14,13 @@ export const getGameList = async () => {
   return result;
 };
 
-export const getGamesInfo = async (startIdx: number, count: number) => {
+export const getGamesInfo = async () => {
   const result = await contractClient.readContract({
     address: MONAD_GAME_FACTORY_ADDRESS,
     abi: gameFactoryAbi,
-    functionName: "getGamesInfo",
-    args: [startIdx, count],
+    functionName: "getGames",
   });
-  console.log(result);
+  console.log("result", result);
   return result;
 };
 

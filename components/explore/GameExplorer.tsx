@@ -72,7 +72,8 @@ export default function GameExplorer() {
 
     const fetchGames = useCallback(async () => {
         try {
-            const gamesInfo = await getGamesInfo(0, 10)
+            const gamesInfo = await getGamesInfo()
+            console.log("gamesInfo", gamesInfo)
             setGames(gamesInfo as Game[])
         } catch (error) {
             toast({
@@ -80,6 +81,7 @@ export default function GameExplorer() {
                 description: "Failed to fetch games",
                 variant: "destructive",
             })
+            console.error(error)
         } finally {
             setIsLoading(false)
         }
@@ -107,10 +109,10 @@ export default function GameExplorer() {
         }
     }
 
-    const filteredGames = games?.filter(game =>
-        game.gameAddress.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (statusFilter === 'all' || getStatusText(game.status).toLowerCase() === statusFilter)
-    )
+    // const filteredGames = games?.filter(game =>
+    //     game?.gameAddress.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    //     (statusFilter === 'all' || getStatusText(game.status).toLowerCase() === statusFilter)
+    // )
 
     if (isLoading) {
         return (
@@ -167,10 +169,11 @@ export default function GameExplorer() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredGames?.map((game) => (
+                            {games?.map((game) => (
                                 <TableRow key={game.gameAddress} className="border-gray-800 hover:bg-white/5">
-                                    <TableCell className="font-mono">{game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}</TableCell>
-                                    <TableCell className="text-center">
+                                    <TableCell className="font-mono">{game.gameAddress}</TableCell>
+                                    {/* <TableCell className="font-mono">{game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}</TableCell> */}
+                                    {/* <TableCell className="text-center">
                                         <div className="flex items-center justify-end gap-1 w-full">
                                             <Users className="h-4 w-4" />
                                             <span className="text-sm w-full">{game.totalPlayers} / {game.maxPlayers}</span>
@@ -180,7 +183,7 @@ export default function GameExplorer() {
                                         <span className={getStatusStyles(game.status)}>
                                             {getStatusText(game.status)}
                                         </span>
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell className="text-right">
                                         <div className="flex flex-row gap-2 items-end justify-end">
                                             <Button
@@ -191,14 +194,14 @@ export default function GameExplorer() {
                                             >
                                                 Quick Join
                                             </Button>
-                                            <Button
+                                            {/* <Button
                                                 size="sm"
                                                 variant="outline"
                                                 className="w-fit"
                                                 onClick={() => setSelectedGame(game)}
                                             >
                                                 <Info className="h-4 w-4" />
-                                            </Button>
+                                            </Button> */}
                                         </div>
                                     </TableCell>
                                 </TableRow>

@@ -40,7 +40,7 @@ const CreateNewGame = () => {
         } catch (err) {
             toast({
                 title: 'Error',
-                description: error?.message || 'Failed to create game',
+                description: error?.message,
                 variant: 'destructive',
             })
         }

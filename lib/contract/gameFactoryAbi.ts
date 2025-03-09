@@ -88,44 +88,6 @@ export const gameFactoryAbi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-    ],
-    name: "getGamesByCreator",
-    outputs: [
-      {
-        internalType: "address[]",
-        name: "",
-        type: "address[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-    ],
-    name: "getGamesByCreatorCount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "getGamesCount",
     outputs: [
@@ -139,18 +101,7 @@ export const gameFactoryAbi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "startIdx",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "count",
-        type: "uint256",
-      },
-    ],
+    inputs: [],
     name: "getGamesInfo",
     outputs: [
       {
