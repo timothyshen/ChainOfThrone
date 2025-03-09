@@ -92,16 +92,10 @@ contract Game {
         uint256 units,
         uint256 roundNumber
     );
-    event RewardClaimed(
-        address indexed player,
-        uint256 amount,
-        uint256 timestamp
-    );
-    event ProtocolFeeSent(address indexed vault, uint256 amount);
+    event RewardClaimed(address indexed player, uint256 amount);
 
     // --- Constructor ---
     constructor(address _vault) {
-        require(_vault != address(0), "Vault address cannot be zero");
         vault = _vault;
     }
 
@@ -147,7 +141,6 @@ contract Game {
 
         (bool success, ) = vault.call{value: protocolFee}("");
         require(success, "Failed to send protocol fee");
-        emit ProtocolFeeSent(vault, protocolFee);
 
         uint8 playerId = totalPlayers;
         idToAddress[playerId] = msg.sender;
@@ -162,10 +155,6 @@ contract Game {
     }
 
     function makeMove(Move memory _move) public onlyOngoing {
-        require(
-            _move.player != address(0),
-            "Move player cannot be zero address"
-        );
         require(
             !roundSubmitted[addressToId[msg.sender]],
             "Player has already submitted a move for this round"
@@ -213,36 +202,16 @@ contract Game {
         (bool sentWinner, ) = msg.sender.call{value: winnerAmount}("");
         require(sentWinner, "Failed to send winner amount");
 
-        emit RewardClaimed(msg.sender, winnerAmount, block.timestamp);
+        emit RewardClaimed(msg.sender, winnerAmount);
     }
 
     // --- View Functions ---
     function getWinnerAmount() public pure returns (uint256) {
-        // Check for potential overflow in multiplication
-        require(
-            (STAKE_AMOUNT * MAX_PLAYERS) / MAX_PLAYERS == STAKE_AMOUNT,
-            "Overflow in stake calculation"
-        );
-        uint256 totalStake = STAKE_AMOUNT * MAX_PLAYERS;
-        require(
-            (totalStake * WINNER_PERCENTAGE) / 100 <= totalStake,
-            "Overflow in winner amount calculation"
-        );
-        return (totalStake * WINNER_PERCENTAGE) / 100;
+        return (STAKE_AMOUNT * MAX_PLAYERS * WINNER_PERCENTAGE) / 100;
     }
 
     function getProtocolFee() public pure returns (uint256) {
-        // Check for potential overflow in multiplication
-        require(
-            (STAKE_AMOUNT * MAX_PLAYERS) / MAX_PLAYERS == STAKE_AMOUNT,
-            "Overflow in stake calculation"
-        );
-        uint256 totalStake = STAKE_AMOUNT * MAX_PLAYERS;
-        require(
-            (totalStake * PROTOCOL_PERCENTAGE) / 100 <= totalStake,
-            "Overflow in protocol fee calculation"
-        );
-        return (totalStake * PROTOCOL_PERCENTAGE) / 100;
+        return (STAKE_AMOUNT * MAX_PLAYERS * PROTOCOL_PERCENTAGE) / 100;
     }
 
     function getGrid() public view returns (Cell[9] memory cells) {
@@ -437,17 +406,7 @@ contract Game {
                 if (tie || totalUnits == 0 || winnerId == MAX_PLAYERS) {
                     cell.player = address(0);
                 } else {
-                    // Add safety checks for unit calculations
-                    require(
-                        winnerUnits <= type(uint256).max / 2,
-                        "Winner units too large"
-                    );
-                    uint256 newUnits = 2 * winnerUnits;
-                    require(
-                        newUnits >= totalUnits,
-                        "Invalid combat resolution calculation"
-                    );
-                    cell.units[winnerId] = newUnits - totalUnits;
+                    cell.units[winnerId] = 2 * winnerUnits - totalUnits;
                     cell.player = idToAddress[winnerId];
                 }
             }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {IGame} from "./interfaces/IGame.sol";
+import {Game} from "./Game.sol";
 
 contract GameFactory {
     event GameCreated(address indexed gameAddress, address indexed creator);
@@ -14,7 +15,7 @@ contract GameFactory {
 
     // Mapping to track games created by specific addresses
     mapping(address => address[]) public gamesByCreator;
-    
+
     struct GameInfo {
         address gameAddress;
         IGame.GameStatus status;
@@ -24,13 +25,13 @@ contract GameFactory {
     }
 
     function createGame() external returns (address) {
-        Game game = new Game();
+        Game game = new Game(msg.sender);
         address gameAddress = address(game);
 
         games.push(gameAddress);
         isGame[gameAddress] = true;
         gamesByCreator[msg.sender].push(gameAddress);
-        
+
         emit GameCreated(gameAddress, msg.sender);
 
         return gameAddress;
@@ -39,10 +40,11 @@ contract GameFactory {
     function getGames() external view returns (address[] memory) {
         return games;
     }
-    
+
     function getGamesCount() external view returns (uint256) {
         return games.length;
     }
+
     function getGamesInfo() external view returns (GameInfo[] memory) {
         uint256 length = games.length;
         GameInfo[] memory infos = new GameInfo[](length);
