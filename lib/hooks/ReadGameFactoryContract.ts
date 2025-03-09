@@ -18,7 +18,7 @@ export const getGamesInfo = async () => {
   const result = await contractClient.readContract({
     address: MONAD_GAME_FACTORY_ADDRESS,
     abi: gameFactoryAbi,
-    functionName: "getGames",
+    functionName: "getGamesInfo",
   });
   console.log("result", result);
   return result;
