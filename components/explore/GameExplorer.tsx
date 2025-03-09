@@ -2,7 +2,7 @@
 
 import { useWatchContractEvent } from "wagmi"
 import { gameFactoryAbi } from "@/lib/contract/gameFactoryAbi"
-import { GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts";
+import { GAME_FACTORY_ADDRESS, MONAD_GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts";
 
 
 // UI Components
@@ -41,9 +41,9 @@ const getStatusText = (status: number): string => STATUS_MAP[status as GameStatu
 const getStatusStyles = (status: number): string => {
     const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium w-full justify-center"
     const statusStyles = {
-        0: 'bg-black text-green-400',
-        1: 'bg-black text-yellow-400',
-        2: 'bg-black text-red-400'
+        0: 'bg-white text-green-400 border border-green-400',
+        1: 'bg-white text-yellow-400 border border-yellow-400',
+        2: 'bg-white text-red-400 border border-red-400'
     }
     return `${baseStyles} ${statusStyles[status as GameStatus] ?? ''}`
 }
@@ -62,7 +62,7 @@ export default function GameExplorer() {
 
 
     useWatchContractEvent({
-        address: GAME_FACTORY_ADDRESS,
+        address: MONAD_GAME_FACTORY_ADDRESS,
         abi: gameFactoryAbi,
         eventName: "GameCreated",
         onLogs: () => {
@@ -72,7 +72,8 @@ export default function GameExplorer() {
 
     const fetchGames = useCallback(async () => {
         try {
-            const gamesInfo = await getGamesInfo(0, 10)
+            const gamesInfo = await getGamesInfo()
+            console.log("gamesInfo", gamesInfo)
             setGames(gamesInfo as Game[])
         } catch (error) {
             toast({
@@ -80,6 +81,7 @@ export default function GameExplorer() {
                 description: "Failed to fetch games",
                 variant: "destructive",
             })
+            console.error(error)
         } finally {
             setIsLoading(false)
         }
@@ -107,10 +109,10 @@ export default function GameExplorer() {
         }
     }
 
-    const filteredGames = games?.filter(game =>
-        game.gameAddress.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (statusFilter === 'all' || getStatusText(game.status).toLowerCase() === statusFilter)
-    )
+    // const filteredGames = games?.filter(game =>
+    //     game?.gameAddress.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    //     (statusFilter === 'all' || getStatusText(game.status).toLowerCase() === statusFilter)
+    // )
 
     if (isLoading) {
         return (
@@ -167,7 +169,7 @@ export default function GameExplorer() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredGames?.map((game) => (
+                            {games?.map((game) => (
                                 <TableRow key={game.gameAddress} className="border-gray-800 hover:bg-white/5">
                                     <TableCell className="font-mono">{game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}</TableCell>
                                     <TableCell className="text-center">

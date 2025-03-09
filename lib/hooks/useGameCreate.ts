@@ -3,7 +3,10 @@ import {
   useWriteContract,
   useAccount,
 } from "wagmi";
-import { GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts";
+import {
+  GAME_FACTORY_ADDRESS,
+  MONAD_GAME_FACTORY_ADDRESS,
+} from "@/lib/constants/contracts";
 import { gameFactoryAbi } from "@/lib/contract/gameFactoryAbi";
 
 type UseGameCreateReturn = {
@@ -21,7 +24,7 @@ export const useGameCreate = (): UseGameCreateReturn => {
   const createGame = async () => {
     if (!isConnected) throw new Error("Wallet not connected");
     const result = await writeContract({
-      address: GAME_FACTORY_ADDRESS,
+      address: MONAD_GAME_FACTORY_ADDRESS,
       abi: gameFactoryAbi,
       functionName: "createGame",
     });
