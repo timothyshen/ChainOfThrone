@@ -20,7 +20,6 @@ import { Search, Sword, Users, Info, Loader2 } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from "@/lib/hooks/use-toast"
-import { useAddPlayer } from '@/lib/hooks/useAddPlayer'
 import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 
 // Types
@@ -58,7 +57,6 @@ export default function GameExplorer() {
 
     const { toast } = useToast()
     const router = useRouter()
-    const { addPlayer } = useAddPlayer()
 
 
     useWatchContractEvent({

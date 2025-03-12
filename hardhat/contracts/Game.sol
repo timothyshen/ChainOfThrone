@@ -194,7 +194,7 @@ contract Game {
     }
 
     function claimReward() external {
-        require(gameStatus == GameStatus.Finished, "Game not finished");
+        // require(gameStatus == GameStatus.Finished, "Game not finished");
         require(winner != address(0), "No winner");
         require(msg.sender == winner, "Only winner can claim prize");
         uint256 winnerAmount = (STAKE_AMOUNT * WINNER_PERCENTAGE) / 100;

@@ -10,17 +10,18 @@ import {
 } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
-import { sepolia, monadTestnet } from 'viem/chains';
+import { sepolia, monadTestnet, localhost } from 'viem/chains';
 
 
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 
 
 const config = createConfig({
-  chains: [monadTestnet],
+  chains: [monadTestnet, localhost],
   multiInjectedProviderDiscovery: false,
   transports: {
     [monadTestnet.id]: http(),
+    [localhost.id]: http(),
   },
 });
 
