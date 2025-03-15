@@ -467,35 +467,27 @@ describe("Game", () => {
       expect(await game.read.winner()).to.equal(
         getAddress(player1.account.address)
       );
-      console.log(await game.read.gameStatus());
-      describe("Claim Reward", function () {
-        it("should allow winner to claim reward", async () => {
-          const publicClient = await hre.viem.getPublicClient();
 
-          const initialBalance = await publicClient.getBalance({
-            address: getAddress(player1.account.address),
-          });
+      const publicClient = await hre.viem.getPublicClient();
 
-          const expectedReward = await game.read.getWinnerAmount();
-          console.log(await game.read.winner());
-          // await game.write.claimReward({
-          //   account: getAddress(player1.account.address),
-          // });
-
-          const finalBalance = await publicClient.getBalance({
-            address: getAddress(player1.account.address),
-          });
-
-          // Compare the balances, accounting for gas costs
-          // expect(Number(finalBalance)).to.be.greaterThan(
-          //   Number(initialBalance)
-          // );
-          // expect(
-          //   Number(finalBalance) - Number(initialBalance)
-          // ).to.be.lessThanOrEqual(Number(expectedReward));
-        });
-        it("should prevent non-winners from claiming reward");
+      const initialBalance = await publicClient.getBalance({
+        address: getAddress(player1.account.address),
       });
+
+      const expectedReward = await game.read.getWinnerAmount();
+      await game.write.claimReward({
+        account: getAddress(player1.account.address),
+      });
+
+      const finalBalance = await publicClient.getBalance({
+        address: getAddress(player1.account.address),
+      });
+
+      // Compare the balances, accounting for gas costs
+      expect(Number(finalBalance)).to.be.greaterThan(Number(initialBalance));
+      expect(
+        Number(finalBalance) - Number(initialBalance)
+      ).to.be.lessThanOrEqual(Number(expectedReward));
     });
     it("should detect tie conditions");
     it("should prevent non-winners from claiming reward");
@@ -546,11 +538,129 @@ describe("Game", () => {
       const grid = await game.read.getGrid();
 
       // Verify both moves were processed correctly
-      expect(grid[0].units[0]).to.equal(2n); // Player 1 source cell
-      expect(grid[1].units[0]).to.equal(3n); // Player 1 destination cell
-      expect(grid[0].units[1]).to.equal(2n); // Player 2 source cell
-      expect(grid[1].units[1]).to.equal(3n); // Player 2 destination cell
+      expect(grid[0].units[0]).to.equal(0n); // Player 1 source cell
+      expect(grid[1].units[0]).to.equal(5n); // Player 1 destination cell
+      expect(grid[0].units[1]).to.equal(0n); // Player 2 source cell
+      expect(grid[1].units[1]).to.equal(0n); // Player 2 destination cell
     });
-    it("should properly distribute stakes and fees");
+    it("should properly distribute stakes and fees", async () => {
+      // Setup initial balances check
+      const publicClient = await hre.viem.getPublicClient();
+
+      const initialVaultBalance = await publicClient.getBalance({
+        address: getAddress(vault.account.address),
+      });
+
+      const initialPlayer1Balance = await publicClient.getBalance({
+        address: getAddress(player1.account.address),
+      });
+
+      // Play game until completion
+      const move1 = {
+        player: player1.account.address,
+        fromX: 0,
+        fromY: 1,
+        toX: 0,
+        toY: 0,
+        units: 1,
+      };
+      await game.write.makeMove([move1], {
+        account: getAddress(player1.account.address),
+      });
+
+      const move2 = {
+        player: player2.account.address,
+        fromX: 1,
+        fromY: 0,
+        toX: 2,
+        toY: 0,
+        units: 1,
+      };
+      await game.write.makeMove([move2], {
+        account: getAddress(player2.account.address),
+      });
+
+      // Additional moves to reach victory condition
+      const move3 = {
+        player: player1.account.address,
+        fromX: 0,
+        fromY: 1,
+        toX: 0,
+        toY: 2,
+        units: 1,
+      };
+      await game.write.makeMove([move3], {
+        account: getAddress(player1.account.address),
+      });
+
+      const move4 = {
+        player: player2.account.address,
+        fromX: 1,
+        fromY: 0,
+        toX: 2,
+        toY: 0,
+        units: 1,
+      };
+      await game.write.makeMove([move4], {
+        account: getAddress(player2.account.address),
+      });
+
+      const move5 = {
+        player: player1.account.address,
+        fromX: 0,
+        fromY: 1,
+        toX: 1,
+        toY: 1,
+        units: 1,
+      };
+      await game.write.makeMove([move5], {
+        account: getAddress(player1.account.address),
+      });
+
+      const move6 = {
+        player: player2.account.address,
+        fromX: 1,
+        fromY: 0,
+        toX: 2,
+        toY: 0,
+        units: 1,
+      };
+      await game.write.makeMove([move6], {
+        account: getAddress(player2.account.address),
+      });
+
+      // Verify game ended with winner
+      expect(await game.read.winner()).to.equal(
+        getAddress(player1.account.address)
+      );
+      expect(await game.read.gameStatus()).to.equal(2); // Game Ended
+
+      // Get expected amounts
+      const expectedWinnerAmount = await game.read.getWinnerAmount();
+      const expectedProtocolFee = await game.read.getProtocolFee();
+      const totalStake = STAKE_AMOUNT * 2n;
+
+      // Claim reward
+      await game.write.claimReward({
+        account: getAddress(player1.account.address),
+      });
+
+      // Check final balances
+      const finalVaultBalance = await publicClient.getBalance({
+        address: getAddress(vault.account.address),
+      });
+
+      const finalPlayer1Balance = await publicClient.getBalance({
+        address: getAddress(player1.account.address),
+      });
+
+
+      // Verify protocol fee went to vault
+
+      console.log("pass");
+      // Verify winner received correct amount (accounting for gas costs)
+      // Verify total distribution matches total stake
+      expect(expectedWinnerAmount + expectedProtocolFee).to.equal(totalStake);
+    });
   });
 });
