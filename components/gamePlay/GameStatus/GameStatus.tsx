@@ -64,7 +64,7 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
     const { gameAddress } = useGameAddress();
 
     const { addPlayer, isPending, isConfirming, error, isConfirmed } = useAddPlayer();
-    const [showCompleteModal, setShowCompleteModal] = useState(false);
+    const [showCompleteModal, setShowCompleteModal] = useState(true);
 
 
     useEffect(() => {
