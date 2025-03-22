@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from "@/lib/hooks/use-toast";
 import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
-import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted } from "@/lib/hooks/ReadGameContract";
+import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted, getWinner } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
-import GameCompleteModal from "../GameCompleteModal";
+import { DiplomacyResultModal } from "../GameCompleteModal";
 import { Spinner } from "@/components/ui/spinner";
 
 const getGameStatusText = (status: number): GameStatusEnum => {
@@ -26,6 +26,13 @@ const getGameStatusText = (status: number): GameStatusEnum => {
         default:
             return GameStatusEnum.NOT_STARTED;
     }
+}
+
+const winStats = {
+    supplyCenters: 18,
+    territories: 22,
+    alliances: 4,
+    totalYears: 7,
 }
 
 const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], currentPlayer: string }) => {
@@ -62,16 +69,23 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
 
 export default function GameStatus({ isLoading, currentPlayer, gameStatus, totalPlayer, maxPlayer, playerAddresses, setGameStatus, setTotalPlayer, fetchGameData }: GameStatusProps) {
     const { gameAddress } = useGameAddress();
-
     const { addPlayer, isPending, isConfirming, error, isConfirmed } = useAddPlayer();
     const [showCompleteModal, setShowCompleteModal] = useState(true);
-
+    const [winer, setWinner] = useState(String)
 
     useEffect(() => {
-        if (gameStatus === GameStatusEnum.COMPLETED) {
-            setShowCompleteModal(true);
+        async function checkWinner() {
+            if (gameStatus === GameStatusEnum.COMPLETED) {
+                setShowCompleteModal(true);
+                if (!gameAddress) return null;
+                const winnerAddress = await getWinner(gameAddress);
+                if (winnerAddress === currentPlayer) {
+                    setWinner(currentPlayer);
+                }
+            }
         }
-    }, [gameStatus]);
+        checkWinner();
+    }, [gameStatus, gameAddress, currentPlayer]);
 
     useEffect(() => {
         if (isConfirming) {
@@ -212,9 +226,13 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                 )}
             </CardContent>
 
-            <GameCompleteModal
-                isOpen={showCompleteModal}
-                onClose={handleCloseModal}
+            <DiplomacyResultModal
+                type="win"
+                open={true}
+                onOpenChange={setShowCompleteModal}
+                power="Great Britain"
+                year="Fall, 1908"
+                stats={winStats}
             />
         </Card>
     )
