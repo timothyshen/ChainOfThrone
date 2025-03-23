@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from "@/lib/hooks/use-toast";
 import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
-import { getGameStatus, totalPlayers, idToAddress, getMaxPlayer, getRoundSubmitted, getWinner } from "@/lib/hooks/ReadGameContract";
+import { getGameStatus, totalPlayers, getWinner } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
@@ -226,14 +226,17 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                 )}
             </CardContent>
 
-            <DiplomacyResultModal
-                type="win"
-                open={true}
-                onOpenChange={setShowCompleteModal}
-                power="Great Britain"
-                year="Fall, 1908"
-                stats={winStats}
-            />
+            {gameAddress && (
+                <DiplomacyResultModal
+                    gameAddress={gameAddress}
+                    type="win"
+                    open={true}
+                    onOpenChange={setShowCompleteModal}
+                    power="Great Britain"
+                    year="Fall, 1908"
+                    stats={winStats}
+                />
+            )}
         </Card>
     )
 }

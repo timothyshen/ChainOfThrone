@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, memo } from "react"
+import { useState, useCallback, memo, useEffect, use } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     Globe,
@@ -29,6 +29,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useClaimReward } from "@/lib/hooks/useClaimReward"
 import { toast } from "@/lib/hooks/use-toast"
+import { getWinnerAmount } from "@/lib/hooks/ReadGameContract"
 // import DiplomacyAnalysis from "./diplomacy-analysis"
 
 // Types for our components
@@ -36,6 +37,7 @@ type GameResultType = "win" | "loss"
 type PowerName = "Great Britain" | "France" | "Germany" | "Italy" | "Austria-Hungary" | "Russia" | "Turkey"
 
 interface DiplomacyResultModalProps {
+    gameAddress: `0x${string}`
     type: GameResultType
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -57,6 +59,7 @@ interface IconSectionProps {
 }
 
 interface StatsSectionProps {
+    gameAddress: `0x${string}`
     type: GameResultType
     power: PowerName
     stats: {
@@ -148,7 +151,18 @@ const IconSection = memo(({ type }: IconSectionProps) => {
 IconSection.displayName = "IconSection"
 
 // Stats Section Component
-const StatsSection = memo(({ type, power, stats, year }: StatsSectionProps) => {
+const StatsSection = memo(({ gameAddress, type, power, stats, year }: StatsSectionProps) => {
+
+    const [reward, setReward] = useState(0)
+
+    useEffect(() => {
+        const fetchReward = async () => {
+            const reward = await getWinnerAmount(gameAddress)
+            setReward(reward as number)
+        }
+        fetchReward()
+    }, [gameAddress])
+
     if (type === "win") {
         return (
             <Card className="border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-900/10">
@@ -193,8 +207,8 @@ const StatsSection = memo(({ type, power, stats, year }: StatsSectionProps) => {
                 </CardContent>
                 <CardFooter className="px-4 pt-2 pb-4 border-t border-amber-200 dark:border-amber-900/30">
                     <div className="flex justify-between items-center w-full">
-                        <span className="font-medium text-slate-800 dark:text-slate-200">Final Year</span>
-                        <span className="font-bold text-lg text-amber-700 dark:text-amber-400">{year || "Fall, 1908"}</span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200">Reward</span>
+                        <span className="font-bold text-lg text-amber-700 dark:text-amber-400">{reward || "0"}</span>
                     </div>
                 </CardFooter>
             </Card>
@@ -351,6 +365,7 @@ export function DiplomacyResultModal({
     power = "Great Britain",
     year = "Fall, 1908",
     stats = {},
+    gameAddress = "0x0000000000000000000000000000000000000000",
 }: DiplomacyResultModalProps) {
 
     // const { claimReward } = useClaimReward(gameAddress)
@@ -387,7 +402,7 @@ export function DiplomacyResultModal({
                     <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         <DialogHeader className="pt-8 pb-2 px-6 text-center">
                             <div className="flex justify-center mb-4">
-                                <IconSection type={type} power={power} />
+                                <IconSection type={type} />
                             </div>
 
                             <DialogTitle className="text-2xl font-bold text-center">
@@ -426,7 +441,7 @@ export function DiplomacyResultModal({
                                 transition={{ delay: 0.3 }}
                                 className="mb-6"
                             >
-                                <StatsSection type={type} power={power} stats={stats} year={year} />
+                                <StatsSection gameAddress={gameAddress} type={type} power={power} stats={stats} year={year} />
                             </motion.div>
 
                             {/* Action Section */}

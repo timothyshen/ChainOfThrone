@@ -109,3 +109,12 @@ export const getWinner = async (address: `0x${string}`) => {
   });
   return winnerAddress;
 };
+
+export const getWinnerAmount = async (address: `0x${string}`) => {
+  const result = await contractClient.readContract({
+    address: address,
+    abi: gameAbi,
+    functionName: "getWinnerAmount",
+  });
+  return result;
+};
