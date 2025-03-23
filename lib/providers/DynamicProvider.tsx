@@ -2,6 +2,7 @@
 
 import {
   DynamicContextProvider,
+  mergeNetworks,
 } from "@dynamic-labs/sdk-react-core";
 import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector";
 import {
@@ -17,11 +18,11 @@ import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 
 
 const config = createConfig({
-  chains: [monadTestnet, localhost],
+  chains: [monadTestnet, sepolia],
   multiInjectedProviderDiscovery: false,
   transports: {
     [monadTestnet.id]: http(),
-    [localhost.id]: http(),
+    [sepolia.id]: http(),
   },
 });
 
@@ -35,7 +36,6 @@ export default function DynamicProvider({
   return (
     <DynamicContextProvider
       settings={{
-        // Find your environment id at https://app.dynamic.xyz/dashboard/developer
         environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID as string,
         walletConnectors: [EthereumWalletConnectors],
       }}

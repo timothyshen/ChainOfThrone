@@ -10,7 +10,14 @@ const config: HardhatUserConfig = {
   solidity: "0.8.26",
   networks: {
     hardhat: {
-      chainId: 1337,
+      chainId: 31337,
+      accounts: [
+        {
+          privateKey:
+            "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
+          balance: "1000000000000000000000000",
+        },
+      ],
     },
     sepolia: {
       url: process.env.SEPOLIA_URL,

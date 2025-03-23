@@ -230,7 +230,7 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                 <DiplomacyResultModal
                     gameAddress={gameAddress}
                     type="win"
-                    open={true}
+                    open={false}
                     onOpenChange={setShowCompleteModal}
                     power="Great Britain"
                     year="Fall, 1908"
