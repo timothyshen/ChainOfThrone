@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id            String   @id @default(cuid())
+  gameAddress   String   @unique // Ethereum address of the game contract
+  winner        String   // Winner's wallet address
+  timestamp     DateTime @default(now())
+  totalRounds   Int
+  players       Player[] @relation("GamePlayers")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Player {
+  id              String   @id @default(cuid())
+  address         String   @unique // Wallet address
+  games           Game[]   @relation("GamePlayers")
+  stats           PlayerStats?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PlayerStats {
+  id                String   @id @default(cuid())
+  player            Player   @relation(fields: [playerId], references: [id])
+  playerId          String   @unique
+  wins              Int      @default(0)
+  totalGames        Int      @default(0)
+  lastWinTimestamp  DateTime?
+  winRate           Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+} 
