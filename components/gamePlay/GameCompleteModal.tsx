@@ -1,30 +1,26 @@
 "use client"
 
-import { useState, useCallback, memo, useEffect, use } from "react"
+import { useState, useCallback, memo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-    Globe,
-    MapPin,
-    Flag,
-    Handshake,
-    Swords,
-    Crown,
-    Building,
-    Users,
-    ArrowRight,
     BarChart3,
+    Building,
+    Crown,
+    Flag,
+    Globe,
     Map,
     Scroll,
+    Swords,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
     DialogDescription,
     DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { useClaimReward } from "@/lib/hooks/useClaimReward"
