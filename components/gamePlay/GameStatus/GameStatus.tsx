@@ -232,7 +232,6 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                     type="win"
                     open={false}
                     onOpenChange={setShowCompleteModal}
-                    power="Great Britain"
                     year="Fall, 1908"
                     stats={winStats}
                 />

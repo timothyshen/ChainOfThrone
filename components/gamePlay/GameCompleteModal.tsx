@@ -34,14 +34,12 @@ import { getWinnerAmount } from "@/lib/hooks/ReadGameContract"
 
 // Types for our components
 type GameResultType = "win" | "loss"
-type PowerName = "Great Britain" | "France" | "Germany" | "Italy" | "Austria-Hungary" | "Russia" | "Turkey"
 
 interface DiplomacyResultModalProps {
     gameAddress: `0x${string}`
     type: GameResultType
     open: boolean
     onOpenChange: (open: boolean) => void
-    power: PowerName
     year: string
     stats?: {
         supplyCenters?: number
@@ -49,7 +47,7 @@ interface DiplomacyResultModalProps {
         alliances?: number
         betrayals?: number
         totalYears?: number
-        winnerName?: PowerName
+        winnerName?: `0x${string}`
         winnerSupplyCenters?: number
     }
 }
@@ -61,14 +59,13 @@ interface IconSectionProps {
 interface StatsSectionProps {
     gameAddress: `0x${string}`
     type: GameResultType
-    power: PowerName
     stats: {
         supplyCenters?: number
         territories?: number
         alliances?: number
         betrayals?: number
         totalYears?: number
-        winnerName?: PowerName
+        winnerName?: `0x${string}`
         winnerSupplyCenters?: number
     }
     year: string
@@ -76,8 +73,7 @@ interface StatsSectionProps {
 
 interface ActionSectionProps {
     type: GameResultType
-    onAction: () => void
-    actionTaken: boolean
+    gameAddress: `0x${string}`
 }
 
 interface FooterSectionProps {
@@ -151,7 +147,7 @@ const IconSection = memo(({ type }: IconSectionProps) => {
 IconSection.displayName = "IconSection"
 
 // Stats Section Component
-const StatsSection = memo(({ gameAddress, type, power, stats, year }: StatsSectionProps) => {
+const StatsSection = memo(({ gameAddress, type, stats, year }: StatsSectionProps) => {
 
     const [reward, setReward] = useState(0)
 
@@ -176,34 +172,11 @@ const StatsSection = memo(({ gameAddress, type, power, stats, year }: StatsSecti
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <Building className="h-5 w-5 text-amber-600 dark:text-amber-500" />
-                            <span className="text-slate-700 dark:text-slate-300">Supply Centers</span>
+                            <span className="text-slate-700 dark:text-slate-300">Castles</span>
                         </div>
-                        <span className="font-semibold text-slate-900 dark:text-white">{stats.supplyCenters || 18}/34</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{stats.supplyCenters || 5}/5</span>
                     </div>
 
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            <span className="text-slate-700 dark:text-slate-300">Territories</span>
-                        </div>
-                        <span className="font-semibold text-slate-900 dark:text-white">{stats.territories || 22}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <Handshake className="h-5 w-5 text-green-600 dark:text-green-400" />
-                            <span className="text-slate-700 dark:text-slate-300">Alliances Formed</span>
-                        </div>
-                        <span className="font-semibold text-slate-900 dark:text-white">{stats.alliances || 4}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <Scroll className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                            <span className="text-slate-700 dark:text-slate-300">Years to Victory</span>
-                        </div>
-                        <span className="font-semibold text-slate-900 dark:text-white">{stats.totalYears || 7}</span>
-                    </div>
                 </CardContent>
                 <CardFooter className="px-4 pt-2 pb-4 border-t border-amber-200 dark:border-amber-900/30">
                     <div className="flex justify-between items-center w-full">
@@ -227,86 +200,50 @@ const StatsSection = memo(({ gameAddress, type, power, stats, year }: StatsSecti
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <Building className="h-5 w-5 text-blue-500" />
-                        <span className="text-slate-700 dark:text-slate-300">Your Supply Centers</span>
+                        <span className="text-slate-700 dark:text-slate-300">Your Castles</span>
                     </div>
-                    <span className="font-semibold text-slate-900 dark:text-white">{stats.supplyCenters || 8}/34</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{stats.supplyCenters || 8}/5</span>
                 </div>
 
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-green-500" />
-                        <span className="text-slate-700 dark:text-slate-300">Alliances Formed</span>
-                    </div>
-                    <span className="font-semibold text-slate-900 dark:text-white">{stats.alliances || 3}</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Swords className="h-5 w-5 text-red-500" />
-                        <span className="text-slate-700 dark:text-slate-300">Betrayals</span>
-                    </div>
-                    <span className="font-semibold text-slate-900 dark:text-white">{stats.betrayals || 1}</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Crown className="h-5 w-5 text-amber-500" />
-                        <span className="text-slate-700 dark:text-slate-300">Victor</span>
-                    </div>
-                    <span className="font-semibold text-slate-900 dark:text-white flex items-center">
-                        {stats.winnerName || "France"}
-                        <ArrowRight className="h-3 w-3 mx-1" />
-                        {stats.winnerSupplyCenters || 18}
-                    </span>
-                </div>
             </CardContent>
-            <CardFooter className="px-4 pt-2 pb-4 border-t border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center w-full">
-                    <span className="font-medium text-slate-800 dark:text-slate-200">Final Year</span>
-                    <span className="font-bold text-lg text-slate-600 dark:text-slate-400">{year || "Fall, 1908"}</span>
-                </div>
-            </CardFooter>
         </Card>
     )
 })
 StatsSection.displayName = "StatsSection"
 
 // Action Section Component
-const ActionSection = memo(({ type, onAction, actionTaken }: ActionSectionProps) => {
-    const handleClaimReward = async () => {
-        // await claimReward(gameAddress)
+const ActionSection = memo(({ type, gameAddress }: ActionSectionProps) => {
+    const { claimReward, isConfirmed, isPending, error } = useClaimReward()
 
+    if (type !== "win") return null;
+
+    if (error) {
         toast({
-            title: "Reward Claimed",
-            description: "Your reward has been claimed successfully",
+            title: "Error",
+            description: "An error occurred while claiming your reward",
         })
     }
+    return (
+        <div>
+            <p className="text-center font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center justify-center gap-2">
+                <Scroll className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                Redeem your reward
+            </p>
 
-    if (type === "win") {
-        return (
-            <div>
-                <p className="text-center font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center justify-center gap-2">
-                    <Scroll className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                    Redeem your reward
-                </p>
-
-                <Button
-                    className={cn(
-                        "w-full py-6 text-base font-medium transition-all",
-                        actionTaken
-                            ? "bg-green-600 hover:bg-green-700"
-                            : "bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-800",
-                    )}
-                    onClick={handleClaimReward}
-                    disabled={actionTaken}
-                >
-                    Claim Reward
-                </Button>
-            </div>
-        )
-    }
-
-    return null
+            <Button
+                className={cn(
+                    "w-full py-6 text-base font-medium transition-all",
+                    isConfirmed
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-800"
+                )}
+                onClick={() => claimReward(gameAddress)}
+                disabled={isConfirmed || isPending}
+            >
+                {isPending ? "Claiming..." : isConfirmed ? "Reward Claimed" : "Claim Reward"}
+            </Button>
+        </div>
+    )
 })
 ActionSection.displayName = "ActionSection"
 
@@ -362,7 +299,6 @@ export function DiplomacyResultModal({
     type = "win",
     open = false,
     onOpenChange,
-    power = "Great Britain",
     year = "Fall, 1908",
     stats = {},
     gameAddress = "0x0000000000000000000000000000000000000000",
@@ -375,7 +311,6 @@ export function DiplomacyResultModal({
 
     const handleAction = useCallback(() => {
         setActionTaken(true)
-        setShowAnalysis(true)
     }, [])
 
     const handleClose = useCallback(() => {
@@ -410,7 +345,7 @@ export function DiplomacyResultModal({
                             </DialogTitle>
 
                             <DialogDescription className="text-center pt-1">
-                                <span className="h-10 w-10 text-blue-600 dark:text-blue-400 text-primary">{power}</span>
+                                <span className="h-10 w-10 text-blue-600 dark:text-blue-400 text-primary">Player 1</span>
                                 {type === "win" ? " has achieved dominance over Europe" : " has been outmaneuvered"}
                             </DialogDescription>
                         </DialogHeader>
@@ -441,7 +376,7 @@ export function DiplomacyResultModal({
                                 transition={{ delay: 0.3 }}
                                 className="mb-6"
                             >
-                                <StatsSection gameAddress={gameAddress} type={type} power={power} stats={stats} year={year} />
+                                <StatsSection gameAddress={gameAddress} type={type} stats={stats} year={year} />
                             </motion.div>
 
                             {/* Action Section */}
@@ -451,7 +386,7 @@ export function DiplomacyResultModal({
                                 transition={{ delay: 0.4 }}
                                 className="mb-6"
                             >
-                                <ActionSection type={type} onAction={handleAction} actionTaken={actionTaken} />
+                                <ActionSection type={type} gameAddress={gameAddress} />
                             </motion.div>
                         </div>
 
