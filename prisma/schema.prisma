@@ -3,34 +3,36 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Game {
-  id            String   @id @default(cuid())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   gameAddress   String   @unique // Ethereum address of the game contract
   winner        String   // Winner's wallet address
   timestamp     DateTime @default(now())
   totalRounds   Int
-  players       Player[] @relation("GamePlayers")
+  players       Player[] @relation(fields: [playerIds], references: [id])
+  playerIds     String[] @db.ObjectId
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
 model Player {
-  id              String   @id @default(cuid())
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
   address         String   @unique // Wallet address
-  games           Game[]   @relation("GamePlayers")
+  games           Game[]   @relation(fields: [gameIds], references: [id])
+  gameIds         String[] @db.ObjectId
   stats           PlayerStats?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model PlayerStats {
-  id                String   @id @default(cuid())
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
   player            Player   @relation(fields: [playerId], references: [id])
-  playerId          String   @unique
+  playerId          String   @unique @db.ObjectId
   wins              Int      @default(0)
   totalGames        Int      @default(0)
   lastWinTimestamp  DateTime?

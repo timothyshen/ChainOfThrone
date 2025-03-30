@@ -24,59 +24,36 @@ export async function addGameHistory(game: GameHistory) {
         winner: game.winner,
         timestamp: new Date(game.timestamp),
         totalRounds: game.totalRounds,
-        players: {
-          connect: players.map((p) => ({ id: p.id })),
-        },
+        playerIds: players.map((p) => p.id),
       },
     });
 
     // Update player stats
     await Promise.all(
       players.map(async (player) => {
-        const stats = await prisma.playerStats.upsert({
+        const currentStats = await prisma.playerStats.findUnique({
+          where: { playerId: player.id },
+        });
+
+        const isWinner = player.address === game.winner;
+        const newWins = (currentStats?.wins || 0) + (isWinner ? 1 : 0);
+        const newTotalGames = (currentStats?.totalGames || 0) + 1;
+        const newWinRate = (newWins / newTotalGames) * 100;
+
+        await prisma.playerStats.upsert({
           where: { playerId: player.id },
           update: {
-            totalGames: { increment: 1 },
-            wins: { increment: player.address === game.winner ? 1 : 0 },
-            lastWinTimestamp:
-              player.address === game.winner
-                ? new Date(game.timestamp)
-                : undefined,
-            winRate: {
-              set:
-                player.address === game.winner
-                  ? (((
-                      await prisma.playerStats.findUnique({
-                        where: { playerId: player.id },
-                      })
-                    )?.wins || 0 + 1) /
-                      ((
-                        await prisma.playerStats.findUnique({
-                          where: { playerId: player.id },
-                        })
-                      )?.totalGames || 0 + 1)) *
-                    100
-                  : (
-                      await prisma.playerStats.findUnique({
-                        where: { playerId: player.id },
-                      })
-                    )?.wins ||
-                    (0 /
-                      ((
-                        await prisma.playerStats.findUnique({
-                          where: { playerId: player.id },
-                        })
-                      )?.totalGames || 0 + 1)) *
-                      100,
-            },
+            totalGames: newTotalGames,
+            wins: newWins,
+            lastWinTimestamp: isWinner ? new Date(game.timestamp) : undefined,
+            winRate: newWinRate,
           },
           create: {
             playerId: player.id,
             totalGames: 1,
-            wins: player.address === game.winner ? 1 : 0,
-            lastWinTimestamp:
-              player.address === game.winner ? new Date(game.timestamp) : null,
-            winRate: player.address === game.winner ? 100 : 0,
+            wins: isWinner ? 1 : 0,
+            lastWinTimestamp: isWinner ? new Date(game.timestamp) : null,
+            winRate: isWinner ? 100 : 0,
           },
         });
       })
