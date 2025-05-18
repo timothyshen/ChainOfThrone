@@ -1,12 +1,15 @@
 {
-  "name": "apps",
+  "name": "chain-of-throne",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write \"**/*.{js,ts,tsx,json,md}\"",
+    "clean": "rm -rf .next node_modules",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@dynamic-labs/ethereum": "^3.3.0",

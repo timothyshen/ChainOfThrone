@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import DynamicProvider from "@/lib/providers/DynamicProvider";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Header, Footer } from "@/components/layout";
 import { Toaster } from "@/components/ui/toaster"
 
 
