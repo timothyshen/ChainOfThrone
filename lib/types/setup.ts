@@ -12,12 +12,6 @@ export type Game = {
   status: number;
 };
 
-export type PlayerRank = {
-  id: string;
-  walletAddress: string;
-  wins: number;
-};
-
 export type MakeMoveArgs = {
   player: string;
   fromX: number;

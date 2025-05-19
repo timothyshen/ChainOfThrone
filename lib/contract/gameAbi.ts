@@ -3,7 +3,7 @@ export const gameAbi = [
     inputs: [
       {
         internalType: "address",
-        name: "_usdcAddress",
+        name: "_vault",
         type: "address",
       },
     ],
@@ -145,6 +145,25 @@ export const gameAbi = [
     inputs: [
       {
         indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "RewardClaimed",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: "uint256",
         name: "roundNumber",
         type: "uint256",
@@ -161,19 +180,6 @@ export const gameAbi = [
         internalType: "uint8",
         name: "",
         type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "MULTISIG",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
       },
     ],
     stateMutability: "view",
@@ -222,7 +228,7 @@ export const gameAbi = [
     inputs: [],
     name: "addPlayer",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -247,13 +253,6 @@ export const gameAbi = [
   {
     inputs: [],
     name: "claimReward",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "executeRound",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -579,44 +578,6 @@ export const gameAbi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "hasClaimed",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "hasStaked",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint8",
         name: "",
         type: "uint8",
@@ -810,13 +771,6 @@ export const gameAbi = [
   },
   {
     inputs: [],
-    name: "stake",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "totalPlayers",
     outputs: [
       {
@@ -830,10 +784,10 @@ export const gameAbi = [
   },
   {
     inputs: [],
-    name: "usdc",
+    name: "vault",
     outputs: [
       {
-        internalType: "contract IUSDC",
+        internalType: "address",
         name: "",
         type: "address",
       },

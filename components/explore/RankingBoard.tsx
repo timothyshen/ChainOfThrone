@@ -5,7 +5,25 @@ import { Trophy } from "lucide-react"
 import { useGameHistory } from "@/lib/hooks/useGameHistory"
 
 function RankingBoard() {
-    const { playerRanks } = useGameHistory()
+    // const { playerRanks } = useGameHistory()
+
+    const playerRanks = [
+        {
+            address: "0x1234567890123456789012345678901234567890",
+            wins: 10,
+            winRate: 90
+        },
+        {
+            address: "0x1234567890123456789012345678901234567890",
+            wins: 9,
+            winRate: 90
+        },
+        {
+            address: "0x1234567890123456789012345678901234567890",
+            wins: 15,
+            winRate: 70
+        },
+    ]
 
     const truncateAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -31,11 +49,11 @@ function RankingBoard() {
                     </TableHeader>
                     <TableBody>
                         {playerRanks.slice(0, 10).map((player, i) => (
-                            <TableRow key={player.address} className="border-gray-800">
+                            <TableRow key={i} className="border-gray-800">
                                 <TableCell className="font-bold">{i + 1}</TableCell>
                                 <TableCell className="font-mono text-gray-300">{truncateAddress(player.address)}</TableCell>
                                 <TableCell className="text-right">{player.wins}</TableCell>
-                                <TableCell className="text-right">{player.winRate.toFixed(1)}%</TableCell>
+                                <TableCell className="text-right">{player.winRate}%</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

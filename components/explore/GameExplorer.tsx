@@ -31,7 +31,7 @@ export default function GameExplorer() {
     const { toast } = useToast()
 
     useWatchContractEvent({
-        address: MONAD_GAME_FACTORY_ADDRESS,
+        address: MONAD_GAME_FACTORY_ADDRESS as `0x${string}`,
         abi: gameFactoryAbi,
         eventName: "GameCreated",
         onLogs: () => {

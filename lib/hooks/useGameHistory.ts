@@ -36,7 +36,7 @@ export function useGameHistory() {
         getTopPlayers(),
       ]);
       setGameHistory(history);
-      setPlayerRanks(ranks);
+      // setPlayerRanks(ranks);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load game data");
     } finally {

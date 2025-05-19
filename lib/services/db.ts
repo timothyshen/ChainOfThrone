@@ -24,7 +24,9 @@ export async function addGameHistory(game: GameHistory) {
         winner: game.winner,
         timestamp: new Date(game.timestamp),
         totalRounds: game.totalRounds,
-        playerIds: players.map((p) => p.id),
+        players: {
+          connect: players.map((p) => ({ id: p.id })),
+        },
       },
     });
 

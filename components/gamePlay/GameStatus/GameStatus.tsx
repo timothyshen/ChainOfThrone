@@ -133,6 +133,15 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
         }
     })
 
+    useWatchContractEvent({
+        address: gameAddress as `0x${string}` | undefined,
+        abi: gameAbi,
+        eventName: "MoveSubmitted",
+        onLogs: () => {
+            fetchGameData();
+        }
+    })
+
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;
 
