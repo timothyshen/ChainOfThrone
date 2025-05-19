@@ -30,7 +30,7 @@ export const useGameCreate = (): UseGameCreateReturn => {
   const createGame = async () => {
     if (!isConnected) throw new Error("Wallet not connected");
     const result = await writeContract({
-      address: factoryAddress,
+      address: MONAD_GAME_FACTORY_ADDRESS,
       abi: gameFactoryAbi,
       functionName: "createGame",
     });

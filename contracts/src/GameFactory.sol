@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+
+import "./Game.sol";
 import {IGame} from "./interfaces/IGame.sol";
-import {Game} from "./Game.sol";
 
 contract GameFactory {
     event GameCreated(address indexed gameAddress, address indexed creator);

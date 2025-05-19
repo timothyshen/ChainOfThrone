@@ -19,7 +19,8 @@ import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 
 // Types
 import { Game } from "@/lib/types/setup"
-
+  
+  
 export default function GameExplorer() {
     const [selectedGame, setSelectedGame] = useState<Game | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
@@ -87,6 +88,7 @@ export default function GameExplorer() {
                 />
 
                 {/* Games Table */}
+
                 <GameTable
                     games={games}
                     searchTerm={searchTerm}

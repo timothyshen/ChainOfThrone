@@ -808,4 +808,4 @@ export const gameFactoryAbi = [
       "stateMutability": "view",
       "type": "function"
     }
-  ],
+  ]

@@ -18,11 +18,10 @@ import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 
 
 const config = createConfig({
-  chains: [monadTestnet, sepolia],
+  chains: [monadTestnet],
   multiInjectedProviderDiscovery: false,
   transports: {
     [monadTestnet.id]: http(),
-    [sepolia.id]: http(),
   },
 });
 
