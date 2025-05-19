@@ -137,6 +137,7 @@ contract Game {
                 (totalPlayers == 0 || idToAddress[0] != msg.sender),
             "Address is already registered as a player in this game"
         );
+        //@todo: need to come back during v2
         // require(msg.value == protocolFee + gameDeposit, "Must stake 1 mon");
 
         // (bool success, ) = vault.call{value: protocolFee}("");

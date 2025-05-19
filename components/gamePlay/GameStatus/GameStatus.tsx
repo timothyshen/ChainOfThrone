@@ -11,9 +11,10 @@ import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameSt
 import { getGameStatus, totalPlayers, getWinner } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
-import { useGameStateUpdates } from "@/lib/hooks/useGameStateUpdates";
 import { DiplomacyResultModal } from "../GameCompleteModal";
 import { Spinner } from "@/components/ui/spinner";
+import { useWatchContractEvent } from "wagmi"
+import { gameAbi } from '@/lib/contract/gameAbi'
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -111,6 +112,26 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
         }
 
     }, [fetchGameData, isConfirmed]);
+
+
+
+    useWatchContractEvent({
+        address: gameAddress as `0x${string}` | undefined,
+        abi: gameAbi,
+        eventName: "PlayerAdded",
+        onLogs: () => {
+            fetchGameData();
+        }
+    })
+
+    useWatchContractEvent({
+        address: gameAddress as `0x${string}` | undefined,
+        abi: gameAbi,
+        eventName: "GameStarted",
+        onLogs: () => {
+            fetchGameData();
+        }
+    })
 
     const handlePlayerJoin = async () => {
         if (!gameAddress) return;
