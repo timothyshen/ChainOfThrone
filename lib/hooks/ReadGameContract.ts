@@ -100,3 +100,21 @@ export const getPlayerState = async (
   const playerState = await getRoundSubmitted(address, playerId as number);
   return playerState;
 };
+
+export const getWinner = async (address: `0x${string}`) => {
+  const winnerAddress = await contractClient.readContract({
+    address: address,
+    abi: gameAbi,
+    functionName: "getWinner",
+  });
+  return winnerAddress;
+};
+
+export const getWinnerAmount = async (address: `0x${string}`) => {
+  const result = await contractClient.readContract({
+    address: address,
+    abi: gameAbi,
+    functionName: "getWinnerAmount",
+  });
+  return result;
+};

@@ -1,9 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import DynamicProvider from "@/lib/providers/DynamicProvider";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Header, Footer } from "@/components/layout";
 import { Toaster } from "@/components/ui/toaster"
 
 
@@ -23,6 +22,17 @@ export const metadata: Metadata = {
   description: "Where Strategy Meets Blockchain",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#020817" }
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,16 +41,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-
         <DynamicProvider>
           <Header />
-          {children}
+          <main className="flex-grow">{children}</main>
           <Footer />
           <Toaster />
         </DynamicProvider>
       </body>
-    </html >
+    </html>
   );
 }

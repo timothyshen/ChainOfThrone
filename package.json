@@ -1,18 +1,22 @@
 {
-  "name": "apps",
+  "name": "chain-of-throne",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write \"**/*.{js,ts,tsx,json,md}\"",
+    "clean": "rm -rf .next node_modules",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@dynamic-labs/ethereum": "^3.3.0",
     "@dynamic-labs/sdk-react-core": "^3.3.0",
     "@dynamic-labs/wagmi-connector": "^3.3.0",
     "@lit-protocol/lit-node-client": "^6.11.2",
+    "@prisma/client": "^6.5.0",
     "@pushprotocol/restapi": "^1.7.29",
     "@pushprotocol/socket": "^0.5.3",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -49,9 +53,10 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.15",
+    "eslint": "^9.23.0",
+    "eslint-config-next": "15.0.0",
     "postcss": "^8",
+    "prisma": "^6.5.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

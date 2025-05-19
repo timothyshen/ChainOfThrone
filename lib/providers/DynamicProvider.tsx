@@ -2,6 +2,7 @@
 
 import {
   DynamicContextProvider,
+  mergeNetworks,
 } from "@dynamic-labs/sdk-react-core";
 import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector";
 import {
@@ -10,7 +11,7 @@ import {
 } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
-import { sepolia, monadTestnet } from 'viem/chains';
+import { sepolia, monadTestnet, localhost } from 'viem/chains';
 
 
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
@@ -34,7 +35,6 @@ export default function DynamicProvider({
   return (
     <DynamicContextProvider
       settings={{
-        // Find your environment id at https://app.dynamic.xyz/dashboard/developer
         environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID as string,
         walletConnectors: [EthereumWalletConnectors],
       }}

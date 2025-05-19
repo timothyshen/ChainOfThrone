@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+
 import "./Game.sol";
 import {IGame} from "./interfaces/IGame.sol";
 
@@ -25,7 +26,7 @@ contract GameFactory {
     }
 
     function createGame() external returns (address) {
-        Game game = new Game();
+        Game game = new Game(msg.sender);
         address gameAddress = address(game);
 
         games.push(gameAddress);

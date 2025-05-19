@@ -8,14 +8,33 @@ Available on Sepolia Testnet
 
 Chain of Thrones is an onchain strategy pvp wargame that immerses players in a simplified geopolitics simulation. Designed for 2-3 players, each participant stakes 10 USDC as their starting armies and vies to control 3 of 5 key castles on a 3x3 grid. Players move armies, negotiate strategic loans, and resolve conflicts using a mix of deterministic logic and occasional randomness, simulating the unpredictability of real-world geopolitics. Fully autonomous AI can drive gameplay, making Chain of Thrones an engaging and tactical challenge for both human and automated competitors.
 
-## How to play
+## Project Structure
+
+```
+chain-of-throne/
+├── app/                 # Next.js app directory
+├── components/          # React components
+│   ├── layout/          # Layout components
+│   ├── ui/              # UI components
+│   └── ...
+├── lib/                 # Utility functions and hooks
+│   ├── utils/           # General utilities
+│   ├── hooks/           # React hooks
+│   ├── providers/       # Context providers
+│   └── ...
+├── contracts/           # Smart contracts
+├── public/              # Static assets
+└── ...
+```
+
+## How to Play
 
 1. Create a game
 2. Add players
 3. Make moves
 4. Win the game
 
-## How to create a game
+## How to Create a Game
 
 1. Go to the Explorer page
 2. Click on the "Create Game" button
@@ -52,14 +71,37 @@ For more details, please refer to the "How to Play" Button on the Home Page.
 - Reward pool design
 - Ranking system
 
-## How to contribute
+## Development
+
+### Prerequisites
+
+- Node.js 18 or higher
+- pnpm 9 or higher
+
+### Setup
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Run linter
+pnpm lint
+
+# Type checking
+pnpm typecheck
+```
+
+## How to Contribute
 
 - Raise an issue
 - Submit a PR
 
-## How to run
+## License
 
-We suggest using [pnpm](https://pnpm.io/installation) to install the dependencies.
-
-1. `pnpm install`
-2. `pnpm run dev`
+MIT

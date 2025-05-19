@@ -1,5 +1,16 @@
 export const gameAbi = [
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_vault",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
     anonymous: false,
     inputs: [
       {
@@ -16,6 +27,55 @@ export const gameAbi = [
     anonymous: false,
     inputs: [],
     name: "GameStarted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "fromX",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "fromY",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "toX",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint8",
+        name: "toY",
+        type: "uint8",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "units",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "roundNumber",
+        type: "uint256",
+      },
+    ],
+    name: "MoveRecorded",
     type: "event",
   },
   {
@@ -85,6 +145,25 @@ export const gameAbi = [
     inputs: [
       {
         indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "RewardClaimed",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: "uint256",
         name: "roundNumber",
         type: "uint256",
@@ -108,9 +187,48 @@ export const gameAbi = [
   },
   {
     inputs: [],
+    name: "PROTOCOL_PERCENTAGE",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "STAKE_AMOUNT",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "WINNER_PERCENTAGE",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "addPlayer",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -133,59 +251,8 @@ export const gameAbi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "player",
-            type: "address",
-          },
-          {
-            internalType: "uint8",
-            name: "fromX",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "fromY",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "toX",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "toY",
-            type: "uint8",
-          },
-          {
-            internalType: "uint256",
-            name: "units",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct Game.Move",
-        name: "_move",
-        type: "tuple",
-      },
-    ],
-    name: "checkValidMove",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [],
-    name: "executeRound",
+    name: "claimReward",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -264,6 +331,222 @@ export const gameAbi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "getMoveHistory",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "player",
+            type: "address",
+          },
+          {
+            internalType: "uint8",
+            name: "fromX",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "fromY",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "toX",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "toY",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "units",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "roundNumber",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct Game.MoveHistory[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "getPlayerMoves",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "player",
+            type: "address",
+          },
+          {
+            internalType: "uint8",
+            name: "fromX",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "fromY",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "toX",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "toY",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "units",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "roundNumber",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct Game.MoveHistory[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getProtocolFee",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "round",
+        type: "uint256",
+      },
+    ],
+    name: "getRoundMoves",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "player",
+            type: "address",
+          },
+          {
+            internalType: "uint8",
+            name: "fromX",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "fromY",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "toX",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "toY",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "units",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "roundNumber",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct Game.MoveHistory[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getWinner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getWinnerAmount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -317,56 +600,6 @@ export const gameAbi = [
         components: [
           {
             internalType: "address",
-            name: "lender",
-            type: "address",
-          },
-          {
-            internalType: "address",
-            name: "borrower",
-            type: "address",
-          },
-          {
-            internalType: "uint8",
-            name: "fromX",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "fromY",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "toX",
-            type: "uint8",
-          },
-          {
-            internalType: "uint8",
-            name: "toY",
-            type: "uint8",
-          },
-          {
-            internalType: "uint256",
-            name: "units",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct Game.Loan",
-        name: "_loan",
-        type: "tuple",
-      },
-    ],
-    name: "makeLoan",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
             name: "player",
             type: "address",
           },
@@ -404,6 +637,60 @@ export const gameAbi = [
     name: "makeMove",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "moveHistory",
+    outputs: [
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+      {
+        internalType: "uint8",
+        name: "fromX",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "fromY",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "toX",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "toY",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "units",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "roundNumber",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -490,6 +777,19 @@ export const gameAbi = [
         internalType: "uint8",
         name: "",
         type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "vault",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",

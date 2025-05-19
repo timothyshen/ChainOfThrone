@@ -4,6 +4,7 @@ import {
   useAccount,
 } from "wagmi";
 import { gameAbi } from "@/lib/contract/gameAbi";
+import { parseEther } from "viem";
 
 type UseAddPlayerReturn = {
   addPlayer: (address: `0x${string}`) => `0x${string}` | undefined;
@@ -26,6 +27,7 @@ export const useAddPlayer = (): UseAddPlayerReturn => {
       abi: gameAbi,
       functionName: "addPlayer",
       args: [],
+      value: parseEther("0.1"),
     });
 
     return hash;

@@ -21,6 +21,7 @@ import { gameAbi } from '@/lib/contract/gameAbi'
 import { PlayerState } from '@/lib/types/gameStatus'
 import { GameStatusEnum } from '@/lib/types/gameStatus'
 import { Spinner } from '../ui/spinner'
+import { cn } from "@/lib/utils"
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -54,6 +55,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [isGridLoading, setIsGridLoading] = useState(true)
     const [isStatusLoading, setIsStatusLoading] = useState(true)
     const [moveAction, setMoveAction] = useState<Territory | null>(null)
+    const [activeTab, setActiveTab] = useState<string>("map")
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove, error: makeMoveError, isConfirmed: isMoveConfirmed, isConfirming: isMoveConfirming } = useMakeMove()
@@ -205,6 +207,11 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         setSelectedTerritory(territory);
         setMoveStrength(0);
         setCurrentUnits(Number(territory.units[Number(playerId)]));
+
+        // On mobile, switch to info tab when territory is selected
+        if (window.innerWidth < 768) {
+            setActiveTab("info");
+        }
     }
 
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
@@ -298,99 +305,132 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         setMoveStrength(0);
     }
 
-    return (
-        <div className="flex flex-col min-h-screen mt-12">
-            <div className="flex flex-1 h-[calc(100vh-2rem)]">
-                <div className="flex-1 p-4 overflow-auto">
-                    <Tabs defaultValue="map" className="w-full h-full flex flex-col">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="map">Game Map</TabsTrigger>
-                            {/* <TabsTrigger value="chat">Diplomacy Chat</TabsTrigger> */}
-                        </TabsList>
-                        <TabsContent value="map" className="flex-1">
-                            <GameMap
-                                currentPlayer={address ?? ''}
-                                territories={territories}
-                                onTerritoryClick={handleTerritoryClick}
-                                isLoading={isGridLoading}
-                            />
-                        </TabsContent>
-                        <TabsContent value="chat" className="flex-1">
-                            <ChatSystem
-                                players={players}
-                                currentPlayerId={address ?? ''}
-                                onSendMessage={handleSendMessage}
-                            />
-                        </TabsContent>
-                    </Tabs>
-                </div>
-                <div className="w-1/3 p-4 space-y-4 overflow-auto">
-                    <GameStatus
-                        isLoading={isStatusLoading}
-                        currentPlayer={address ?? ''}
-                        gameStatus={gameStatus}
-                        totalPlayer={totalPlayer}
-                        maxPlayer={maxPlayer}
-                        playerAddresses={playerAddresses}
-                        setGameStatus={setGameStatus}
-                        setTotalPlayer={setTotalPlayer}
-                        fetchGameData={fetchGameData} />
+    // Game Status Panel
+    const GameStatusPanel = () => (
+        <div className="w-full">
+            <GameStatus
+                isLoading={isStatusLoading}
+                currentPlayer={address ?? ''}
+                gameStatus={gameStatus}
+                totalPlayer={totalPlayer}
+                maxPlayer={maxPlayer}
+                playerAddresses={playerAddresses}
+                setGameStatus={setGameStatus}
+                setTotalPlayer={setTotalPlayer}
+                fetchGameData={fetchGameData} />
+        </div>
+    );
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Territory Information</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {selectedTerritory ? (
-                                <div>
-                                    <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
-                                    <p className="mb-2">Type: {selectedTerritory.isCastle ? 'castle' : 'land'}</p>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="moveStrength">Units to Move:</Label>
-                                            <div className="flex gap-2 mt-1">
-                                                <Input
-                                                    id="moveStrength"
-                                                    type="number"
-                                                    min={1}
-                                                    value={moveStrength ?? ''}
-                                                    max={currentUnits}
-                                                    onChange={(e) => setMoveStrength(Number(e.target.value))}
-                                                    className="w-full"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <Label>Select Destination:</Label>
-                                            <p className="text-sm text-muted-foreground mb-2">
-                                                Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
-                                            </p>
-                                            <div className="grid gap-2 mt-1">
-
-                                                {getAdjacentTerritories(selectedTerritory).map(territory => (
-                                                    <Button
-                                                        key={`${territory.x}-${territory.y}`}
-                                                        className="w-full"
-                                                        onClick={() => handleAction(territory)}
-                                                        disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
-
-                                                    >
-                                                        {isMoveConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
-                                                        {isMoveConfirming && <span className="animate-pulse">...</span>}
-                                                    </Button>
-                                                ))}
-                                                {isMoveConfirming && <Spinner className="animate-pulse" />}
-                                                {isMoveConfirmed && <Button>You have made the move to {moveAction?.x}, {moveAction?.y}</Button>}
-                                            </div>
-                                        </div>
-                                    </div>
+    // Territory Info Panel
+    const TerritoryInfoPanel = () => (
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle className="text-lg md:text-xl">Territory Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {selectedTerritory ? (
+                    <div>
+                        <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
+                        <p className="mb-2">Type: {selectedTerritory.isCastle ? 'castle' : 'land'}</p>
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="moveStrength">Units to Move:</Label>
+                                <div className="flex gap-2 mt-1">
+                                    <Input
+                                        id="moveStrength"
+                                        type="number"
+                                        min={1}
+                                        value={moveStrength ?? ''}
+                                        max={currentUnits}
+                                        onChange={(e) => setMoveStrength(Number(e.target.value))}
+                                        className="w-full"
+                                    />
                                 </div>
-                            ) : (
-                                <p>Select a territory to view information and perform actions.</p>
-                            )}
-                        </CardContent>
-                    </Card>
+                            </div>
+
+                            <div>
+                                <Label>Select Destination:</Label>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                    Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
+                                </p>
+                                <div className="grid gap-2 mt-1">
+                                    {getAdjacentTerritories(selectedTerritory).map(territory => (
+                                        <Button
+                                            key={`${territory.x}-${territory.y}`}
+                                            className="w-full text-sm"
+                                            onClick={() => handleAction(territory)}
+                                            disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
+                                        >
+                                            {isMoveConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
+                                            {isMoveConfirming && <span className="animate-pulse">...</span>}
+                                        </Button>
+                                    ))}
+                                    {isMoveConfirming && <Spinner className="animate-pulse" />}
+                                    {isMoveConfirmed && <Button>You have made the move to {moveAction?.x}, {moveAction?.y}</Button>}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <p>Select a territory to view information and perform actions.</p>
+                )}
+            </CardContent>
+        </Card>
+    );
+
+    return (
+        <div className="flex flex-col min-h-screen md:mt-12 mt-4">
+            {/* Mobile tab navigation */}
+            <div className="md:hidden mb-4 px-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="map">
+                            Map
+                        </TabsTrigger>
+                        <TabsTrigger value="status">
+                            Status
+                        </TabsTrigger>
+                        <TabsTrigger value="info">
+                            Action
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-4rem)]">
+                {/* Map section */}
+                <div className={cn(
+                    "p-4 overflow-auto md:flex-1",
+                    activeTab === "map" ? "block" : "hidden md:block"
+                )}>
+                    <GameMap
+                        currentPlayer={address ?? ''}
+                        territories={territories}
+                        onTerritoryClick={handleTerritoryClick}
+                        isLoading={isGridLoading}
+                    />
+                </div>
+
+                {/* Mobile: Territory Info Tab (conditionally shown based on active tab) */}
+                <div className={cn(
+                    "p-4 space-y-4 overflow-auto",
+                    activeTab === "info" ? "block md:hidden" : "hidden"
+                )}>
+                    <TerritoryInfoPanel />
+                </div>
+
+                {/* Mobile: Status Tab (conditionally shown based on active tab) */}
+                <div className={cn(
+                    "p-4 space-y-4 overflow-auto",
+                    activeTab === "status" ? "block md:hidden" : "hidden"
+                )}>
+                    <GameStatusPanel />
+                </div>
+
+                {/* Desktop: Side panel (always visible on desktop) */}
+                <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto">
+                    <GameStatusPanel />
+                    <TerritoryInfoPanel />
                 </div>
             </div>
         </div>

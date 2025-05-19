@@ -12,12 +12,6 @@ export type Game = {
   status: number;
 };
 
-export type PlayerRank = {
-  id: string;
-  walletAddress: string;
-  wins: number;
-};
-
 export type MakeMoveArgs = {
   player: string;
   fromX: number;
@@ -26,3 +20,19 @@ export type MakeMoveArgs = {
   toY: number;
   units: number;
 };
+
+export interface GameHistory {
+  gameAddress: `0x${string}`;
+  winner: `0x${string}`;
+  timestamp: number;
+  totalRounds: number;
+  players: `0x${string}`[];
+}
+
+export interface PlayerRank {
+  address: `0x${string}`;
+  wins: number;
+  totalGames: number;
+  lastWinTimestamp: number;
+  winRate: number;
+}
