@@ -5,9 +5,15 @@ import {
 } from "@/lib/constants/contracts";
 import { gameFactoryAbi } from "@/lib/contract/gameFactoryAbi";
 
+if (MONAD_GAME_FACTORY_ADDRESS === undefined) {
+  throw new Error("MONAD_GAME_FACTORY_ADDRESS is not defined");
+}
+
+const factoryAddress = MONAD_GAME_FACTORY_ADDRESS as `0x${string}`;
+
 export const getGameList = async () => {
   const result = await contractClient.readContract({
-    address: MONAD_GAME_FACTORY_ADDRESS,
+    address: factoryAddress,
     abi: gameFactoryAbi,
     functionName: "games",
   });
@@ -16,7 +22,7 @@ export const getGameList = async () => {
 
 export const getGamesInfo = async () => {
   const result = await contractClient.readContract({
-    address: MONAD_GAME_FACTORY_ADDRESS,
+    address: factoryAddress,
     abi: gameFactoryAbi,
     functionName: "getGamesInfo",
   });
@@ -26,7 +32,7 @@ export const getGamesInfo = async () => {
 
 export const getTotalGames = async () => {
   const result = await contractClient.readContract({
-    address: MONAD_GAME_FACTORY_ADDRESS,
+    address: factoryAddress,
     abi: gameFactoryAbi,
     functionName: "getGamesCount",
   });

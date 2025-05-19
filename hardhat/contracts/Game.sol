@@ -137,10 +137,10 @@ contract Game {
                 (totalPlayers == 0 || idToAddress[0] != msg.sender),
             "Address is already registered as a player in this game"
         );
-        require(msg.value == protocolFee + gameDeposit, "Must stake 1 mon");
+        // require(msg.value == protocolFee + gameDeposit, "Must stake 1 mon");
 
-        (bool success, ) = vault.call{value: protocolFee}("");
-        require(success, "Failed to send protocol fee");
+        // (bool success, ) = vault.call{value: protocolFee}("");
+        // require(success, "Failed to send protocol fee");
 
         uint8 playerId = totalPlayers;
         idToAddress[playerId] = msg.sender;

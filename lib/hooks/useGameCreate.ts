@@ -17,6 +17,12 @@ type UseGameCreateReturn = {
   isConfirmed: boolean;
 };
 
+if (MONAD_GAME_FACTORY_ADDRESS === undefined) {
+  throw new Error("MONAD_GAME_FACTORY_ADDRESS is not defined");
+}
+
+const factoryAddress = MONAD_GAME_FACTORY_ADDRESS as `0x${string}`;
+
 export const useGameCreate = (): UseGameCreateReturn => {
   const { isConnected } = useAccount();
   const { data: hash, error, isPending, writeContract } = useWriteContract();
@@ -24,7 +30,7 @@ export const useGameCreate = (): UseGameCreateReturn => {
   const createGame = async () => {
     if (!isConnected) throw new Error("Wallet not connected");
     const result = await writeContract({
-      address: MONAD_GAME_FACTORY_ADDRESS,
+      address: factoryAddress,
       abi: gameFactoryAbi,
       functionName: "createGame",
     });
