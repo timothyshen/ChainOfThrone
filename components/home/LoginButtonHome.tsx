@@ -1,13 +1,14 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { DynamicWidget, useDynamicContext } from "@dynamic-labs/sdk-react-core"
-import { useAccount } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 import Link from "next/link";
+import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
 
 export default function LoginButtonHome() {
     const { isConnected } = useAccount();
-    const { setShowAuthFlow } = useDynamicContext();
+    const { connect } = useConnect();
+
     return (
         <>
             {
@@ -21,7 +22,7 @@ export default function LoginButtonHome() {
                     <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => setShowAuthFlow(true)}
+                        onClick={() => connect({ connector: farcasterFrame() })}
                     >
                         Get Started
                     </Button>
