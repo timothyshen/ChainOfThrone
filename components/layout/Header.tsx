@@ -4,9 +4,11 @@ import LoginButton from "@/components/home/LoginButton"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
+import { useFarcasterActions } from "@/lib/hooks/useFarcasterActions"
 
 function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const { openUrl } = useFarcasterActions();
 
     return (
         <header className={cn("bg-primary text-primary-foreground py-4")}>
@@ -20,7 +22,14 @@ function Header() {
                         <ul className={cn("flex space-x-4")}>
                             <li><Link href="/explore" className={cn("hover:underline")}>Explore</Link></li>
                             <li><Link href="/about" className={cn("hover:underline")}>About</Link></li>
-                            <li><Link href="https://github.com/timothyshen/ChainOfThrone" className={cn("hover:underline")}>Contact</Link></li>
+                            <li>
+                                <button
+                                    onClick={() => openUrl("https://github.com/timothyshen/ChainOfThrone")}
+                                    className={cn("hover:underline")}
+                                >
+                                    Contact
+                                </button>
+                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -52,7 +61,12 @@ function Header() {
                         <nav className="flex flex-col space-y-4">
                             <Link href="/explore" className="hover:underline">Explore</Link>
                             <Link href="/about" className="hover:underline">About</Link>
-                            <Link href="https://github.com/timothyshen/ChainOfThrone" className="hover:underline">Contact</Link>
+                            <button
+                                onClick={() => openUrl("https://github.com/timothyshen/ChainOfThrone")}
+                                className="hover:underline text-left"
+                            >
+                                Contact
+                            </button>
                             <div className="pt-2">
                                 <LoginButton />
                             </div>

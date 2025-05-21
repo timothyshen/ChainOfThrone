@@ -5,3 +5,7 @@ export const GAME_FACTORY_ADDRESS =
 export const MONAD_GAME_FACTORY_ADDRESS =
   process.env.NEXT_PUBLIC_MONAD_CONTRACT;
 
+export const APP_URL = process.env.NEXT_PUBLIC_URL!;
+if (!APP_URL) {
+  throw new Error("NEXT_PUBLIC_URL is not set");
+}

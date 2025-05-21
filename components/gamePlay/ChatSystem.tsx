@@ -5,7 +5,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
-import { PushAPI, CONSTANTS } from '@pushprotocol/restapi';
 
 
 type Player = {

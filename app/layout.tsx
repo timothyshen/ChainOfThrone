@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import DynamicProvider from "@/lib/providers/DynamicProvider";
+import DynamicProvider from "@/lib/providers/FarcasterWalletProvider";
 import { Header, Footer } from "@/components/layout";
 import { Toaster } from "@/components/ui/toaster"
+import { FrameProvider } from "@/lib/providers/FarcasterProvider";
 
 
 const geistSans = localFont({
@@ -44,10 +45,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <DynamicProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <Toaster />
+          <FrameProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+            <Toaster />
+          </FrameProvider>
         </DynamicProvider>
       </body>
     </html>

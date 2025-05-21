@@ -1,6 +1,43 @@
+// Next.js imports
+import { Metadata } from "next";
+
+// Component imports
 import HowToPlayButton from "@/components/home/HowToPlayButton"
 import LoginButtonHome from "@/components/home/LoginButtonHome";
+
+// Utility imports
 import { cn } from "@/lib/utils";
+import { APP_URL } from "@/lib/constants/contracts";
+
+const appUrl = APP_URL;
+
+const frame = {
+  version: "next",
+  imageUrl: `${appUrl}/images/open-graph.png`, // Embed image URL (3:2 image ratio)
+  button: {
+    title: "🚩 Start Battle", // Text on the embed button
+    action: {
+      type: "launch_frame",
+      name: "Chain of Thorns",
+      url: appUrl, // URL that is opened when the embed button is tapped or clicked.
+      splashImageUrl: `${appUrl}/images/splash.png`,
+      splashBackgroundColor: "#F5F5F5",
+    },
+  },
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Chain of Thorns",
+    openGraph: {
+      title: "Chain of Thorns",
+      description: "Chain of Thorns",
+    },
+    other: {
+      "fc:frame": JSON.stringify(frame),
+    },
+  };
+}
 
 export default function HomePage() {
 
