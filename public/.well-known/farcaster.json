@@ -1,0 +1,17 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "Chain of Thorns",
+    "subtitle": "Rule, Strategize, Conquer.",
+    "description": "Enter a decentralized battlefield where negotiation and blockchain-powered strategy define your path to victory.",
+    "iconUrl": "https://chainofthrone.vercel.app/images/Logo.png",
+    "homeUrl": "https://chainofthrone.vercel.app/",
+    "imageUrl": "https://chainofthrone.vercel.app/images/open-graph.png",
+    "buttonTitle": "🚩 Start Battle",
+    "primaryCategorySchema": "games",
+    "splashImageUrl": "https://chainofthrone.vercel.app/images/splash.png",
+    "splashBackgroundColor": "#F5F5F5",
+    "requiredChains": ["eip155:10143"],
+    "requiredCapabilities": ["actions.signIn", "wallet.getEvmProvider"]
+  }
+}
