@@ -1,9 +1,0 @@
-{
-  "name": "EthBKK2024",
-  "description": "EthBKK2024 Mini App",
-  "icon": "/icon.png",
-  "appUrl": "https://ethbkk2024.vercel.app",
-  "appId": "ethbkk2024",
-  "version": "1.0.0",
-  "permissions": ["notifications", "identity"]
-}
