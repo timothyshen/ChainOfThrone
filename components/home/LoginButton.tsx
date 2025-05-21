@@ -9,10 +9,12 @@ import {
     useSwitchChain,
 } from "wagmi";
 import { farcasterFrame } from "@farcaster/frame-wagmi-connector";
+import { useMiniAppContext } from "@/lib/hooks/use-miniapp-context";
 
 
 export default function LoginButton() {
     const { isConnected, chainId } = useAccount();
+    const { isEthProviderAvailable } = useMiniAppContext();
     const { disconnect } = useDisconnect();
     const { switchChain } = useSwitchChain();
     const { connect } = useConnect();
@@ -40,16 +42,21 @@ export default function LoginButton() {
                     )}
                 </div >
             ) : (
-
-                <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => connect({ connector: farcasterFrame() })}
-                >
-                    Connect Wallet
-                </Button>
-
+                isEthProviderAvailable ? (
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => connect({ connector: farcasterFrame() })}
+                    >
+                        Connect Wallet
+                    </Button>
+                ) : (
+                    <p className="text-sm text-left">
+                        Wallet connection only via Warpcast
+                    </p>
+                )
             )}
+
         </>
     )
 }
