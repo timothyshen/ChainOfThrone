@@ -17,6 +17,6 @@
     "splashImageUrl": "https://chainofthrone.vercel.app/images/splash.png",
     "splashBackgroundColor": "#F5F5F5",
     "requiredChains": ["eip155:10143"],
-    "requiredCapabilities": ["actions.signIn", "wallet.getEvmProvider"]
+    "requiredCapabilities": ["actions.signIn", "wallet.getEthereumProvider"]
   }
 }
