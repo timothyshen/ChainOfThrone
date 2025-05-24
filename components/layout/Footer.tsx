@@ -53,7 +53,7 @@ function Footer() {
 
                     <Link href="/profile" className={cn(
                         "flex flex-col items-center px-4 py-1 rounded-md transition-colors",
-                        isActive('/') ? "text-white bg-primary-foreground/20" : "text-primary-foreground/70 hover:bg-primary-foreground/10"
+                        isActive('/profile') ? "text-white bg-primary-foreground/20" : "text-primary-foreground/70 hover:bg-primary-foreground/10"
                     )}>
                         <User size={24} />
                         <span className="text-xs mt-1">Profile</span>

@@ -11,11 +11,9 @@ export function ExplorePageComponent() {
         <p className="text-gray-400">Join a game room and prove your worth in the realm</p>
       </div>
       <div className="flex flex-col md:flex-row gap-6">
+        <CreateNewGame />
         <GameExplorer />
-        <div className="flex flex-col gap-6">
-          <CreateNewGame />
-          <RankingBoard />
-        </div>
+        <RankingBoard />
       </div>
     </div>
   )
