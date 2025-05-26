@@ -46,9 +46,7 @@ export default function RootLayout({
       >
         <DynamicProvider>
           <FrameProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
+            {children}
             <Toaster />
           </FrameProvider>
         </DynamicProvider>

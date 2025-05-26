@@ -49,7 +49,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [currentUnits, setCurrentUnits] = useState<number>(0)
     const [moveStrength, setMoveStrength] = useState<number>(0)
     const [players, setPlayers] = useState<Player[]>(InitialPlayers)
-    const [executionRecord, setExecutionRecord] = useState<string[]>([])
     const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
     const [playerId, setPlayerId] = useState<string | null>(null)
     const [isGridLoading, setIsGridLoading] = useState(true)
