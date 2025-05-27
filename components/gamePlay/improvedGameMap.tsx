@@ -171,7 +171,7 @@ export default function GameMap() {
     ]
 
     const armies: Army[] = [
-        { id: "a1", gridX: 0, gridY: 0, size: 500, owner: "P1", isMoving: false },
+        { id: "a1", gridX: 1, gridY: 0, size: 500, owner: "P1", isMoving: false },
         { id: "a2", gridX: 1, gridY: 1, size: 800, owner: "P2", isMoving: false },
     ]
 
@@ -682,7 +682,7 @@ export default function GameMap() {
             {activePanel === "overview" && (
                 <>
                     <h3 className="text-lg font-bold">Kingdom Overview</h3>
-                    <Card className="bg-slate-700 border-slate-600">
+                    <Card className="bg-slate-700 border-slate-600 text-white">
                         <CardContent className="p-4">
                             <h4 className="font-semibold mb-2">Your Territories</h4>
                             <div className="space-y-2">
@@ -697,7 +697,7 @@ export default function GameMap() {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-700 border-slate-600">
+                    <Card className="bg-slate-700 border-slate-600 text-white">
                         <CardContent className="p-4">
                             <h4 className="font-semibold mb-2">Resources</h4>
                             <div className="space-y-2">
@@ -725,7 +725,7 @@ export default function GameMap() {
                         {getTerritoryIcon(selectedTerritory.type)}
                         <h3 className="text-lg font-bold">{selectedTerritory.name}</h3>
                     </div>
-                    <Card className="bg-slate-700 border-slate-600">
+                    <Card className="bg-slate-700 border-slate-600 text-white">
                         <CardContent className="p-4">
                             <div className="space-y-3">
                                 <div className="flex justify-between">
@@ -756,13 +756,9 @@ export default function GameMap() {
                             <Sword className="w-4 h-4 mr-2" />
                             Attack
                         </Button>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full text-black">
                             <Users className="w-4 h-4 mr-2" />
                             Move Army Here
-                        </Button>
-                        <Button variant="outline" className="w-full">
-                            <Shield className="w-4 h-4 mr-2" />
-                            Fortify
                         </Button>
                     </div>
                 </>
@@ -771,7 +767,7 @@ export default function GameMap() {
             {activePanel === "army" && selectedArmy && (
                 <>
                     <h3 className="text-lg font-bold">Army Details</h3>
-                    <Card className="bg-slate-700 border-slate-600">
+                    <Card className="bg-slate-700 border-slate-600 text-white">
                         <CardContent className="p-4">
                             <div className="space-y-3">
                                 <div className="flex justify-between">
@@ -813,7 +809,7 @@ export default function GameMap() {
                                 </div>
                                 <p className="text-sm text-green-300">Click on a highlighted cell to move your army there.</p>
                             </div>
-                            <Button variant="outline" className="w-full" onClick={cancelMovement}>
+                            <Button variant="outline" className="w-full text-black" onClick={cancelMovement}>
                                 Cancel Movement
                             </Button>
                         </div>
@@ -971,7 +967,7 @@ export default function GameMap() {
 
     return (
         <div
-            className="h-screen bg-slate-900 text-white flex flex-col md:flex-row"
+            className="h-max bg-slate-900 text-white flex flex-col md:flex-row"
             onClick={(e) => {
                 if (e.target === e.currentTarget) {
                     setSelectedArmy(null)
@@ -980,51 +976,33 @@ export default function GameMap() {
                 }
             }}
         >
-            {/* Mobile Header */}
-            {isMobile && (
-                <div className="flex items-center justify-between p-2 bg-slate-800 border-b border-slate-700">
-                    <h1 className="text-lg font-bold">Chain of Thrones</h1>
-                    <div className="flex gap-2">
-                        <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
-                            <SheetTrigger asChild>
-                                <Button size="sm" variant="ghost">
-                                    <Settings className="w-4 h-4" />
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="right" className="bg-slate-800 border-slate-700">
-                                <div className="mt-6 p-4">
-                                    <h3 className="text-lg font-bold mb-4">Settings</h3>
-                                    <p className="text-sm text-slate-400">Game settings will be available here.</p>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                        <Button size="sm" variant="ghost" onClick={() => setMobileBottomPanelOpen(!mobileBottomPanelOpen)}>
-                            <Menu className="w-4 h-4" />
-                        </Button>
-                    </div>
-                </div>
-            )}
+
 
             {/* Main Map Area */}
             <div className="flex-1 relative overflow-hidden">
                 {/* Map Canvas */}
                 <div
                     ref={mapRef}
-                    className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-auto"
-                    style={{ transform: `scale(1)`, transformOrigin: "center center" }}
+                    className="w-full bg-gradient-to-br from-slate-800 to-slate-900 overflow-auto"
+                    style={{
+                        transform: `scale(1)`,
+                        transformOrigin: "center center",
+                        height: isMobile && mobileBottomPanelOpen
+                            ? 'calc(100vh - 60vh)' // Subtract panel height (60vh)
+                            : '100vh'
+                    }}
                 >
                     {/* 3x3 Grid Background */}
-                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 p-4">
+                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 ">
                         {Array.from({ length: 9 }).map((_, index) => (
                             <div key={index} className="border border-slate-600/30 rounded-lg bg-slate-800/20" />
                         ))}
                     </div>
 
                     {/* Territories in Grid */}
-                    <div className="absolute inset-0 p-4">
+                    <div className="absolute inset-0 p-2 rounded-lg">
                         <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
                             {territories.map((territory) => {
-                                const gridIndex = territory.gridY * 3 + territory.gridX
                                 return (
                                     <div
                                         key={territory.id}
@@ -1217,7 +1195,7 @@ export default function GameMap() {
 
             {/* Desktop Side Panel */}
             {!isMobile && (
-                <div className="w-80 bg-slate-800 border-l border-slate-700 flex flex-col">
+                <div className="w-80 bg-slate-800 border-l border-slate-700 flex flex-col z-10">
                     <div className="flex border-b border-slate-700">
                         <Button
                             variant={activePanel === "overview" ? "default" : "ghost"}

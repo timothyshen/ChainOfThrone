@@ -8,9 +8,18 @@ interface GameMapProps {
     territories: Territory[][]
     onTerritoryClick: (territory: Territory) => void
     isLoading: boolean
+    isMobileBottomPanelOpen?: boolean
+    panelHeight?: number
 }
 
-export default function GameMap({ currentPlayer, territories, onTerritoryClick, isLoading }: GameMapProps) {
+export default function GameMap({
+    currentPlayer,
+    territories,
+    onTerritoryClick,
+    isLoading,
+    isMobileBottomPanelOpen = false,
+    panelHeight = 300
+}: GameMapProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
 
     const handleTerritoryClick = (territory: Territory) => {
@@ -28,7 +37,15 @@ export default function GameMap({ currentPlayer, territories, onTerritoryClick, 
         <Card className="h-full">
             <CardContent className="p-3 h-full flex flex-col border-none">
                 {/* Map Grid Container */}
-                <div className="overflow-auto">
+                <div
+                    className="overflow-auto h-full md:h-[calc(100vh-200px)] lg:h-[calc(100vh-150px)]"
+                    style={{
+                        height: isMobileBottomPanelOpen
+                            ? `calc(100vh - ${panelHeight + 100}px)`
+                            : 'calc(100vh - 200px)', // Reserve space for potential panels
+                        maxHeight: '100%'
+                    }}
+                >
                     <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-2 min-h-[400px] max-w-4xl mx-auto">
                         {territories.map((row, rowIndex) => (
                             row.map((territory, colIndex) => {
