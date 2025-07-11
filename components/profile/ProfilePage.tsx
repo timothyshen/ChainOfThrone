@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Trophy, Sword, Shield, Crown, Target, Calendar, MapPin, Star, TrendingUp, Award, Zap } from "lucide-react"
-import Footer from "../layout/Footer"
+import GameFooter from "@/components/layout/GameFooter"
 
 interface PlayerStats {
     id: string
@@ -346,7 +346,7 @@ export default function ProfilePage() {
                     </TabsContent>
                 </Tabs>
             </div>
-            <Footer />
+            <GameFooter />
         </div>
     )
 }

@@ -23,8 +23,16 @@ import { GameStatusEnum } from '@/lib/types/gameStatus'
 import { Spinner } from '../ui/spinner'
 import { cn } from "@/lib/utils"
 import { GameOverview } from './GameStatus/GameOverview'
-import { Badge } from '../ui/badge'
-import { Crown, Sword, Users } from 'lucide-react'
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -42,7 +50,6 @@ const getGameStatusText = (status: number): GameStatusEnum => {
 
 export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: `0x${string}` }) {
     const { gameAddress } = useGameAddress();
-    const { gameState, gameStatusLoading, error, refreshGameState } = useGameStateUpdates(gameAddressParam);
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
@@ -310,7 +317,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     // Game Status Panel
     const GameStatusPanel = () => (
         <div className="w-full">
-
             <GameStatus
                 isLoading={isStatusLoading}
                 currentPlayer={address ?? ''}
@@ -379,7 +385,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     <p>Select a territory to view information and perform actions.</p>
                 )}
             </CardContent>
-           
+
         </Card>
     );
 
@@ -387,45 +393,22 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         <div className="flex flex-col min-h-screen md:mt-12 mt-4">
             {/* Mobile tab navigation */}
             <div className="md:hidden mb-4 px-4">
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="map">
-                            Map
-                        </TabsTrigger>
-                        <TabsTrigger value="status">
-                            Status
-                        </TabsTrigger>
-                        <TabsTrigger value="info">
-                            Action
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
+                <Drawer>
+                    <DrawerTrigger value="status">
+                        Status
+                    </DrawerTrigger>
+                    <DrawerContent>
+                        <GameStatusPanel />
+                    </DrawerContent>
+                </Drawer>
             </div>
 
             <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-4rem)]">
                 {/* Map section */}
-                <div className={cn(
-                    "p-4 overflow-auto md:flex-1",
-                    activeTab === "map" ? "block" : "hidden md:block"
-                )}>
-                    <ImprovedGameMap />
+                <div className="p-4 overflow-auto md:flex-1 block">
+                    {/* <ImprovedGameMap /> */}
                 </div>
 
-                {/* Mobile: Territory Info Tab (conditionally shown based on active tab) */}
-                <div className={cn(
-                    "p-4 space-y-4 overflow-auto",
-                    activeTab === "info" ? "block md:hidden" : "hidden"
-                )}>
-                    <TerritoryInfoPanel />
-                </div>
-
-                {/* Mobile: Status Tab (conditionally shown based on active tab) */}
-                <div className={cn(
-                    "p-4 space-y-4 overflow-auto",
-                    activeTab === "status" ? "block md:hidden" : "hidden"
-                )}>
-                    <GameStatusPanel />
-                </div>
 
                 {/* Desktop: Side panel (always visible on desktop) */}
                 <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto">

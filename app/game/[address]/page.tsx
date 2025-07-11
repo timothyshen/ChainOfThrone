@@ -1,4 +1,5 @@
-import GamePlayPage from '@/components/gamePlay/GamePlayPage'
+// import GamePlayPage from '@/components/gamePlay/GamePlayPage'
+import GamePlayPage from '@/components/gamePlay/GamePlayPageNew'
 
 export default function GamePage({ params }: { params: { address: string } }) {
   return (
