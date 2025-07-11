@@ -171,10 +171,6 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
         }
     };
 
-    const handleCloseModal = () => {
-        setShowCompleteModal(false);
-    };
-
     if (isLoading) {
         return (
             <Card className="w-full max-w-2xl mx-auto">

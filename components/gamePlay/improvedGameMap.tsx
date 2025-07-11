@@ -719,50 +719,6 @@ export default function GameMap() {
                 </>
             )}
 
-            {activePanel === "territory" && selectedTerritory && (
-                <>
-                    <div className="flex items-center gap-2">
-                        {getTerritoryIcon(selectedTerritory.type)}
-                        <h3 className="text-lg font-bold">{selectedTerritory.name}</h3>
-                    </div>
-                    <Card className="bg-slate-700 border-slate-600 text-white">
-                        <CardContent className="p-4">
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <span>Owner</span>
-                                    <Badge style={{ backgroundColor: getTerritoryColor(selectedTerritory.owner) }}>
-                                        {selectedTerritory.owner}
-                                    </Badge>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Strength</span>
-                                    <span>{selectedTerritory.strength}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Resources</span>
-                                    <span>{selectedTerritory.resources}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Position</span>
-                                    <span>
-                                        ({selectedTerritory.gridX}, {selectedTerritory.gridY})
-                                    </span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <div className="grid grid-cols-1 gap-2">
-                        <Button className="w-full">
-                            <Sword className="w-4 h-4 mr-2" />
-                            Attack
-                        </Button>
-                        <Button variant="outline" className="w-full text-black">
-                            <Users className="w-4 h-4 mr-2" />
-                            Move Army Here
-                        </Button>
-                    </div>
-                </>
-            )}
 
             {activePanel === "army" && selectedArmy && (
                 <>
@@ -975,7 +931,7 @@ export default function GameMap() {
                     cancelMovement()
                 }
             }}
-        >
+        >f
 
 
             {/* Main Map Area */}
@@ -1192,86 +1148,6 @@ export default function GameMap() {
                     )}
                 </div>
             </div>
-
-            {/* Desktop Side Panel */}
-            {!isMobile && (
-                <div className="w-80 bg-slate-800 border-l border-slate-700 flex flex-col z-10">
-                    <div className="flex border-b border-slate-700">
-                        <Button
-                            variant={activePanel === "overview" ? "default" : "ghost"}
-                            onClick={() => setActivePanel("overview")}
-                            className="flex-1 rounded-none"
-                        >
-                            <Map className="w-4 h-4 mr-1" />
-                            Overview
-                        </Button>
-                        <Button
-                            variant={activePanel === "territory" ? "default" : "ghost"}
-                            onClick={() => setActivePanel("territory")}
-                            className="flex-1 rounded-none"
-                            disabled={!selectedTerritory}
-                        >
-                            <Crown className="w-4 h-4 mr-1" />
-                            Territory
-                        </Button>
-                        <Button
-                            variant={activePanel === "army" ? "default" : "ghost"}
-                            onClick={() => setActivePanel("army")}
-                            className="flex-1 rounded-none"
-                            disabled={!selectedArmy}
-                        >
-                            <Users className="w-4 h-4 mr-1" />
-                            Army
-                        </Button>
-                    </div>
-                    <div className="flex-1 overflow-auto p-4">
-                        <PanelContent />
-                    </div>
-                </div>
-            )}
-
-            {/* Mobile Bottom Panel */}
-            {isMobile && (
-                <div
-                    className={`fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 transition-transform duration-300 z-30 ${mobileBottomPanelOpen ? "translate-y-0" : "translate-y-full"
-                        }`}
-                    style={{ height: "60vh" }}
-                >
-                    <div className="flex items-center justify-between p-3 border-b border-slate-700">
-                        <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                variant={activePanel === "overview" ? "default" : "ghost"}
-                                onClick={() => setActivePanel("overview")}
-                            >
-                                <Map className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant={activePanel === "territory" ? "default" : "ghost"}
-                                onClick={() => setActivePanel("territory")}
-                                disabled={!selectedTerritory}
-                            >
-                                <Crown className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant={activePanel === "army" ? "default" : "ghost"}
-                                onClick={() => setActivePanel("army")}
-                                disabled={!selectedArmy}
-                            >
-                                <Users className="w-4 h-4" />
-                            </Button>
-                        </div>
-                        <Button size="sm" variant="ghost" onClick={() => setMobileBottomPanelOpen(false)}>
-                            <ChevronDown className="w-4 h-4" />
-                        </Button>
-                    </div>
-                    <div className="overflow-auto p-4 h-full pb-20">
-                        <PanelContent />
-                    </div>
-                </div>
-            )}
 
             {/* Battle/Siege Preview Modal */}
             {showBattlePreview && battleTarget && selectedArmy && (

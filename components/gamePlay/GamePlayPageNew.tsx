@@ -22,6 +22,9 @@ import { PlayerState } from '@/lib/types/gameStatus'
 import { GameStatusEnum } from '@/lib/types/gameStatus'
 import { Spinner } from '../ui/spinner'
 import { cn } from "@/lib/utils"
+import { GameOverview } from './GameStatus/GameOverview'
+import { Badge } from '../ui/badge'
+import { Crown, Sword, Users } from 'lucide-react'
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -307,6 +310,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     // Game Status Panel
     const GameStatusPanel = () => (
         <div className="w-full">
+
             <GameStatus
                 isLoading={isStatusLoading}
                 currentPlayer={address ?? ''}
@@ -317,6 +321,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 setGameStatus={setGameStatus}
                 setTotalPlayer={setTotalPlayer}
                 fetchGameData={fetchGameData} />
+            <GameOverview territories={[]} />
         </div>
     );
 
@@ -374,6 +379,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     <p>Select a territory to view information and perform actions.</p>
                 )}
             </CardContent>
+           
         </Card>
     );
 
