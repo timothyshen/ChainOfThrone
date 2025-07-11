@@ -53,7 +53,7 @@ export default function GameTable({ games, searchTerm, statusFilter, onSelectGam
     const handleJoinGame = async (gameAddress: string) => {
         try {
             localStorage.setItem("gameAddress", gameAddress)
-            router.push(`/game/${gameAddress}/new`)
+            router.push(`/game/${gameAddress}`)
             toast({
                 title: "Joining game",
                 description: "Redirecting to game room...",

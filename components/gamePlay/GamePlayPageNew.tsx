@@ -33,6 +33,7 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer"
+import { ChevronDown } from 'lucide-react'
 
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
@@ -394,8 +395,11 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
             {/* Mobile tab navigation */}
             <div className="md:hidden mb-4 px-4">
                 <Drawer>
-                    <DrawerTrigger value="status">
-                        Status
+                    <DrawerTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                            <span className="text-sm">Status</span>
+                            <ChevronDown className="w-4 h-4" />
+                        </Button>
                     </DrawerTrigger>
                     <DrawerContent>
                         <GameStatusPanel />
@@ -406,7 +410,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
             <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-4rem)]">
                 {/* Map section */}
                 <div className="p-4 overflow-auto md:flex-1 block">
-                    {/* <ImprovedGameMap /> */}
+                    <ImprovedGameMap />
                 </div>
 
 
