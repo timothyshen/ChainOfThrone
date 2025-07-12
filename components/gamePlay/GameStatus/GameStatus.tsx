@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, UserPlus, CheckCircle, XCircle, Users, Clock, Copy } from 'lucide-react';
 import { toast } from "@/lib/hooks/use-toast";
 import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
 import { getGameStatus, totalPlayers, getWinner } from "@/lib/hooks/ReadGameContract";
@@ -43,6 +42,10 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
         return <p className="text-sm text-muted-foreground">Waiting for players...</p>;
     }
 
+    const copyAddress = (address: string) => {
+        navigator.clipboard.writeText(address)
+    }
+
     return (
         <div className="grid gap-2">
             {players.map((player, index) => (
@@ -57,6 +60,14 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
                         {player.address.toLowerCase() === currentPlayer.toLowerCase() && '👉 '}
                         Player {index + 1}: {sliceAddress(player.address)}
                     </span>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 hover:bg-gray-200"
+                        onClick={() => copyAddress(player.address)}
+                    >
+                        <Copy className="w-3 h-3" />
+                    </Button>
                     {player.roundSubmitted ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                     ) : (
@@ -197,72 +208,99 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
     // TODO: need two progress bars, one for player progress and one for round progress
 
     return (
-        <Card className="w-full max-w-2xl mx-auto">
-            <CardHeader>
-                <CardTitle className="text-2xl font-bold">Game Status</CardTitle>
-                <CardDescription>Current game information and player status</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">Total Players</p>
-                        <p className="text-2xl font-bold">{totalPlayer} / {maxPlayer}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground ">Game Status</p>
-                        <Badge className={`${getStatusColor(gameStatus)} text-white w-max`}>
-                            {gameStatus}
-                        </Badge>
-                    </div>
+        <div className="w-full">
+            <div className="grid gap-6">
+                <div className="grid grid-cols-2 gap-3">
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center space-x-2">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                                <div>
+                                    <p className="text-xs text-muted-foreground">Players</p>
+                                    <p className="text-lg font-semibold">
+                                        {totalPlayer} / {maxPlayer}
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-4">
+                            <div className="flex items-center space-x-2">
+                                <Clock className="w-3 h-3" />
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground ">Status</p>
+                                    <Badge className={`${getStatusColor(gameStatus)} text-white w-max`}>
+                                        {gameStatus}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Player Progress</p>
-                    <Progress value={(totalPlayer / maxPlayer) * 100} className="w-full" />
-                </div>
-
-                <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Players</p>
-                    <PlayerList players={playerAddresses} currentPlayer={currentPlayer} />
-                </div>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            Players
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {playerAddresses.length > 0 ? (
+                            <PlayerList players={playerAddresses} currentPlayer={currentPlayer} />
+                        ) : (
+                            <div className="text-center py-4">
+                                <UserPlus className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                                <p className="text-sm text-muted-foreground">Waiting for players to join...</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
 
                 <Button
                     onClick={handlePlayerJoin}
                     disabled={isPending || totalPlayer === maxPlayer}
                     className="w-full"
                 >
-                    {isPending ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Joining...
-                        </>
-                    ) : (
+                    {totalPlayer === maxPlayer ? (
                         <>
                             <UserPlus className="mr-2 h-4 w-4" />
-                            Join Game
+                            Game is full
                         </>
+                    ) : (
+                        isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Joining...
+                            </>
+                        ) : (
+                            <>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Join Game
+                            </>
+                        )
                     )}
                 </Button>
 
-                {totalPlayer === maxPlayer && (
-                    <p className="text-sm text-center text-muted-foreground">Game is full</p>
-                )}
                 {error && (
                     <p className="text-sm text-center text-red-500">Error: {error.message}</p>
                 )}
-            </CardContent>
+            </div>
 
-            {gameAddress && (
-                <DiplomacyResultModal
-                    gameAddress={gameAddress}
-                    type="win"
-                    open={false}
-                    onOpenChange={setShowCompleteModal}
-                    year="Fall, 1908"
-                    stats={winStats}
-                />
-            )}
-        </Card>
+            {
+                gameAddress && (
+                    <DiplomacyResultModal
+                        gameAddress={gameAddress}
+                        type="win"
+                        open={false}
+                        onOpenChange={setShowCompleteModal}
+                        year="Fall, 1908"
+                        stats={winStats}
+                    />
+                )
+            }
+        </div >
     )
 }
 

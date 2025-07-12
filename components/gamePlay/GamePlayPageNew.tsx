@@ -317,7 +317,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
     // Game Status Panel
     const GameStatusPanel = () => (
-        <div className="w-full">
+        <div className="w-full space-y-6 p-4">
             <GameStatus
                 isLoading={isStatusLoading}
                 currentPlayer={address ?? ''}
