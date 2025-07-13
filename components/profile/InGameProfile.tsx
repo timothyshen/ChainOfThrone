@@ -38,7 +38,7 @@ export default function GameProfile() {
 
     const player1: PlayerProfile = {
         id: "p1",
-        name: "Player 1",
+        name: "P1",
         avatar: "/placeholder.svg?height=80&width=80&text=P1",
         level: 15,
         experience: 2350,
@@ -63,7 +63,7 @@ export default function GameProfile() {
 
     const player2: PlayerProfile = {
         id: "p2",
-        name: "Player 2",
+        name: "P2",
         avatar: "/placeholder.svg?height=80&width=80&text=P2",
         level: 12,
         experience: 1850,
@@ -128,7 +128,7 @@ export default function GameProfile() {
         const winner = getWinner()
 
         return (
-            <Card className="bg-slate-800 border-slate-700">
+            <Card className="bg-slate-800 border-slate-700 text-white">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                         <Icon className="w-4 h-4" />
@@ -160,16 +160,11 @@ export default function GameProfile() {
                     <h1 className="text-3xl font-bold">Player Comparison</h1>
                     <div className="flex gap-2">
                         <Button
-                            variant={selectedView === "overview" ? "default" : "outline"}
-                            onClick={() => setSelectedView("overview")}
+                            variant="default"
+                            className="text-white"
+                            disabled={true}
                         >
                             Overview
-                        </Button>
-                        <Button
-                            variant={selectedView === "detailed" ? "default" : "outline"}
-                            onClick={() => setSelectedView("detailed")}
-                        >
-                            Detailed Stats
                         </Button>
                     </div>
                 </div>
@@ -177,7 +172,7 @@ export default function GameProfile() {
                 {/* Player Headers */}
                 <div className="grid grid-cols-2 gap-6 mb-6">
                     {/* Player 1 */}
-                    <Card className="bg-slate-800 border-slate-700">
+                    <Card className="bg-slate-800 border-slate-700 text-white">
                         <CardContent className="p-6">
                             <div className="flex items-center gap-4">
                                 <Avatar className="w-16 h-16">
@@ -203,7 +198,7 @@ export default function GameProfile() {
                     </Card>
 
                     {/* Player 2 */}
-                    <Card className="bg-slate-800 border-slate-700">
+                    <Card className="bg-slate-800 border-slate-700 text-white">
                         <CardContent className="p-6">
                             <div className="flex items-center gap-4">
                                 <Avatar className="w-16 h-16">
@@ -230,7 +225,7 @@ export default function GameProfile() {
                 </div>
 
                 {/* Head-to-Head Stats */}
-                <Card className="bg-slate-800 border-slate-700 mb-6">
+                <Card className="bg-slate-800 border-slate-700 mb-6 text-white">
                     <CardHeader>
                         <CardTitle className="text-center flex items-center justify-center gap-2">
                             <Sword className="w-5 h-5" />
@@ -259,152 +254,48 @@ export default function GameProfile() {
                     </CardContent>
                 </Card>
 
-                {selectedView === "overview" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <StatCard
-                            title="Win Rate"
-                            player1Value={player1.stats.winRate}
-                            player2Value={player2.stats.winRate}
-                            icon={Trophy}
-                            format="percentage"
-                        />
-                        <StatCard
-                            title="Total Wins"
-                            player1Value={player1.stats.wins}
-                            player2Value={player2.stats.wins}
-                            icon={Crown}
-                        />
-                        <StatCard
-                            title="Current Streak"
-                            player1Value={player1.stats.currentStreak}
-                            player2Value={player2.stats.currentStreak}
-                            icon={Flame}
-                        />
-                        <StatCard
-                            title="Best Streak"
-                            player1Value={player1.stats.bestStreak}
-                            player2Value={player2.stats.bestStreak}
-                            icon={Star}
-                        />
-                        <StatCard
-                            title="Castles Captured"
-                            player1Value={player1.stats.castlesCaptured}
-                            player2Value={player2.stats.castlesCaptured}
-                            icon={Shield}
-                        />
-                        <StatCard
-                            title="Average Game Time"
-                            player1Value={player1.stats.averageGameTime}
-                            player2Value={player2.stats.averageGameTime}
-                            icon={Clock}
-                            format="time"
-                            showComparison={false}
-                        />
-                    </div>
-                )}
 
-                {selectedView === "detailed" && (
-                    <div className="space-y-6">
-                        {/* Combat Stats */}
-                        <div>
-                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                                <Sword className="w-5 h-5" />
-                                Combat Statistics
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <StatCard
-                                    title="Troops Killed"
-                                    player1Value={player1.stats.totalTroopsKilled}
-                                    player2Value={player2.stats.totalTroopsKilled}
-                                    icon={Target}
-                                />
-                                <StatCard
-                                    title="Troops Lost"
-                                    player1Value={player1.stats.totalTroopsLost}
-                                    player2Value={player2.stats.totalTroopsLost}
-                                    icon={Users}
-                                />
-                                <StatCard
-                                    title="Kill/Death Ratio"
-                                    player1Value={Number((player1.stats.totalTroopsKilled / player1.stats.totalTroopsLost).toFixed(2))}
-                                    player2Value={Number((player2.stats.totalTroopsKilled / player2.stats.totalTroopsLost).toFixed(2))}
-                                    icon={TrendingUp}
-                                />
-                                <StatCard
-                                    title="Sieges Won"
-                                    player1Value={player1.stats.siegesWon}
-                                    player2Value={player2.stats.siegesWon}
-                                    icon={Shield}
-                                />
-                                <StatCard
-                                    title="Total Games"
-                                    player1Value={player1.stats.totalGames}
-                                    player2Value={player2.stats.totalGames}
-                                    icon={Award}
-                                />
-                                <StatCard
-                                    title="Losses"
-                                    player1Value={player1.stats.losses}
-                                    player2Value={player2.stats.losses}
-                                    icon={Zap}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Strategy Comparison */}
-                        <div>
-                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                                <Zap className="w-5 h-5" />
-                                Strategy Profile
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Card className="bg-slate-800 border-slate-700">
-                                    <CardHeader>
-                                        <CardTitle className="text-blue-400">{player1.name}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between">
-                                                <span>Preferred Strategy:</span>
-                                                <span className="font-semibold text-blue-400">{player1.stats.favoriteStrategy}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>Aggression Level:</span>
-                                                <Badge className="bg-red-600">High</Badge>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>Playstyle:</span>
-                                                <span className="text-orange-400">Offensive</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="bg-slate-800 border-slate-700">
-                                    <CardHeader>
-                                        <CardTitle className="text-red-400">{player2.name}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between">
-                                                <span>Preferred Strategy:</span>
-                                                <span className="font-semibold text-red-400">{player2.stats.favoriteStrategy}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>Aggression Level:</span>
-                                                <Badge className="bg-blue-600">Medium</Badge>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>Playstyle:</span>
-                                                <span className="text-green-400">Defensive</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <StatCard
+                        title="Win Rate"
+                        player1Value={player1.stats.winRate}
+                        player2Value={player2.stats.winRate}
+                        icon={Trophy}
+                        format="percentage"
+                    />
+                    <StatCard
+                        title="Total Wins"
+                        player1Value={player1.stats.wins}
+                        player2Value={player2.stats.wins}
+                        icon={Crown}
+                    />
+                    <StatCard
+                        title="Current Streak"
+                        player1Value={player1.stats.currentStreak}
+                        player2Value={player2.stats.currentStreak}
+                        icon={Flame}
+                    />
+                    <StatCard
+                        title="Best Streak"
+                        player1Value={player1.stats.bestStreak}
+                        player2Value={player2.stats.bestStreak}
+                        icon={Star}
+                    />
+                    <StatCard
+                        title="Castles Captured"
+                        player1Value={player1.stats.castlesCaptured}
+                        player2Value={player2.stats.castlesCaptured}
+                        icon={Shield}
+                    />
+                    <StatCard
+                        title="Average Game Time"
+                        player1Value={player1.stats.averageGameTime}
+                        player2Value={player2.stats.averageGameTime}
+                        icon={Clock}
+                        format="time"
+                        showComparison={false}
+                    />
+                </div>
             </div>
         </div>
     )

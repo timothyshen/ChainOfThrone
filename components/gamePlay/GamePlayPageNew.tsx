@@ -391,9 +391,11 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     );
 
     return (
-        <div className="flex flex-col min-h-screen md:mt-12 mt-4">
+        <div className="flex flex-col min-h-screen md:mt-12 bg-slate-900" onClick={() => {
+            setSelectedTerritory(null)
+        }}>
             {/* Mobile tab navigation */}
-            <div className="md:hidden mb-4 px-4">
+            <div className="md:hidden my-1 px-4">
                 <Drawer>
                     <DrawerTrigger asChild>
                         <Button variant="outline" className="w-full">
@@ -417,7 +419,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 {/* Desktop: Side panel (always visible on desktop) */}
                 <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto">
                     <GameStatusPanel />
-                    <TerritoryInfoPanel />
                 </div>
             </div>
         </div>
