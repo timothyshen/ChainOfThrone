@@ -40,7 +40,7 @@ function Footer() {
                         isActive('/') ? "text-white bg-primary-foreground/20" : "text-primary-foreground/70 hover:bg-primary-foreground/10"
                     )}>
                         <Home size={24} />
-                        <span className="text-xs mt-1">status</span>
+                        <span className="text-xs mt-1">Home</span>
                     </Link>
 
                     <Link href="/explore" className={cn(

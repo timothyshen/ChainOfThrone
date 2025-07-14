@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Map, Sword, Shield, Crown, Users, Settings, Navigation, Home, Flag, Menu, ChevronDown } from "lucide-react"
+import GameOperationPanel from "./GameMap/GameOperationPanel"
 
 interface Territory {
     id: string
@@ -57,8 +58,12 @@ interface SiegeState extends BattleState {
     siegeDuration: number
 }
 
-interface SiegeEffect extends BattleEffect {
+interface SiegeEffect {
+    id: string
     type: "catapult" | "battering_ram" | "wall_damage" | "fire" | "breach" | "victory" | "clash" | "explosion" | "damage"
+    x: number
+    y: number
+    timestamp: number
     projectile?: boolean
     startX?: number
     startY?: number
@@ -172,7 +177,7 @@ export default function GameMap() {
 
     const armies: Army[] = [
         { id: "a1", gridX: 1, gridY: 0, size: 500, owner: "P1", isMoving: false },
-        { id: "a2", gridX: 1, gridY: 1, size: 800, owner: "P2", isMoving: false },
+        { id: "a2", gridX: 0, gridY: 1, size: 800, owner: "P2", isMoving: false },
     ]
 
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
@@ -317,6 +322,7 @@ export default function GameMap() {
         setMovementMode(false)
         setShowMovementPaths(false)
         setValidMovementCells([])
+        setMobileBottomPanelOpen(false)
     }
 
     const getTerritoryColor = (owner: string) => {
@@ -453,6 +459,7 @@ export default function GameMap() {
 
         setTimeout(() => {
             applyBattleResults(battle, winner)
+            setMobileBottomPanelOpen(false)
         }, 2000)
     }
 
@@ -651,6 +658,7 @@ export default function GameMap() {
 
         setTimeout(() => {
             applySiegeResults(siege, winner)
+            setMobileBottomPanelOpen(false)
         }, 3000)
     }
 
@@ -677,208 +685,6 @@ export default function GameMap() {
         setShowBattlePreview(true)
     }
 
-    const PanelContent = () => (
-        <div className="space-y-4">
-            {activePanel === "army" && selectedArmy && (
-                <>
-                    <h3 className="text-lg font-bold">Army Details</h3>
-                    <Card className="bg-slate-700 border-slate-600 text-white">
-                        <CardContent className="p-4">
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <span>Owner</span>
-                                    <Badge style={{ backgroundColor: getTerritoryColor(selectedArmy.owner) }}>{selectedArmy.owner}</Badge>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Size</span>
-                                    <span>{selectedArmy.size} troops</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Position</span>
-                                    <span>
-                                        ({selectedArmy.gridX}, {selectedArmy.gridY})
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Status</span>
-                                    <Badge
-                                        variant={selectedArmy.isMoving || animatingArmies.has(selectedArmy.id) ? "default" : "secondary"}
-                                    >
-                                        {animatingArmies.has(selectedArmy.id)
-                                            ? "Moving..."
-                                            : selectedArmy.isMoving
-                                                ? "Moving"
-                                                : "Stationed"}
-                                    </Badge>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {movementMode ? (
-                        <div className="space-y-2">
-                            <div className="bg-green-900/50 border border-green-600 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Navigation className="w-4 h-4 text-green-400" />
-                                    <span className="text-green-400 font-semibold">Movement Mode Active</span>
-                                </div>
-                                <p className="text-sm text-green-300">Click on a highlighted cell to move your army there.</p>
-                            </div>
-                            <Button variant="outline" className="w-full text-black" onClick={cancelMovement}>
-                                Cancel Movement
-                            </Button>
-                        </div>
-                    ) : activeSiege && activeSiege.attackerArmy.id === selectedArmy.id ? (
-                        <div className="space-y-2">
-                            <div className="bg-orange-900/50 border border-orange-600 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Shield className="w-4 h-4 text-orange-400" />
-                                    <span className="text-orange-400 font-semibold">Siege in Progress</span>
-                                </div>
-
-                                {activeSiege.phase === "combat" && (
-                                    <>
-                                        <div className="text-sm mb-2 capitalize text-orange-300">
-                                            Phase: {activeSiege.siegePhase.replace("_", " ")}
-                                        </div>
-
-                                        <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
-                                            <div
-                                                className="bg-orange-500 h-2 rounded-full transition-all duration-150"
-                                                style={{ width: `${activeSiege.progress * 100}%` }}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1 text-xs">
-                                            <div className="flex justify-between">
-                                                <span>Wall Integrity:</span>
-                                                <span
-                                                    className={
-                                                        activeSiege.wallIntegrity > 50
-                                                            ? "text-green-400"
-                                                            : activeSiege.wallIntegrity > 25
-                                                                ? "text-yellow-400"
-                                                                : "text-red-400"
-                                                    }
-                                                >
-                                                    {Math.round(activeSiege.wallIntegrity)}%
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>Attacker Losses:</span>
-                                                <span className="text-red-400">-{activeSiege.attackerDamage}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span>Defender Losses:</span>
-                                                <span className="text-red-400">-{activeSiege.defenderDamage}</span>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-
-                                {activeSiege.phase === "results" && (
-                                    <div className="text-center">
-                                        <div
-                                            className={`text-lg font-bold ${activeSiege.winner === "attacker" ? "text-green-400" : "text-red-400"
-                                                }`}
-                                        >
-                                            {activeSiege.winner === "attacker" ? "Fortress Captured!" : "Siege Failed!"}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ) : activeBattle && activeBattle.attackerArmy.id === selectedArmy.id ? (
-                        <div className="space-y-2">
-                            <div className="bg-red-900/50 border border-red-600 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Sword className="w-4 h-4 text-red-400" />
-                                    <span className="text-red-400 font-semibold">Battle in Progress</span>
-                                </div>
-
-                                {activeBattle.phase === "combat" && (
-                                    <>
-                                        <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
-                                            <div
-                                                className="bg-red-500 h-2 rounded-full transition-all duration-100"
-                                                style={{ width: `${activeBattle.progress * 100}%` }}
-                                            />
-                                        </div>
-                                        <div className="flex justify-between text-xs">
-                                            <span>Attacker: -{activeBattle.attackerDamage}</span>
-                                            <span>Defender: -{activeBattle.defenderDamage}</span>
-                                        </div>
-                                    </>
-                                )}
-
-                                {activeBattle.phase === "results" && (
-                                    <div className="text-center">
-                                        <div
-                                            className={`text-lg font-bold ${activeBattle.winner === "attacker" ? "text-green-400" : "text-red-400"
-                                                }`}
-                                        >
-                                            {activeBattle.winner === "attacker" ? "Victory!" : "Defeat!"}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-2">
-                            <Button
-                                className="w-full"
-                                disabled={selectedArmy && animatingArmies.has(selectedArmy.id)}
-                                onClick={() => {
-                                    if (selectedArmy && !animatingArmies.has(selectedArmy.id)) {
-                                        const validCells = getValidMovementCells(selectedArmy)
-                                        setValidMovementCells(validCells)
-                                        setShowMovementPaths(true)
-                                        setMovementMode(true)
-                                    }
-                                }}
-                            >
-                                <Navigation className="w-4 h-4 mr-2" />
-                                {selectedArmy && animatingArmies.has(selectedArmy.id) ? "Moving..." : "Move Army"}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full"
-                                onClick={() => {
-                                    // Find nearby enemies to attack
-                                    const nearbyEnemies = armies.filter(
-                                        (army) =>
-                                            army.owner !== selectedArmy?.owner &&
-                                            Math.abs(army.gridX - selectedArmy!.gridX) <= 1 &&
-                                            Math.abs(army.gridY - selectedArmy!.gridY) <= 1,
-                                    )
-
-                                    const nearbyTerritories = territories.filter(
-                                        (territory) =>
-                                            territory.owner !== selectedArmy?.owner &&
-                                            Math.abs(territory.gridX - selectedArmy!.gridX) <= 1 &&
-                                            Math.abs(territory.gridY - selectedArmy!.gridY) <= 1,
-                                    )
-
-                                    if (nearbyEnemies.length > 0) {
-                                        initiateBattle(nearbyEnemies[0])
-                                    } else if (nearbyTerritories.length > 0) {
-                                        initiateBattle(nearbyTerritories[0])
-                                    }
-                                }}
-                            >
-                                <Sword className="w-4 h-4 mr-2" />
-                                Attack Nearby
-                            </Button>
-                            <Button variant="outline" className="w-full">
-                                <Users className="w-4 h-4 mr-2" />
-                                Split Army
-                            </Button>
-                        </div>
-                    )}
-                </>
-            )}
-        </div>
-    )
 
     return (
         <div
@@ -896,13 +702,17 @@ export default function GameMap() {
                 {/* Map Canvas */}
                 <div
                     ref={mapRef}
-                    className="w-full bg-gradient-to-br from-slate-800 to-slate-900 overflow-auto"
+                    className="w-full bg-gradient-to-br from-slate-800 to-slate-900"
                     style={{
                         transform: `scale(1)`,
                         transformOrigin: "center center",
                         height: isMobile && mobileBottomPanelOpen
-                            ? 'calc(100vh - 60vh)' // Subtract panel height (60vh)
-                            : '100vh'
+                            ? 'calc(100vh - 50vh)' // Reserve space for mobile panel
+                            : 'calc(100vh - 200px)', // Reserve space for headers/navigation
+                        maxWidth: '100%',
+                        maxHeight: 'calc(100vh - 200px)', // Constrain max height
+                        minHeight: '400px', // Ensure minimum usable size
+                        margin: '0 auto'
                     }}
                 >
                     {/* 3x3 Grid Background */}
@@ -1057,8 +867,8 @@ export default function GameMap() {
                           opacity: 0.9;
                         }
                         100% {
-                          left: ${endPos.gridX * 33.333 + 16.666}%;
-                          top: ${endPos.gridY * 33.333 + 16.666}%;
+                          left: ${endPos?.gridX ? endPos.gridX * 33.333 + 16.666 : 50}%;
+                          top: ${endPos?.gridY ? endPos.gridY * 33.333 + 16.666 : 50}%;
                           transform: translate(-50%, -50%) scale(1);
                           opacity: 1;
                         }
@@ -1106,279 +916,27 @@ export default function GameMap() {
                 </div>
             </div>
 
+            {mobileBottomPanelOpen && <GameOperationPanel
+                activePanel={activePanel}
+                selectedArmy={selectedArmy}
+                animatingArmies={animatingArmies}
+                movementMode={movementMode}
+                cancelMovement={cancelMovement}
+            />}
+
             {/* Battle/Siege Preview Modal */}
             {showBattlePreview && battleTarget && selectedArmy && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <Card className="bg-slate-800 border-slate-700 w-96 max-w-[90vw]">
-                        <CardContent className="p-6">
-                            {(() => {
-                                const target = battleTarget.army || battleTarget.territory!
-                                const isFortified =
-                                    battleTarget.territory &&
-                                    (battleTarget.territory.type === "castle" || battleTarget.territory.type === "stronghold")
-
-                                return (
-                                    <>
-                                        <h3 className="text-xl font-bold mb-4 text-center">
-                                            {isFortified ? "Siege Preview" : "Battle Preview"}
-                                        </h3>
-
-                                        {isFortified && (
-                                            <div className="mb-4 p-3 bg-orange-900/30 border border-orange-600 rounded-lg">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Shield className="w-4 h-4 text-orange-400" />
-                                                    <span className="text-orange-400 font-semibold">Fortified Position</span>
-                                                </div>
-                                                <div className="text-sm text-orange-300">
-                                                    This {battleTarget.territory!.type} has strong defenses. Siege will take longer and cause more
-                                                    casualties.
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div className="text-center">
-                                                <div className="text-lg font-semibold text-blue-400">Attacker</div>
-                                                <div className="text-sm">{selectedArmy.owner}</div>
-                                                <div className="text-2xl font-bold">{selectedArmy.size}</div>
-                                                <div className="text-xs text-slate-400">troops</div>
-                                            </div>
-
-                                            <div className="text-center">
-                                                <div className="text-lg font-semibold text-red-400">Defender</div>
-                                                <div className="text-sm">{battleTarget.army?.owner || battleTarget.territory?.owner}</div>
-                                                <div className="text-2xl font-bold">
-                                                    {battleTarget.army?.size || battleTarget.territory!.strength * 10}
-                                                </div>
-                                                <div className="text-xs text-slate-400">
-                                                    {battleTarget.army ? "troops" : isFortified ? "fortified strength" : "strength"}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {(() => {
-                                            const { attackerOdds, defenderOdds } = calculateBattleOdds(selectedArmy, target)
-                                            const adjustedAttackerOdds = isFortified ? attackerOdds * 0.7 : attackerOdds
-                                            const adjustedDefenderOdds = 1 - adjustedAttackerOdds
-
-                                            return (
-                                                <div className="mb-4">
-                                                    <div className="text-sm text-center mb-2">
-                                                        {isFortified ? "Siege Odds (Reduced)" : "Battle Odds"}
-                                                    </div>
-                                                    <div className="flex">
-                                                        <div
-                                                            className="bg-blue-500 h-4 flex items-center justify-center text-xs text-white"
-                                                            style={{ width: `${adjustedAttackerOdds * 100}%` }}
-                                                        >
-                                                            {Math.round(adjustedAttackerOdds * 100)}%
-                                                        </div>
-                                                        <div
-                                                            className="bg-red-500 h-4 flex items-center justify-center text-xs text-white"
-                                                            style={{ width: `${adjustedDefenderOdds * 100}%` }}
-                                                        >
-                                                            {Math.round(adjustedDefenderOdds * 100)}%
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })()}
-
-                                        <div className="flex gap-2">
-                                            <Button
-                                                className="flex-1"
-                                                onClick={() => {
-                                                    const target = battleTarget.army || battleTarget.territory!
-                                                    startBattle(selectedArmy, target)
-                                                }}
-                                            >
-                                                {isFortified ? (
-                                                    <>
-                                                        <Shield className="w-4 h-4 mr-2" />
-                                                        Begin Siege!
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Sword className="w-4 h-4 mr-2" />
-                                                        Attack!
-                                                    </>
-                                                )}
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                className="flex-1"
-                                                onClick={() => {
-                                                    setShowBattlePreview(false)
-                                                    setBattleTarget(null)
-                                                }}
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </div>
-                                    </>
-                                )
-                            })()}
-                        </CardContent>
-                    </Card>
-                </div>
+                <SiegeBattleModal />
             )}
 
             {/* Battle Effects Overlay */}
             {battleEffects.length > 0 && (
-                <div className="absolute inset-0 p-4 pointer-events-none z-30">
-                    <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-                        {battleEffects.map((effect) => (
-                            <div
-                                key={effect.id}
-                                className="absolute flex items-center justify-center"
-                                style={{
-                                    left: `${effect.x * 33.333 + 16.666}%`,
-                                    top: `${effect.y * 33.333 + 16.666}%`,
-                                    transform: "translate(-50%, -50%)",
-                                }}
-                            >
-                                {effect.type === "clash" && (
-                                    <div className="relative">
-                                        <div className="w-8 h-8 bg-yellow-500 rounded-full animate-ping" />
-                                        <Sword className="absolute inset-0 w-6 h-6 text-white animate-spin" style={{ margin: "4px" }} />
-                                    </div>
-                                )}
-
-                                {effect.type === "explosion" && (
-                                    <div className="relative">
-                                        <div className="w-12 h-12 bg-red-500 rounded-full animate-ping opacity-75" />
-                                        <div
-                                            className="absolute inset-0 w-8 h-8 bg-orange-400 rounded-full animate-pulse"
-                                            style={{ margin: "8px" }}
-                                        />
-                                    </div>
-                                )}
-
-                                {effect.type === "damage" && <div className="text-red-400 font-bold text-lg animate-bounce">-DMG</div>}
-
-                                {effect.type === "victory" && (
-                                    <div className="relative">
-                                        <div className="w-16 h-16 bg-green-500 rounded-full animate-ping opacity-50" />
-                                        <Crown
-                                            className="absolute inset-0 w-8 h-8 text-yellow-400 animate-pulse"
-                                            style={{ margin: "16px" }}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <BattleEffectOverlay />
             )}
 
             {/* Siege Effects Overlay */}
             {siegeEffects.length > 0 && (
-                <div className="absolute inset-0 p-4 pointer-events-none z-30">
-                    <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-                        {siegeEffects.map((effect) => (
-                            <div
-                                key={effect.id}
-                                className="absolute flex items-center justify-center"
-                                style={{
-                                    left: `${effect.x * 33.333 + 16.666}%`,
-                                    top: `${effect.y * 33.333 + 16.666}%`,
-                                    transform: "translate(-50%, -50%)",
-                                }}
-                            >
-                                {effect.type === "catapult" && (
-                                    <div className="relative">
-                                        {effect.projectile && (
-                                            <div
-                                                className="absolute w-3 h-3 bg-orange-500 rounded-full"
-                                                style={{
-                                                    animation: `catapultProjectile-${effect.id} 1.5s ease-in-out forwards`,
-                                                }}
-                                            />
-                                        )}
-                                        <div className="w-16 h-16 bg-orange-600 rounded-full animate-ping opacity-75" />
-                                        <div
-                                            className="absolute inset-0 w-12 h-12 bg-red-500 rounded-full animate-pulse"
-                                            style={{ margin: "8px" }}
-                                        />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="text-orange-200 font-bold text-xs">CATAPULT</div>
-                                        </div>
-
-                                        <style jsx>{`
-                      @keyframes catapultProjectile-${effect.id} {
-                        0% {
-                          left: ${(effect.startX! - effect.x) * 33.333}%;
-                          top: ${(effect.startY! - effect.y) * 33.333}%;
-                          transform: translate(-50%, -50%);
-                        }
-                        50% {
-                          top: ${(effect.startY! - effect.y) * 33.333 - 20}%;
-                        }
-                        100% {
-                          left: 0%;
-                          top: 0%;
-                          transform: translate(-50%, -50%);
-                        }
-                      }
-                    `}</style>
-                                    </div>
-                                )}
-
-                                {effect.type === "battering_ram" && (
-                                    <div className="relative">
-                                        <div className="w-12 h-8 bg-amber-700 rounded animate-pulse" />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="w-8 h-2 bg-amber-900 animate-bounce" />
-                                        </div>
-                                        <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-amber-200 font-bold text-xs">
-                                            RAM
-                                        </div>
-                                    </div>
-                                )}
-
-                                {effect.type === "wall_damage" && (
-                                    <div className="relative">
-                                        <div className="w-20 h-20 border-4 border-slate-600 rounded animate-pulse opacity-75" />
-                                        <div className="absolute inset-2 bg-red-500 animate-ping opacity-50" />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="text-red-400 font-bold text-sm animate-bounce">CRACK!</div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {effect.type === "fire" && (
-                                    <div className="relative">
-                                        <div className="w-8 h-12 bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400 animate-pulse" />
-                                        <div className="absolute -inset-2 bg-orange-400 rounded-full animate-ping opacity-30" />
-                                    </div>
-                                )}
-
-                                {effect.type === "breach" && (
-                                    <div className="relative">
-                                        <div className="w-24 h-24 border-4 border-slate-400 rounded opacity-50" />
-                                        <div className="absolute inset-4 bg-gradient-to-br from-red-600 to-orange-500 animate-pulse" />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="text-green-400 font-bold text-lg animate-bounce">BREACH!</div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {effect.type === "victory" && (
-                                    <div className="relative">
-                                        <div className="w-20 h-20 bg-green-500 rounded-full animate-ping opacity-50" />
-                                        <Crown
-                                            className="absolute inset-0 w-10 h-10 text-yellow-400 animate-pulse"
-                                            style={{ margin: "20px" }}
-                                        />
-                                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-green-400 font-bold text-sm">
-                                            CAPTURED!
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <SiegeEffectOverlay />
             )}
         </div>
     )

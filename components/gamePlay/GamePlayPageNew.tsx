@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/lib/hooks/use-toast"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Territory, Player, InitialPlayers } from '@/lib/types/game'
 import GameStatus from '@/components/gamePlay/GameStatus/GameStatus'
-import ChatSystem from '@/components/gamePlay/ChatSystem'
 import ImprovedGameMap from '@/components/gamePlay/improvedGameMap'
 import { get2DGrid, addressToId, getMaxPlayer, totalPlayers, getGameStatus, getRoundSubmitted, idToAddress } from '@/lib/hooks/ReadGameContract'
 import { useAccount } from 'wagmi'
@@ -21,7 +19,6 @@ import { gameAbi } from '@/lib/contract/gameAbi'
 import { PlayerState } from '@/lib/types/gameStatus'
 import { GameStatusEnum } from '@/lib/types/gameStatus'
 import { Spinner } from '../ui/spinner'
-import { cn } from "@/lib/utils"
 import { GameOverview } from './GameStatus/GameOverview'
 import {
     Drawer,
