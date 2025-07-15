@@ -42,24 +42,33 @@ const getGameStatusText = (status: number): GameStatusEnum => {
 
 
 export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: `0x${string}` }) {
+    // Game contract and address
     const { gameAddress } = useGameAddress();
+    const { address } = useAccount();
+    const { makeMove, error: makeMoveError, isConfirmed: isMoveConfirmed, isConfirming: isMoveConfirming } = useMakeMove();
+    const { toast } = useToast();
+    
+    // Game status states
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
-    const [territories, setTerritories] = useState<Territory[][]>([])
-    const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
-    const [currentUnits, setCurrentUnits] = useState<number>(0)
-    const [moveStrength, setMoveStrength] = useState<number>(0)
-    const [players, setPlayers] = useState<Player[]>(InitialPlayers)
-    const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
-    const [playerId, setPlayerId] = useState<string | null>(null)
-    const [isGridLoading, setIsGridLoading] = useState(true)
-    const [isStatusLoading, setIsStatusLoading] = useState(true)
-    const [moveAction, setMoveAction] = useState<Territory | null>(null)
-    const { toast } = useToast()
-    const { address } = useAccount()
-    const { makeMove, error: makeMoveError, isConfirmed: isMoveConfirmed, isConfirming: isMoveConfirming } = useMakeMove()
+    const [players, setPlayers] = useState<Player[]>(InitialPlayers);
+    const [playerId, setPlayerId] = useState<string | null>(null);
+    
+    // Loading states
+    const [isGridLoading, setIsGridLoading] = useState(true);
+    const [isStatusLoading, setIsStatusLoading] = useState(true);
+    
+    // Territory and movement states
+    const [territories, setTerritories] = useState<Territory[][]>([]);
+    const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null);
+    const [currentUnits, setCurrentUnits] = useState<number>(0);
+    const [moveStrength, setMoveStrength] = useState<number>(0);
+    const [moveAction, setMoveAction] = useState<Territory | null>(null);
+    const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false);
+    const [showMovementPaths, setShowMovementPaths] = useState(false)
+
 
     useWatchContractEvent({
         address: gameAddressParam,

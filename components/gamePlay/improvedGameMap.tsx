@@ -15,9 +15,9 @@ interface TerritoryState extends Territory {
 
 interface Army {
     id: string
-    gridX: number
-    gridY: number
-    size: number
+    x: number
+    y: number
+    units: bigint[]
     owner: string
     isMoving: boolean
 }
@@ -73,7 +73,7 @@ export default function GameMap() {
             x: 0,
             y: 0,
             player: "0x0000000000000000000000000000000000000000",
-            units: [85n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -83,8 +83,7 @@ export default function GameMap() {
             x: 1,
             y: 0,
             player: "0x0000000000000000000000000000000000000000",
-            units: [60n],
-            isCastle: true,
+            units: [0n, 0n], isCastle: true,
             isSelected: false,
         },
         {
@@ -93,7 +92,7 @@ export default function GameMap() {
             x: 2,
             y: 0,
             player: "0x0000000000000000000000000000000000000000",
-            units: [70n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -103,7 +102,7 @@ export default function GameMap() {
             x: 0,
             y: 1,
             player: "0x0000000000000000000000000000000000000000",
-            units: [65n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -113,7 +112,7 @@ export default function GameMap() {
             x: 1,
             y: 1,
             player: "0x0000000000000000000000000000000000000000",
-            units: [95n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -123,7 +122,7 @@ export default function GameMap() {
             x: 2,
             y: 1,
             player: "0x0000000000000000000000000000000000000000",
-            units: [75n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -133,7 +132,7 @@ export default function GameMap() {
             x: 0,
             y: 2,
             player: "0x0000000000000000000000000000000000000000",
-            units: [90n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -143,7 +142,7 @@ export default function GameMap() {
             x: 1,
             y: 2,
             player: "0x0000000000000000000000000000000000000000",
-            units: [70n],
+            units: [0n, 0n],
             isCastle: true,
             isSelected: false,
         },
@@ -153,22 +152,21 @@ export default function GameMap() {
             x: 2,
             y: 2,
             player: "0x0000000000000000000000000000000000000000",
-            units: [65n],
+            units: [0n, 0n],
             isCastle: false,
             isSelected: false,
         },
     ]
 
     const armies: Army[] = [
-        { id: "a1", gridX: 1, gridY: 0, size: 500, owner: "P1", isMoving: false },
-        { id: "a2", gridX: 0, gridY: 1, size: 800, owner: "P2", isMoving: false },
+        { id: "1", x: 1, y: 0, units: [10n, 0n], owner: "0x0000000000000000000000000000000000000001", isMoving: false },
+        { id: "2", x: 0, y: 1, units: [0n, 10n], owner: "0x0000000000000000000000000000000000000002", isMoving: false },
     ]
 
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null)
     const [selectedArmy, setSelectedArmy] = useState<Army | null>(null)
     const [activePanel, setActivePanel] = useState<"territory" | "army" | "overview" | null>("overview")
     const [isMobile, setIsMobile] = useState(false)
-    const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
     const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false)
     const mapRef = useRef<HTMLDivElement>(null)
 
@@ -198,15 +196,6 @@ export default function GameMap() {
     const [showBattlePreview, setShowBattlePreview] = useState(false)
     const [battleTarget, setBattleTarget] = useState<{ army?: Army; territory?: Territory } | null>(null)
 
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768)
-        }
-        checkMobile()
-        window.addEventListener("resize", checkMobile)
-        return () => window.removeEventListener("resize", checkMobile)
-    }, [])
-
     const handleTerritoryClick = (territory: Territory) => {
         setSelectedTerritory(territory)
         setSelectedArmy(null)
@@ -226,8 +215,8 @@ export default function GameMap() {
         ]
 
         directions.forEach((dir) => {
-            const newX = army.gridX + dir.x
-            const newY = army.gridY + dir.y
+            const newX = army.x + dir.x
+            const newY = army.y + dir.y
 
             // Check if the new position is within the 3x3 grid
             if (newX >= 0 && newX < 3 && newY >= 0 && newY < 3) {
@@ -241,9 +230,9 @@ export default function GameMap() {
     const getArmyDisplayPosition = (army: Army) => {
         const animatedPosition = armyPositions[army.id]
         if (animatedPosition && animatedPosition.isAnimating) {
-            return { gridX: animatedPosition.gridX, gridY: animatedPosition.gridY }
+            return { x: animatedPosition.x, y: animatedPosition.y }
         }
-        return { gridX: army.gridX, gridY: army.gridY }
+        return { x: army.x, y: army.y }
     }
 
     const handleArmyClick = (army: Army) => {
@@ -309,21 +298,6 @@ export default function GameMap() {
         setMobileBottomPanelOpen(false)
     }
 
-    const getTerritoryColor = (owner: string) => {
-        const colors = {
-            Stark: "#4A90E2",
-            Baratheon: "#F5A623",
-            Lannister: "#D0021B",
-            Targaryen: "#7ED321",
-            Tyrell: "#50E3C2",
-            Frey: "#9013FE",
-            Arryn: "#00BCD4",
-            Tully: "#FF5722",
-            Martell: "#FF9800",
-        }
-        return colors[owner as keyof typeof colors] || "#9B9B9B"
-    }
-
     const getTerritoryIcon = (isCastle: boolean) => {
         switch (isCastle) {
             case true:
@@ -336,14 +310,8 @@ export default function GameMap() {
 
 
     const calculateBattleOdds = (attacker: Army, defender: Army | Territory) => {
-        const attackerStrength = attacker.size
-        let defenderStrength = "size" in defender ? defender.size : defender.units * 10
-
-        // Add fortification bonus for castles and strongholds
-        if ("isCastle" in defender && defender.isCastle) {
-            const fortificationBonus = defender.isCastle ? 2.5 : 2.0
-            defenderStrength *= fortificationBonus
-        }
+        const attackerStrength = attacker.units.reduce((acc, curr) => acc + Number(curr), 0)
+        const defenderStrength = defender.units.reduce((acc, curr) => acc + Number(curr), 0)
 
         const attackerOdds = attackerStrength / (attackerStrength + defenderStrength)
         const defenderOdds = 1 - attackerOdds
@@ -401,8 +369,8 @@ export default function GameMap() {
         const effect: BattleEffect = {
             id: `battle_effect_${Date.now()}_${Math.random()}`,
             type: type,
-            x: (attackerPos.gridX + defenderPos.gridX) / 2,
-            y: (attackerPos.gridY + defenderPos.gridY) / 2,
+            x: (attackerPos.x + defenderPos.x) / 2,
+            y: (attackerPos.y + defenderPos.y) / 2,
             timestamp: Date.now(),
         }
 
@@ -472,8 +440,8 @@ export default function GameMap() {
             const battle: BattleState = {
                 id: battleId,
                 attackerArmy: attacker,
-                defenderArmy: "size" in target ? target : undefined,
-                defenderTerritory: "units" in target ? target : undefined,
+                defenderArmy: "units" in target ? target as Army : undefined,
+                defenderTerritory: "units" in target ? target as Territory : undefined,
                 isActive: true,
                 progress: 0,
                 attackerDamage: 0,
@@ -578,9 +546,9 @@ export default function GameMap() {
                 type: "catapult",
                 x: defenderPos.gridX,
                 y: defenderPos.gridY,
-                startX: attackerPos.gridX,
-                startY: attackerPos.gridY,
-                endX: defenderPos.gridX,
+                startX: attackerPos.x,
+                startY: attackerPos.y,
+                endX: defenderPos.x,
                 endY: defenderPos.gridY,
                 projectile: true,
                 timestamp: Date.now(),
@@ -663,8 +631,8 @@ export default function GameMap() {
         if (!selectedArmy) return
 
         setBattleTarget({
-            army: "size" in target ? target : undefined,
-            territory: "strength" in target ? target : undefined,
+            army: "units" in target ? target as Army : undefined,
+            territory: "units" in target ? target as Territory : undefined,
         })
         setShowBattlePreview(true)
     }
@@ -727,12 +695,6 @@ export default function GameMap() {
                                                 {getTerritoryIcon(territory.isCastle)}
                                                 <span className="text-xs md:text-sm font-bold truncate">{territory.name}</span>
                                             </div>
-                                            <div className="text-xs">
-                                                <div className="flex items-center gap-1">
-                                                    <Sword className="w-3 h-3" />
-                                                    <span>{territory.units.reduce((acc, curr) => acc + curr, 0)}</span>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         {/* Army on Territory */}
@@ -740,7 +702,7 @@ export default function GameMap() {
                                         {armies
                                             .filter((army) => {
                                                 const displayPos = getArmyDisplayPosition(army)
-                                                return displayPos.gridX === territory.x && displayPos.gridY === territory.y
+                                                return displayPos.x === territory.x && displayPos.y === territory.y
                                             })
                                             .map((army) => {
                                                 const isAnimating = animatingArmies.has(army.id)
@@ -755,7 +717,7 @@ export default function GameMap() {
                                                             } ${army.isMoving || isAnimating ? "animate-pulse" : ""} ${isAnimating ? "scale-110 shadow-lg" : "hover:scale-110"
                                                             }`}
                                                         style={{
-                                                            backgroundColor: getTerritoryColor(army.owner),
+                                                            backgroundColor: "#9B9B9B",
                                                             transform: isAnimating ? "translateZ(0)" : undefined,
                                                         }}
                                                         onClick={(e) => {
@@ -767,7 +729,7 @@ export default function GameMap() {
                                                     >
                                                         <Users className="w-3 h-3 md:w-4 md:h-4 text-white" />
                                                         <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs bg-slate-800 px-1 rounded whitespace-nowrap">
-                                                            {army.size}
+                                                            {Number(army.units[Number(army.id) - 1])}
                                                         </div>
 
                                                         {/* Movement Trail Effect */}
@@ -870,7 +832,7 @@ export default function GameMap() {
                                     const gridX = index % 3
                                     const gridY = Math.floor(index / 3)
                                     const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
-                                    const isCurrentPosition = selectedArmy && selectedArmy.gridX === gridX && selectedArmy.gridY === gridY
+                                    const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
 
                                     return (
                                         <div
