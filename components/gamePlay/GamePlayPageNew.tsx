@@ -22,12 +22,7 @@ import { Spinner } from '../ui/spinner'
 import { GameOverview } from './GameStatus/GameOverview'
 import {
     Drawer,
-    DrawerClose,
     DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer"
 import { ChevronDown } from 'lucide-react'
@@ -62,7 +57,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [isGridLoading, setIsGridLoading] = useState(true)
     const [isStatusLoading, setIsStatusLoading] = useState(true)
     const [moveAction, setMoveAction] = useState<Territory | null>(null)
-    const [activeTab, setActiveTab] = useState<string>("map")
     const { toast } = useToast()
     const { address } = useAccount()
     const { makeMove, error: makeMoveError, isConfirmed: isMoveConfirmed, isConfirming: isMoveConfirming } = useMakeMove()
@@ -215,10 +209,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         setMoveStrength(0);
         setCurrentUnits(Number(territory.units[Number(playerId)]));
 
-        // On mobile, switch to info tab when territory is selected
-        if (window.innerWidth < 768) {
-            setActiveTab("info");
-        }
     }
 
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
@@ -409,7 +399,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
             <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-4rem)]">
                 {/* Map section */}
                 <div className="p-4 overflow-auto md:flex-1 block">
-                    <ImprovedGameMap />
+                    {isGridLoading ? <Spinner /> : <ImprovedGameMap />}
                 </div>
 
 

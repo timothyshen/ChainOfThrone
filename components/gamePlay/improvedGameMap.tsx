@@ -7,16 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Map, Sword, Shield, Crown, Users, Settings, Navigation, Home, Flag, Menu, ChevronDown } from "lucide-react"
 import GameOperationPanel from "./GameMap/GameOperationPanel"
+import { Territory } from "@/lib/types/game"
 
-interface Territory {
-    id: string
-    name: string
-    gridX: number
-    gridY: number
-    owner: string
-    strength: number
-    resources: number
-    type: "castle" | "city" | "village" | "stronghold"
+interface TerritoryState extends Territory {
     isSelected: boolean
 }
 
@@ -73,104 +66,95 @@ interface SiegeEffect {
 
 export default function GameMap() {
     // 3x3 Grid territories (9 total)
-    const territories: Territory[] = [
+    const territories: TerritoryState[] = [
         {
             id: "1",
             name: "Winterfell",
-            gridX: 0,
-            gridY: 0,
-            owner: "Stark",
-            strength: 85,
-            resources: 1200,
-            type: "castle",
+            x: 0,
+            y: 0,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [85n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "2",
             name: "The Twins",
-            gridX: 1,
-            gridY: 0,
-            owner: "Frey",
-            strength: 60,
-            resources: 800,
-            type: "castle",
+            x: 1,
+            y: 0,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [60n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "3",
             name: "The Eyrie",
-            gridX: 2,
-            gridY: 0,
-            owner: "Arryn",
-            strength: 70,
-            resources: 900,
-            type: "castle",
+            x: 2,
+            y: 0,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [70n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "4",
             name: "Riverrun",
-            gridX: 0,
-            gridY: 1,
-            owner: "Tully",
-            strength: 65,
-            resources: 1000,
-            type: "castle",
+            x: 0,
+            y: 1,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [65n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "5",
             name: "King's Landing",
-            gridX: 1,
-            gridY: 1,
-            owner: "Baratheon",
-            strength: 95,
-            resources: 2500,
-            type: "castle",
+            x: 1,
+            y: 1,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [95n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "6",
             name: "Dragonstone",
-            gridX: 2,
-            gridY: 1,
-            owner: "Targaryen",
-            strength: 75,
-            resources: 800,
-            type: "castle",
+            x: 2,
+            y: 1,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [75n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "7",
             name: "Casterly Rock",
-            gridX: 0,
-            gridY: 2,
-            owner: "Lannister",
-            strength: 90,
-            resources: 3000,
-            type: "stronghold",
+            x: 0,
+            y: 2,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [90n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "8",
             name: "Highgarden",
-            gridX: 1,
-            gridY: 2,
-            owner: "Tyrell",
-            strength: 70,
-            resources: 1800,
-            type: "castle",
+            x: 1,
+            y: 2,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [70n],
+            isCastle: true,
             isSelected: false,
         },
         {
             id: "9",
             name: "Sunspear",
-            gridX: 2,
-            gridY: 2,
-            owner: "Martell",
-            strength: 65,
-            resources: 1100,
-            type: "city",
+            x: 2,
+            y: 2,
+            player: "0x0000000000000000000000000000000000000000",
+            units: [65n],
+            isCastle: false,
             isSelected: false,
         },
     ]
@@ -340,9 +324,9 @@ export default function GameMap() {
         return colors[owner as keyof typeof colors] || "#9B9B9B"
     }
 
-    const getTerritoryIcon = (type: string) => {
-        switch (type) {
-            case "castle":
+    const getTerritoryIcon = (isCastle: boolean) => {
+        switch (isCastle) {
+            case true:
                 return <Crown className="w-3 h-3 md:w-4 md:h-4" />
 
             default:
@@ -353,11 +337,11 @@ export default function GameMap() {
 
     const calculateBattleOdds = (attacker: Army, defender: Army | Territory) => {
         const attackerStrength = attacker.size
-        let defenderStrength = "size" in defender ? defender.size : defender.strength * 10
+        let defenderStrength = "size" in defender ? defender.size : defender.units * 10
 
         // Add fortification bonus for castles and strongholds
-        if ("type" in defender && (defender.type === "castle" || defender.type === "stronghold")) {
-            const fortificationBonus = defender.type === "castle" ? 2.5 : 2.0
+        if ("isCastle" in defender && defender.isCastle) {
+            const fortificationBonus = defender.isCastle ? 2.5 : 2.0
             defenderStrength *= fortificationBonus
         }
 
@@ -412,7 +396,7 @@ export default function GameMap() {
         const attackerPos = getArmyDisplayPosition(battle.attackerArmy)
         const defenderPos = battle.defenderArmy
             ? getArmyDisplayPosition(battle.defenderArmy)
-            : { gridX: battle.defenderTerritory!.gridX, gridY: battle.defenderTerritory!.gridY }
+            : { gridX: battle.defenderTerritory!.x, gridY: battle.defenderTerritory!.y }
 
         const effect: BattleEffect = {
             id: `battle_effect_${Date.now()}_${Math.random()}`,
@@ -440,8 +424,8 @@ export default function GameMap() {
         const finalEffect: BattleEffect = {
             id: `battle_final_${Date.now()}`,
             type: "victory",
-            x: battle.defenderArmy ? battle.defenderArmy.gridX : battle.defenderTerritory!.gridX,
-            y: battle.defenderArmy ? battle.defenderArmy.gridY : battle.defenderTerritory!.gridY,
+            x: battle.defenderArmy ? battle.defenderArmy.gridX : battle.defenderTerritory!.x,
+            y: battle.defenderArmy ? battle.defenderArmy.gridY : battle.defenderTerritory!.y,
             timestamp: Date.now(),
         }
 
@@ -489,7 +473,7 @@ export default function GameMap() {
                 id: battleId,
                 attackerArmy: attacker,
                 defenderArmy: "size" in target ? target : undefined,
-                defenderTerritory: "strength" in target ? target : undefined,
+                defenderTerritory: "units" in target ? target : undefined,
                 isActive: true,
                 progress: 0,
                 attackerDamage: 0,
@@ -521,8 +505,8 @@ export default function GameMap() {
             siegePhase: "approach",
             wallIntegrity: 100,
             siegeEquipment: ["catapult", "battering_ram"],
-            defenseBonus: fortress.type === "castle" ? 2.5 : 2.0,
-            siegeDuration: fortress.type === "castle" ? 8000 : 6000, // 8s for castles, 6s for strongholds
+            defenseBonus: fortress.isCastle ? 2.5 : 2.0,
+            siegeDuration: fortress.isCastle ? 8000 : 6000, // 8s for castles, 6s for strongholds
         }
 
         setActiveSiege(siege)
@@ -584,7 +568,7 @@ export default function GameMap() {
 
     const addSiegeEffect = (siege: SiegeState, effectType: "catapult" | "battering_ram" | "wall_damage") => {
         const attackerPos = getArmyDisplayPosition(siege.attackerArmy)
-        const defenderPos = { gridX: siege.defenderTerritory!.gridX, gridY: siege.defenderTerritory!.gridY }
+        const defenderPos = { gridX: siege.defenderTerritory!.x, gridY: siege.defenderTerritory!.y }
 
         let effect: SiegeEffect
 
@@ -639,8 +623,8 @@ export default function GameMap() {
         const finalEffect: SiegeEffect = {
             id: `siege_final_${Date.now()}`,
             type: winner === "attacker" ? "breach" : "victory",
-            x: siege.defenderTerritory!.gridX,
-            y: siege.defenderTerritory!.gridY,
+            x: siege.defenderTerritory!.x,
+            y: siege.defenderTerritory!.y,
             timestamp: Date.now(),
         }
 
@@ -740,13 +724,13 @@ export default function GameMap() {
                                     >
                                         <div className="p-2 md:p-3 h-full flex flex-col justify-between">
                                             <div className="flex items-center gap-1">
-                                                {getTerritoryIcon(territory.type)}
+                                                {getTerritoryIcon(territory.isCastle)}
                                                 <span className="text-xs md:text-sm font-bold truncate">{territory.name}</span>
                                             </div>
                                             <div className="text-xs">
                                                 <div className="flex items-center gap-1">
                                                     <Sword className="w-3 h-3" />
-                                                    <span>{territory.strength}</span>
+                                                    <span>{territory.units.reduce((acc, curr) => acc + curr, 0)}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -756,7 +740,7 @@ export default function GameMap() {
                                         {armies
                                             .filter((army) => {
                                                 const displayPos = getArmyDisplayPosition(army)
-                                                return displayPos.gridX === territory.gridX && displayPos.gridY === territory.gridY
+                                                return displayPos.gridX === territory.x && displayPos.gridY === territory.y
                                             })
                                             .map((army) => {
                                                 const isAnimating = animatingArmies.has(army.id)
