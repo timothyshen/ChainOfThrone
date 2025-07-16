@@ -246,9 +246,6 @@ export default function GameMap({
         animateBattle(battle)
     }
 
-    const handleTerritoryClick = (territory: Territory) => {
-        onTerritoryClick(territory)
-    }
 
     const handleArmyClick = (army: Army) => {
         const territory = territories.find(t => t.x === army.x && t.y === army.y)
@@ -308,14 +305,16 @@ export default function GameMap({
                                 return (
                                     <div
                                         key={territory.id}
-                                        className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50 ${selectedTerritory?.id === territory.id
-                                            ? "border-yellow-400 shadow-lg shadow-yellow-400/50"
-                                            : "border-slate-600"
+                                        className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50 
+                                            ${selectedTerritory?.id === territory.id
+                                                ? "border-red-400 shadow-lg shadow-red-400/50"
+                                                : territory.player === currentPlayer
+                                                    ? "border-blue-400"
+                                                    : "border-slate-600"
                                             }`}
                                         style={{
                                             minHeight: isMobile ? "80px" : "120px",
                                         }}
-                                        onClick={() => handleTerritoryClick(territory)}
                                     >
                                         <div className="p-2 md:p-3 h-full flex flex-col justify-between">
                                             <div className="flex items-center gap-1">
@@ -344,9 +343,10 @@ export default function GameMap({
                                                 return (
                                                     <div
                                                         key={army.id}
-                                                        className={`absolute top-1 right-1 w-6 h-6 md:w-8 md:h-8 rounded-full border-2 cursor-pointer flex items-center justify-center transition-all duration-800 ease-in-out ${selectedArmy?.id === army.id
-                                                            ? "border-yellow-400 shadow-lg shadow-yellow-400/50"
-                                                            : "border-white"
+                                                        className={`absolute top-1 right-1 w-6 h-6 md:w-8 md:h-8 rounded-full border-2 cursor-pointer flex items-center justify-center transition-all duration-800 ease-in-out 
+                                                            ${selectedArmy?.id === army.id
+                                                                ? "border-yellow-400 shadow-lg shadow-yellow-400/50"
+                                                                : "border-white"
                                                             } ${army.isMoving || isAnimating ? "animate-pulse" : ""} ${isAnimating ? "scale-110 shadow-lg" : "hover:scale-110"
                                                             }`}
                                                         style={{

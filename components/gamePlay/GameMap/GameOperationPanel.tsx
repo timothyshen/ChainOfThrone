@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Navigation, Shield, Sword, Users } from "lucide-react"
 import { Army, Territory } from "@/lib/types/game"
 import { BattleState } from "@/lib/types/advancedGame"
+import { Input } from "@/components/ui/input"
 
 interface GameOperationPanelProps {
     selectedArmy: Army | null
@@ -143,6 +144,12 @@ const GameOperationPanel = ({
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-2">
+                            <Input
+                                type="number"
+                                placeholder="Enter army number"
+                                className="w-full text-black"
+                                maxLength={2}
+                            />
                             <Button
                                 variant="outline"
                                 className="w-full text-black"
@@ -163,29 +170,6 @@ const GameOperationPanel = ({
                                 variant="outline"
                                 className="w-full text-black"
                                 onClick={() => {
-                                    // Find nearby enemies to attack
-                                    const nearbyEnemies = armies.filter(
-                                        (army) =>
-                                            army.owner !== selectedArmy?.owner &&
-                                            Math.abs(army.x - selectedArmy!.x) <= 1 &&
-                                            Math.abs(army.y - selectedArmy!.y) <= 1,
-                                    )
-
-                                    const nearbyTerritories = territories.filter(
-                                        (territory) =>
-                                            territory.player !== selectedArmy?.owner &&
-                                            Math.abs(territory.x - selectedArmy!.x) <= 1 &&
-                                            Math.abs(territory.y - selectedArmy!.y) <= 1,
-                                    )
-
-                                    const firstEnemy = nearbyEnemies[0]
-                                    const firstTerritory = nearbyTerritories[0]
-
-                                    if (firstEnemy) {
-                                        initiateBattle(firstEnemy)
-                                    } else if (firstTerritory) {
-                                        initiateBattle(firstTerritory)
-                                    }
                                 }}
                             >
                                 <Sword className="w-4 h-4 mr-2" />

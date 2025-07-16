@@ -1,18 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/lib/hooks/use-toast"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Territory, Player, InitialPlayers, Army } from '@/lib/types/game'
 import {
     BattleState,
     BattleEffect,
-    SiegeState,
-    SiegeEffect,
-    TerritoryState,
     ActivePanel,
     ArmyPosition,
     BattleTarget
@@ -112,12 +106,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     // ========================================================================
     // ADVANCED GAME STATE (ARMIES, BATTLES, SIEGES)
     // ========================================================================
-
-    // Army management
-    const [armies, setArmies] = useState<Army[]>([
-        { id: "a1", x: 1, y: 0, size: 500, owner: "P1", isMoving: false },
-        { id: "a2", x: 0, y: 1, size: 800, owner: "P2", isMoving: false },
-    ]);
+    const [armies, setArmies] = useState<Army[]>([]);
     const [selectedArmy, setSelectedArmy] = useState<Army | null>(null);
     const [animatingArmies, setAnimatingArmies] = useState<Set<string>>(new Set());
     const [armyPositions, setArmyPositions] = useState<Record<string, ArmyPosition>>({});
@@ -220,8 +209,8 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
             const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
                 row.map((territory: any, colIndex: number) => ({
                     ...territory,
-                    x: rowIndex,
-                    y: colIndex,
+                    x: colIndex,    // x = column index (HORIZONTAL position)
+                    y: rowIndex,    // y = row index (VERTICAL position)
                 }))
             );
             newGridData.map((row: any[], rowIndex: number) =>
@@ -230,8 +219,8 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         if (unit > 0) {
                             armies.push({
                                 id: index.toString(),
-                                x: rowIndex,
-                                y: colIndex,
+                                x: colIndex,    // x = column index (HORIZONTAL position)
+                                y: rowIndex,    // y = row index (VERTICAL position)
                                 size: unit,
                                 owner: territory.player,
                                 isMoving: false,
@@ -353,14 +342,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
      * Handle territory selection and validation
      */
     const handleTerritoryClick = (territory: Territory) => {
-        if (territory.player !== address) {
-            toast({
-                title: "Invalid Selection",
-                description: "You can only select territories that belong to you",
-                variant: "destructive",
-            });
-            return;
-        }
+
         console.log("Territory clicked:", territory);
 
         setSelectedTerritory(territory);
@@ -392,14 +374,14 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
      * Handle army selection and movement setup
      */
     const handleArmyClick = (territory: Territory, army: Army) => {
-        if (territory.player !== address) {
-            toast({
-                title: "Invalid Selection",
-                description: "You can only select territories that belong to you",
-                variant: "destructive",
-            });
-            return;
-        }
+        // if (territory.player !== address) {
+        //     toast({
+        //         title: "Invalid Selection",
+        //         description: "You can only select territories that belong to you",
+        //         variant: "destructive",
+        //     });
+        //     return;
+        // }
         console.log("territory", territory)
         console.log("army", army)
         setSelectedTerritory(territory)
@@ -408,7 +390,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
         // Show movement paths for selected army
         // Note: Using army position to find territory, not passing army directly to getAdjacentTerritories
-        const armyTerritory = territories[army.x]?.[army.y];
+        const armyTerritory = territories[army.y]?.[army.x];  // territories[row][col] = territories[y][x]
         if (armyTerritory) {
             const validCells = getAdjacentTerritories(armyTerritory)
             setValidMovementCells(validCells.map(t => ({ x: t.x, y: t.y })))
@@ -456,7 +438,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 }
             });
         });
-
+        console.log("adjacentTerritories", adjacentTerritories);
         return adjacentTerritories;
     };
 
@@ -464,7 +446,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
      * Get valid movement cells for an army
      */
     const getValidMovementCells = (army: Army): { x: number; y: number }[] => {
-        const armyTerritory = territories[army.x]?.[army.y];
+        const armyTerritory = territories[army.y]?.[army.x];  // territories[row][col] = territories[y][x]
         if (!armyTerritory) return [];
         return getAdjacentTerritories(armyTerritory).map(t => ({ x: t.x, y: t.y }));
     };
@@ -573,8 +555,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         targetTerritory.y,
                         moveStrength
                     ] as const;
+                    console.log("move", move);
 
-                    await makeMove(gameAddress, move);
+                    // await makeMove(gameAddress, move);
 
                 } catch (error) {
                     console.error('Error making move:', error);
@@ -649,61 +632,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     /**
      * Territory information and action panel
      */
-    const TerritoryInfoPanel = () => (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle className="text-lg md:text-xl">Territory Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-                {selectedTerritory ? (
-                    <div>
-                        <h3 className="text-lg font-bold mb-2">{selectedTerritory.name}</h3>
-                        <p className="mb-2">Type: {selectedTerritory.isCastle ? 'castle' : 'land'}</p>
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="moveStrength">Units to Move:</Label>
-                                <div className="flex gap-2 mt-1">
-                                    <Input
-                                        id="moveStrength"
-                                        type="number"
-                                        min={1}
-                                        value={moveStrength ?? ''}
-                                        max={currentUnits}
-                                        onChange={(e) => setMoveStrength(Number(e.target.value))}
-                                        className="w-full"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label>Select Destination:</Label>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                    Current Location: ({selectedTerritory.x}, {selectedTerritory.y})
-                                </p>
-                                <div className="grid gap-2 mt-1">
-                                    {getAdjacentTerritories(selectedTerritory).map(territory => (
-                                        <Button
-                                            key={`${territory.x}-${territory.y}`}
-                                            className="w-full text-sm"
-                                            onClick={() => handleAction(territory)}
-                                            disabled={!moveStrength || moveStrength <= 0 || moveSubmitted}
-                                        >
-                                            {isMoveConfirmed ? `Making the move to ${territory.x}, ${territory.y}` : `Move ${moveStrength} units to ${territory.x}, ${territory.y}`}
-                                            {isMoveConfirming && <span className="animate-pulse">...</span>}
-                                        </Button>
-                                    ))}
-                                    {isMoveConfirming && <Spinner className="animate-pulse" />}
-                                    {isMoveConfirmed && <Button>You have made the move to {moveAction?.x}, {moveAction?.y}</Button>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <p>Select a territory to view information and perform actions.</p>
-                )}
-            </CardContent>
-        </Card>
-    );
 
     // ========================================================================
     // MAIN RENDER
@@ -773,7 +701,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     />}
                 </div>
 
-                {mobileBottomPanelOpen && activePanel && <GameOperationPanel
+                {mobileBottomPanelOpen && <GameOperationPanel
                     selectedArmy={selectedArmy}
                     animatingArmies={animatingArmies}
                     movementMode={movementMode}

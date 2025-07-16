@@ -4,5 +4,5 @@ import { http, createPublicClient } from "viem";
 
 export const contractClient = createPublicClient({
   chain: monadTestnet,
-  transport: http(),
+  transport: http("https://monad-testnet.drpc.org"),
 });
