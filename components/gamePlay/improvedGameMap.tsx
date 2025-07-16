@@ -260,6 +260,10 @@ export default function GameMap({
         if (territory) {
             setTargetTerritory(territory)
             onMoveToCell(territory)
+            // Clear target territory after a delay to allow animation to complete
+            setTimeout(() => {
+                setTargetTerritory(null)
+            }, 1000)
         }
     }
 
@@ -392,6 +396,8 @@ export default function GameMap({
                             const startPos = { x: army.x, y: army.y }
                             const endPos = armyPositions[army.id]
 
+                            if (!endPos) return null
+
                             return (
                                 <div
                                     key={`floating-${army.id}`}
@@ -436,6 +442,8 @@ export default function GameMap({
                                 const startPos = { x: army.x, y: army.y }
                                 const endPos = armyPositions[army.id]
 
+                                if (!endPos) return ''
+
                                 return `
                       @keyframes moveArmy-${army.id} {
                         0% {
@@ -449,8 +457,8 @@ export default function GameMap({
                           opacity: 0.9;
                         }
                         100% {
-                          left: ${endPos?.x ? endPos.x * 33.333 + 16.666 : 50}%;
-                          top: ${endPos?.y ? endPos.y * 33.333 + 16.666 : 50}%;
+                          left: ${endPos.x * 33.333 + 16.666}%;
+                          top: ${endPos.y * 33.333 + 16.666}%;
                           transform: translate(-50%, -50%) scale(1);
                           opacity: 1;
                         }
@@ -472,7 +480,7 @@ export default function GameMap({
                                     const isTargetTerritory = targetTerritory && targetTerritory.x === gridX && targetTerritory.y === gridY
 
                                     // Only check for armies in valid movement cells
-                                    const hasArmy = isValidMove && armies.some((army) => army.x === gridX && army.y === gridY)
+                                    const hasArmy = isValidMove && armies.some((army) => army.x === gridX && army.y === gridY && army.owner !== selectedArmy?.owner)
 
                                     // Check if this destination would result in a battle (army on target territory)
                                     const isBattleDestination = isValidMove && hasArmy &&

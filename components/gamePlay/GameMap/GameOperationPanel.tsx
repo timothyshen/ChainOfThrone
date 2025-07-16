@@ -22,6 +22,7 @@ interface GameOperationPanelProps {
     setMovementMode: (mode: boolean) => void
     getTerritoryColor: (owner: string) => string
     getValidMovementCells: (army: Army) => { x: number; y: number }[]
+    isMoveSubmitted: boolean
 }
 
 const GameOperationPanel = ({
@@ -37,6 +38,7 @@ const GameOperationPanel = ({
     setMovementMode,
     getTerritoryColor,
     getValidMovementCells,
+    isMoveSubmitted,
 }: GameOperationPanelProps) => {
 
     const initiateBattle = (target: Army | Territory) => {
@@ -92,19 +94,32 @@ const GameOperationPanel = ({
                         </CardContent>
                     </Card>
 
-                    {movementMode ? (
-                        <div className="space-y-2">
-                            <div className="bg-green-900/50 border border-green-600 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Navigation className="w-4 h-4 text-green-400" />
-                                    <span className="text-green-400 font-semibold">Movement Mode Active</span>
-                                </div>
-                                <p className="text-sm text-green-300">Click on a highlighted cell to move your army there.</p>
-                            </div>
-                            <Button variant="outline" className="w-full text-black" onClick={cancelMovement}>
-                                Cancel Movement
+                    {isMoveSubmitted ? (
+                        <div className="grid grid-cols-1 gap-2">
+                            <Input
+                                type="number"
+                                placeholder="Enter army number"
+                                className="w-full text-black"
+                                maxLength={Number(selectedArmy.size)}
+                            />
+                            <Button
+                                variant="outline"
+                                className="w-full text-black"
+                                disabled={selectedArmy && animatingArmies.has(selectedArmy.id)}
+                                onClick={() => {
+                                    if (selectedArmy && !animatingArmies.has(selectedArmy.id)) {
+                                        const validCells = getValidMovementCells(selectedArmy)
+                                        setValidMovementCells(validCells)
+                                        setShowMovementPaths(true)
+                                        setMovementMode(true)
+                                    }
+                                }}
+                            >
+                                <Navigation className="w-4 h-4 mr-2" />
+                                {selectedArmy && animatingArmies.has(selectedArmy.id) ? "Moving..." : "Move Army"}
                             </Button>
                         </div>
+
                     ) : activeBattle && activeBattle.attackerArmy.id === selectedArmy.id ? (
                         <div className="space-y-2">
                             <div className="bg-red-900/50 border border-red-600 rounded-lg p-3">
@@ -141,28 +156,16 @@ const GameOperationPanel = ({
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-2">
-                            <Input
-                                type="number"
-                                placeholder="Enter army number"
-                                className="w-full text-black"
-                                maxLength={Number(selectedArmy.size)}
-                            />
-                            <Button
-                                variant="outline"
-                                className="w-full text-black"
-                                disabled={selectedArmy && animatingArmies.has(selectedArmy.id)}
-                                onClick={() => {
-                                    if (selectedArmy && !animatingArmies.has(selectedArmy.id)) {
-                                        const validCells = getValidMovementCells(selectedArmy)
-                                        setValidMovementCells(validCells)
-                                        setShowMovementPaths(true)
-                                        setMovementMode(true)
-                                    }
-                                }}
-                            >
-                                <Navigation className="w-4 h-4 mr-2" />
-                                {selectedArmy && animatingArmies.has(selectedArmy.id) ? "Moving..." : "Move Army"}
+                        <div className="space-y-2">
+                            <div className="bg-green-900/50 border border-green-600 rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Navigation className="w-4 h-4 text-green-400" />
+                                    <span className="text-green-400 font-semibold">Movement Mode Active</span>
+                                </div>
+                                <p className="text-sm text-green-300">Click on a highlighted cell to move your army there.</p>
+                            </div>
+                            <Button variant="outline" className="w-full text-black" onClick={cancelMovement}>
+                                Cancel Movement
                             </Button>
                         </div>
                     )}

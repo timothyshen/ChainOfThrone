@@ -95,7 +95,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     // Movement mechanics
     const [currentUnits, setCurrentUnits] = useState<number>(0);
     const [moveStrength, setMoveStrength] = useState<number>(0);
-    const [moveAction, setMoveAction] = useState<Territory | null>(null);
     const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false);
     const [showMovementPaths, setShowMovementPaths] = useState(false);
     const [movementMode, setMovementMode] = useState(false);
@@ -636,12 +635,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     return newSet
                 })
 
-                // Clear the temporary animation position since the army's actual position is now updated
-                setArmyPositions((prev) => {
-                    const newPositions = { ...prev }
-                    delete newPositions[selectedArmy.id]
-                    return newPositions
-                })
 
                 try {
                     type Move = readonly [number, number, string, number, number, number];
@@ -665,9 +658,19 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         variant: "destructive",
                     });
                 }
+                setMoveSubmitted(true);
 
                 console.log(`Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`)
             }, 800) // Animation duration
+            // Clear the temporary animation position since the army's actual position is now updated
+            setArmyPositions((prev) => {
+                const newPositions = { ...prev }
+                delete newPositions[selectedArmy.id]
+                return newPositions
+            })
+
+            setMoveSubmitted(true);
+
         }
     }
     // Handle move errors
@@ -691,7 +694,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         getGrids();
         getPlayerId();
         fetchGameData();
-        setMoveSubmitted(true);
         toast({
             title: "Move Submitted",
             description: "Your move has been submitted to the blockchain",
@@ -801,6 +803,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     cancelMovement={cancelMovement}
                     activeBattle={activeBattle}
                     armies={armies}
+                    isMoveSubmitted={moveSubmitted}
                     territories={territories.flat()}
                     setBattleTarget={setBattleTarget}
                     setShowBattlePreview={setShowBattlePreview}
