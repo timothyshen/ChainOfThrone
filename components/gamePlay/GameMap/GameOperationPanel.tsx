@@ -30,8 +30,6 @@ const GameOperationPanel = ({
     movementMode,
     cancelMovement,
     activeBattle,
-    armies,
-    territories,
     setBattleTarget,
     setShowBattlePreview,
     setValidMovementCells,
@@ -70,7 +68,7 @@ const GameOperationPanel = ({
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Size</span>
-                                    <span>{selectedArmy.size} troops</span>
+                                    <span>{Number(selectedArmy.size).toLocaleString()} troops</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Position</span>
@@ -148,7 +146,7 @@ const GameOperationPanel = ({
                                 type="number"
                                 placeholder="Enter army number"
                                 className="w-full text-black"
-                                maxLength={2}
+                                maxLength={Number(selectedArmy.size)}
                             />
                             <Button
                                 variant="outline"
@@ -165,19 +163,6 @@ const GameOperationPanel = ({
                             >
                                 <Navigation className="w-4 h-4 mr-2" />
                                 {selectedArmy && animatingArmies.has(selectedArmy.id) ? "Moving..." : "Move Army"}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full text-black"
-                                onClick={() => {
-                                }}
-                            >
-                                <Sword className="w-4 h-4 mr-2" />
-                                Attack Nearby
-                            </Button>
-                            <Button variant="outline" className="w-full text-black">
-                                <Users className="w-4 h-4 mr-2" />
-                                Split Army
                             </Button>
                         </div>
                     )}

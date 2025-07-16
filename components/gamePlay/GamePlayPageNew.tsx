@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/lib/hooks/use-toast"
-import { Territory, Player, InitialPlayers, Army } from '@/lib/types/game'
+import { Territory, Army } from '@/lib/types/game'
 import {
     BattleState,
     BattleEffect,
-    ActivePanel,
     ArmyPosition,
     BattleTarget
 } from '@/lib/types/advancedGame'
@@ -76,7 +75,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
     const [playerAddresses, setPlayerAddresses] = useState<PlayerState[]>([]);
-    const [players, setPlayers] = useState<Player[]>(InitialPlayers);
     const [playerId, setPlayerId] = useState<string | null>(null);
 
     // ========================================================================
@@ -121,7 +119,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     // UI STATE
     // ========================================================================
 
-    const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
     const [isMobile, setIsMobile] = useState(false);
     const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false);
 
@@ -213,7 +210,91 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     y: rowIndex,    // y = row index (VERTICAL position)
                 }))
             );
-            newGridData.map((row: any[], rowIndex: number) =>
+            const data: Territory[][] = [
+                [{
+                    id: "1",
+                    x: 0,
+                    y: 0,
+                    player: "0x123",
+                    units: [0n, 100n],
+                    isCastle: false,
+                    name: "Test",
+                },
+
+                {
+                    id: "2",
+                    x: 1,
+                    y: 0,
+                    player: "0x123",
+                    units: [100n, 0n],
+                    isCastle: false,
+                    name: "Test",
+                },
+                {
+                    id: "3",
+                    x: 2,
+                    y: 0,
+                    player: "0x123",
+                    units: [0n, 0n],
+                    isCastle: false,
+                    name: "Test",
+                }], [
+                    {
+                        id: "4",
+                        x: 0,
+                        y: 1,
+                        player: "0x123",
+                        units: [0n, 0n],
+                        isCastle: false,
+                        name: "Test",
+                    },
+                    {
+                        id: "5",
+                        x: 1,
+                        y: 1,
+                        player: "0x123",
+                        units: [0n, 0n],
+                        isCastle: false,
+                        name: "Test",
+                    },
+                    {
+                        id: "6",
+                        x: 2,
+                        y: 1,
+                        player: "0x123",
+                        units: [0n, 0n],
+                        isCastle: false,
+                        name: "Test",
+                    }],
+                [{
+                    id: "7",
+                    x: 0,
+                    y: 2,
+                    player: "0x123",
+                    units: [0n, 0n],
+                    isCastle: false,
+                    name: "Test",
+                },
+                {
+                    id: "8",
+                    x: 1,
+                    y: 2,
+                    player: "0x123",
+                    units: [0n, 0n],
+                    isCastle: false,
+                    name: "Test",
+                },
+                {
+                    id: "9",
+                    x: 2,
+                    y: 2,
+                    player: "0x123",
+                    units: [0n, 0n],
+                    isCastle: false,
+                    name: "Test",
+                }]
+            ]
+            data.map((row: any[], rowIndex: number) =>
                 row.map((territory: any, colIndex: number) => (
                     territory.units.map((unit: any, index: number) => {
                         if (unit > 0) {
@@ -229,9 +310,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     })
                 ))
             );
-            console.log("newGridData", newGridData);
+            console.log("newGridData", data);
             console.log("armies", armies);
-            setTerritories(newGridData as Territory[][]);
+            setTerritories(data as Territory[][]);
             setArmies(armies as Army[]);
         } catch (error) {
             console.error('Error fetching grid:', error);
@@ -386,7 +467,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         console.log("army", army)
         setSelectedTerritory(territory)
         setSelectedArmy(army)
-        setActivePanel("army")
 
         // Show movement paths for selected army
         // Note: Using army position to find territory, not passing army directly to getAdjacentTerritories
@@ -567,11 +647,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         variant: "destructive",
                     });
                 }
-
-                // Clear movement mode
-                setMovementMode(false)
-                setShowMovementPaths(false)
-                setValidMovementCells([])
 
                 console.log(`Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`)
             }, 800) // Animation duration

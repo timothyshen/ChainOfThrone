@@ -51,7 +51,6 @@ interface ImprovedGameMapProps {
 export default function GameMap({
     territories: territoriesProps,
     selectedTerritory,
-    onTerritoryClick,
     currentPlayer,
     armies,
     selectedArmy,
@@ -77,10 +76,11 @@ export default function GameMap({
     setSelectedArmy,
     setSelectedTerritory,
 }: ImprovedGameMapProps) {
+
     // Convert 2D territories to flat array with selection state  
     const territories = territoriesProps.flat().map(territory => ({
         ...territory,
-        isSelected: selectedTerritory?.id === territory.id
+        isSelected: false
     }));
 
     const mapRef = useRef<HTMLDivElement>(null)
@@ -302,11 +302,12 @@ export default function GameMap({
                     <div className="absolute inset-0 p-2 rounded-lg">
                         <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
                             {territories.map((territory) => {
+                                console.log("territory", territory.isSelected);
                                 return (
                                     <div
                                         key={territory.id}
                                         className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50 
-                                            ${selectedTerritory?.id === territory.id
+                                            ${territory.isSelected
                                                 ? "border-red-400 shadow-lg shadow-red-400/50"
                                                 : territory.player === currentPlayer
                                                     ? "border-blue-400"
@@ -459,26 +460,38 @@ export default function GameMap({
 
                     {/* Movement Path Overlays */}
                     {showMovementPaths && movementMode && (
-                        <div className="absolute inset-0 p-4 pointer-events-none">
+                        <div className="absolute inset-0 p-2 pointer-events-none">
                             <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
                                 {Array.from({ length: 9 }).map((_, index) => {
                                     const gridX = index % 3
                                     const gridY = Math.floor(index / 3)
                                     const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
                                     const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
+                                    // Only check for armies in valid movement cells
+                                    const hasArmy = isValidMove && armies.some((army) => army.x === gridX && army.y === gridY)
 
                                     return (
                                         <div
                                             key={index}
-                                            className={`relative flex items-center justify-center pointer-events-auto cursor-pointer transition-all duration-200 ${isValidMove ? "bg-green-500/30 border-2 border-green-400 rounded-lg hover:bg-green-500/50" : ""
-                                                } ${isCurrentPosition ? "bg-blue-500/30 border-2 border-blue-400 rounded-lg" : ""}`}
+                                            className={`relative flex items-center p-4 justify-center pointer-events-auto cursor-pointer transition-all duration-200 
+                                                ${isCurrentPosition ? "bg-blue-500/30 border-2 border-blue-400 rounded-lg" : ""
+                                                } ${hasArmy ? "bg-red-500/30 border-2 border-red-400 rounded-lg hover:bg-red-500/50" :
+                                                    isValidMove ? "bg-green-500/30 border-2 border-green-400 rounded-lg hover:bg-green-500/50" : ""}`}
                                             onClick={() => (isValidMove ? handleMoveToCell(gridX, gridY) : null)}
                                         >
-                                            {isValidMove && (
+
+                                            {hasArmy ? (
                                                 <div className="flex flex-col items-center">
-                                                    <Navigation className="w-6 h-6 md:w-8 md:h-8 text-green-400 animate-pulse" />
-                                                    <span className="text-xs text-green-400 font-bold mt-1">MOVE</span>
+                                                    <Sword className="w-6 h-6 md:w-8 md:h-8 text-red-400" />
+                                                    <span className="text-xs text-red-400 font-bold mt-1">ARMY</span>
                                                 </div>
+                                            ) : (
+                                                isValidMove && (
+                                                    <div className="flex flex-col items-center">
+                                                        <Navigation className="w-6 h-6 md:w-8 md:h-8 text-green-400 animate-pulse" />
+                                                        <span className="text-xs text-green-400 font-bold mt-1">MOVE</span>
+                                                    </div>
+                                                )
                                             )}
                                             {isCurrentPosition && (
                                                 <div className="flex flex-col items-center">
