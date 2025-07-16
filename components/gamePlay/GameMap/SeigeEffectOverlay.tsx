@@ -1,4 +1,11 @@
-const SiegeEffectOverlay = () => {
+import { SiegeEffect } from "@/lib/types/advancedGame"
+import { Crown } from "lucide-react"
+
+interface SiegeEffectOverlayProps {
+    siegeEffects: SiegeEffect[]
+}
+
+const SiegeEffectOverlay = ({ siegeEffects }: SiegeEffectOverlayProps) => {
     return (
         <div className="absolute inset-0 p-4 pointer-events-none z-30">
             <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">

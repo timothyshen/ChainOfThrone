@@ -11,6 +11,16 @@ interface GameOperationPanelProps {
     movementMode: boolean
     cancelMovement: () => void
     activeBattle: BattleState | null
+    // Additional props needed for functionality
+    armies: Army[]
+    territories: Territory[]
+    setBattleTarget: (target: any) => void
+    setShowBattlePreview: (show: boolean) => void
+    setValidMovementCells: (cells: { x: number; y: number }[]) => void
+    setShowMovementPaths: (show: boolean) => void
+    setMovementMode: (mode: boolean) => void
+    getTerritoryColor: (owner: string) => string
+    getValidMovementCells: (army: Army) => { x: number; y: number }[]
 }
 
 const GameOperationPanel = ({
@@ -19,6 +29,15 @@ const GameOperationPanel = ({
     movementMode,
     cancelMovement,
     activeBattle,
+    armies,
+    territories,
+    setBattleTarget,
+    setShowBattlePreview,
+    setValidMovementCells,
+    setShowMovementPaths,
+    setMovementMode,
+    getTerritoryColor,
+    getValidMovementCells,
 }: GameOperationPanelProps) => {
 
     const initiateBattle = (target: Army | Territory) => {
@@ -55,7 +74,7 @@ const GameOperationPanel = ({
                                 <div className="flex justify-between">
                                     <span>Position</span>
                                     <span>
-                                        ({selectedArmy.gridX}, {selectedArmy.gridY})
+                                        ({selectedArmy.x}, {selectedArmy.y})
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -148,15 +167,15 @@ const GameOperationPanel = ({
                                     const nearbyEnemies = armies.filter(
                                         (army) =>
                                             army.owner !== selectedArmy?.owner &&
-                                            Math.abs(army.gridX - selectedArmy!.gridX) <= 1 &&
-                                            Math.abs(army.gridY - selectedArmy!.gridY) <= 1,
+                                            Math.abs(army.x - selectedArmy!.x) <= 1 &&
+                                            Math.abs(army.y - selectedArmy!.y) <= 1,
                                     )
 
                                     const nearbyTerritories = territories.filter(
                                         (territory) =>
-                                            territory.owner !== selectedArmy?.owner &&
-                                            Math.abs(territory.gridX - selectedArmy!.gridX) <= 1 &&
-                                            Math.abs(territory.gridY - selectedArmy!.gridY) <= 1,
+                                            territory.player !== selectedArmy?.owner &&
+                                            Math.abs(territory.x - selectedArmy!.x) <= 1 &&
+                                            Math.abs(territory.y - selectedArmy!.y) <= 1,
                                     )
 
                                     const firstEnemy = nearbyEnemies[0]

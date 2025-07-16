@@ -383,9 +383,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const getArmyDisplayPosition = (army: Army) => {
         const animatedPosition = armyPositions[army.id]
         if (animatedPosition && animatedPosition.isAnimating) {
-            return { x: animatedPosition.x, y: animatedPosition.y }
+            return { gridX: animatedPosition.x, gridY: animatedPosition.y }
         }
-        return { x: army.x, y: army.y }
+        return { gridX: army.x, gridY: army.y }
     }
 
     /**
@@ -460,6 +460,29 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         return adjacentTerritories;
     };
 
+    /**
+     * Get valid movement cells for an army
+     */
+    const getValidMovementCells = (army: Army): { x: number; y: number }[] => {
+        const armyTerritory = territories[army.x]?.[army.y];
+        if (!armyTerritory) return [];
+        return getAdjacentTerritories(armyTerritory).map(t => ({ x: t.x, y: t.y }));
+    };
+
+    /**
+     * Get territory color based on owner
+     */
+    const getTerritoryColor = (owner: string): string => {
+        // Simple color mapping - you can expand this
+        const colors: Record<string, string> = {
+            'P1': '#3B82F6', // Blue
+            'P2': '#EF4444', // Red
+            'P3': '#10B981', // Green
+            'P4': '#F59E0B', // Yellow
+        };
+        return colors[owner] || '#6B7280'; // Default gray
+    };
+
     // ========================================================================
     // MOVE SUBMISSION HANDLERS
     // ========================================================================
@@ -527,8 +550,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
             }))
 
             // Wait for animation to complete
-            setTimeout(() => {
-
+            setTimeout(async () => {
                 // Clear animation state
                 setAnimatingArmies((prev) => {
                     const newSet = new Set(prev)
@@ -540,8 +562,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     ...prev,
                     [selectedArmy.id]: { ...targetTerritory, isAnimating: false },
                 }))
-
-
 
                 try {
                     type Move = readonly [number, number, string, number, number, number];
@@ -565,13 +585,12 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     });
                 }
 
-
                 // Clear movement mode
                 setMovementMode(false)
                 setShowMovementPaths(false)
                 setValidMovementCells([])
 
-                console.log(`Army ${selectedArmy.id} moved to (${targetX}, ${targetY})`)
+                console.log(`Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`)
             }, 800) // Animation duration
         }
     }
@@ -733,11 +752,23 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         showMovementPaths={showMovementPaths}
                         validMovementCells={validMovementCells}
                         cancelMovement={cancelMovement}
+                        onMoveToCell={handleMoveToCell}
 
-                        // Panel props
-                        activePanel={activePanel}
-                        mobileBottomPanelOpen={mobileBottomPanelOpen}
+                        // Battle props
+                        activeBattle={activeBattle}
+                        setActiveBattle={setActiveBattle}
+                        battleEffects={battleEffects}
+                        setBattleEffects={setBattleEffects}
+                        showBattlePreview={showBattlePreview}
+                        setShowBattlePreview={setShowBattlePreview}
+                        setBattleTarget={setBattleTarget}
+
+                        // UI props
                         isMobile={isMobile}
+                        mobileBottomPanelOpen={mobileBottomPanelOpen}
+                        setMobileBottomPanelOpen={setMobileBottomPanelOpen}
+                        setSelectedArmy={setSelectedArmy}
+                        setSelectedTerritory={setSelectedTerritory}
 
                     />}
                 </div>
@@ -748,11 +779,20 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     movementMode={movementMode}
                     cancelMovement={cancelMovement}
                     activeBattle={activeBattle}
+                    armies={armies}
+                    territories={territories.flat()}
+                    setBattleTarget={setBattleTarget}
+                    setShowBattlePreview={setShowBattlePreview}
+                    setValidMovementCells={setValidMovementCells}
+                    setShowMovementPaths={setShowMovementPaths}
+                    setMovementMode={setMovementMode}
+                    getTerritoryColor={getTerritoryColor}
+                    getValidMovementCells={getValidMovementCells}
                 />}
 
                 {/* Battle Effects Overlay */}
                 {battleEffects.length > 0 && (
-                    <BattleEffectOverlay />
+                    <BattleEffectOverlay battleEffects={battleEffects} />
                 )}
 
                 {/* Desktop side panel */}

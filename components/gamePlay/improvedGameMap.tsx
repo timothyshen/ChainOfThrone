@@ -28,9 +28,23 @@ interface ImprovedGameMapProps {
     movementMode: boolean
     showMovementPaths: boolean
     cancelMovement: () => void
+    onMoveToCell: (targetTerritory: Territory) => void
 
+    // Battle props
+    activeBattle: BattleState | null
+    setActiveBattle: (battle: BattleState | null | ((prev: BattleState | null) => BattleState | null)) => void
+    battleEffects: BattleEffect[]
+    setBattleEffects: (effects: BattleEffect[] | ((prev: BattleEffect[]) => BattleEffect[])) => void
+    showBattlePreview: boolean
+    setShowBattlePreview: (show: boolean) => void
+    setBattleTarget: (target: any) => void
+
+    // UI props
     isMobile: boolean
     mobileBottomPanelOpen: boolean
+    setMobileBottomPanelOpen: (open: boolean) => void
+    setSelectedArmy: (army: Army | null) => void
+    setSelectedTerritory: (territory: Territory | null) => void
     validMovementCells: { x: number; y: number }[]
 }
 
@@ -49,8 +63,19 @@ export default function GameMap({
     showMovementPaths,
     validMovementCells,
     cancelMovement,
+    onMoveToCell,
+    activeBattle,
+    setActiveBattle,
+    battleEffects,
+    setBattleEffects,
+    showBattlePreview,
+    setShowBattlePreview,
+    setBattleTarget,
     isMobile,
     mobileBottomPanelOpen,
+    setMobileBottomPanelOpen,
+    setSelectedArmy,
+    setSelectedTerritory,
 }: ImprovedGameMapProps) {
     // Convert 2D territories to flat array with selection state  
     const territories = territoriesProps.flat().map(territory => ({
@@ -161,8 +186,8 @@ export default function GameMap({
         const finalEffect: BattleEffect = {
             id: `battle_final_${Date.now()}`,
             type: "victory",
-            x: battle.defenderArmy ? battle.defenderArmy.gridX : battle.defenderTerritory!.x,
-            y: battle.defenderArmy ? battle.defenderArmy.gridY : battle.defenderTerritory!.y,
+            x: battle.defenderArmy ? battle.defenderArmy.x : battle.defenderTerritory!.x,
+            y: battle.defenderArmy ? battle.defenderArmy.y : battle.defenderTerritory!.y,
             timestamp: Date.now(),
         }
 
@@ -221,8 +246,23 @@ export default function GameMap({
         animateBattle(battle)
     }
 
+    const handleTerritoryClick = (territory: Territory) => {
+        onTerritoryClick(territory)
+    }
 
+    const handleArmyClick = (army: Army) => {
+        const territory = territories.find(t => t.x === army.x && t.y === army.y)
+        if (territory) {
+            onArmyClick(territory, army)
+        }
+    }
 
+    const handleMoveToCell = (gridX: number, gridY: number) => {
+        const targetTerritory = territories.find(t => t.x === gridX && t.y === gridY)
+        if (targetTerritory) {
+            onMoveToCell(targetTerritory)
+        }
+    }
 
 
     return (
@@ -355,8 +395,8 @@ export default function GameMap({
                                     className="absolute w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/50 z-10"
                                     style={{
                                         backgroundColor: "#9B9B9B",
-                                        left: `${startPos.gridX * 33.333 + 16.666}%`,
-                                        top: `${startPos.gridY * 33.333 + 16.666}%`,
+                                        left: `${startPos.x * 33.333 + 16.666}%`,
+                                        top: `${startPos.y * 33.333 + 16.666}%`,
                                         transform: "translate(-50%, -50%)",
                                         animation: `moveArmy-${army.id} 0.8s ease-in-out forwards`,
                                     }}
@@ -390,14 +430,14 @@ export default function GameMap({
                 ${armies
                             .filter((army) => animatingArmies.has(army.id))
                             .map((army) => {
-                                const startPos = { gridX: army.gridX, gridY: army.gridY }
+                                const startPos = { x: army.x, y: army.y }
                                 const endPos = armyPositions[army.id]
 
                                 return `
                       @keyframes moveArmy-${army.id} {
                         0% {
-                          left: ${startPos.gridX * 33.333 + 16.666}%;
-                          top: ${startPos.gridY * 33.333 + 16.666}%;
+                          left: ${startPos.x * 33.333 + 16.666}%;
+                          top: ${startPos.y * 33.333 + 16.666}%;
                           transform: translate(-50%, -50%) scale(1);
                           opacity: 1;
                         }
@@ -406,8 +446,8 @@ export default function GameMap({
                           opacity: 0.9;
                         }
                         100% {
-                          left: ${endPos?.gridX ? endPos.gridX * 33.333 + 16.666 : 50}%;
-                          top: ${endPos?.gridY ? endPos.gridY * 33.333 + 16.666 : 50}%;
+                          left: ${endPos?.x ? endPos.x * 33.333 + 16.666 : 50}%;
+                          top: ${endPos?.y ? endPos.y * 33.333 + 16.666 : 50}%;
                           transform: translate(-50%, -50%) scale(1);
                           opacity: 1;
                         }
@@ -425,7 +465,7 @@ export default function GameMap({
                                     const gridX = index % 3
                                     const gridY = Math.floor(index / 3)
                                     const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
-                                    const isCurrentPosition = selectedArmy && selectedArmy.gridX === gridX && selectedArmy.gridY === gridY
+                                    const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
 
                                     return (
                                         <div

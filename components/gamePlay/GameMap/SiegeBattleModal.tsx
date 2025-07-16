@@ -1,4 +1,19 @@
-const SiegeBattleModal = () => {
+import { Army, Territory } from "@/lib/types/game"
+import { BattleTarget } from "@/lib/types/advancedGame"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Shield, Sword } from "lucide-react"
+
+interface SiegeBattleModalProps {
+    battleTarget: BattleTarget
+    selectedArmy: Army
+    setShowBattlePreview: (show: boolean) => void
+    setBattleTarget: (target: any) => void
+    startBattle: (attacker: Army, target: Army | Territory) => void
+    calculateBattleOdds: (attacker: Army, target: Army | Territory) => { attackerOdds: number, defenderOdds: number }
+}
+const SiegeBattleModal = ({ battleTarget, selectedArmy, setShowBattlePreview, setBattleTarget, startBattle, calculateBattleOdds }: SiegeBattleModalProps) => {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <Card className="bg-slate-800 border-slate-700 w-96 max-w-[90vw]">
@@ -7,7 +22,7 @@ const SiegeBattleModal = () => {
                         const target = battleTarget.army || battleTarget.territory!
                         const isFortified =
                             battleTarget.territory &&
-                            (battleTarget.territory.type === "castle" || battleTarget.territory.type === "stronghold")
+                            (battleTarget.territory.isCastle)
 
                         return (
                             <>
@@ -22,7 +37,7 @@ const SiegeBattleModal = () => {
                                             <span className="text-orange-400 font-semibold">Fortified Position</span>
                                         </div>
                                         <div className="text-sm text-orange-300">
-                                            This {battleTarget.territory!.type} has strong defenses. Siege will take longer and cause more
+                                            This {battleTarget.territory!.isCastle ? "castle" : "stronghold"} has strong defenses. Siege will take longer and cause more
                                             casualties.
                                         </div>
                                     </div>
@@ -38,9 +53,9 @@ const SiegeBattleModal = () => {
 
                                     <div className="text-center">
                                         <div className="text-lg font-semibold text-red-400">Defender</div>
-                                        <div className="text-sm">{battleTarget.army?.owner || battleTarget.territory?.owner}</div>
+                                        <div className="text-sm">{battleTarget.army?.owner || battleTarget.territory?.player}</div>
                                         <div className="text-2xl font-bold">
-                                            {battleTarget.army?.size || battleTarget.territory!.strength * 10}
+                                            {battleTarget.army?.size || (battleTarget.territory && Number(battleTarget.territory.units[0]) * 10)}
                                         </div>
                                         <div className="text-xs text-slate-400">
                                             {battleTarget.army ? "troops" : isFortified ? "fortified strength" : "strength"}

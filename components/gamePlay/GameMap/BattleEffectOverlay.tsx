@@ -1,4 +1,11 @@
-const BattleEffectOverlay = () => {
+import { BattleEffect } from "@/lib/types/advancedGame"
+import { Crown, Sword } from "lucide-react"
+
+interface BattleEffectOverlayProps {
+    battleEffects: BattleEffect[]
+}
+
+const BattleEffectOverlay = ({ battleEffects }: BattleEffectOverlayProps) => {
     return (<div className="absolute inset-0 p-4 pointer-events-none z-30">
         <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
             {battleEffects.map((effect) => (
