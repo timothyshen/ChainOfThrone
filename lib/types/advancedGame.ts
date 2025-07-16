@@ -1,13 +1,4 @@
-import { Territory } from "./game";
-
-export interface Army {
-  id: string;
-  gridX: number;
-  gridY: number;
-  size: number;
-  owner: string;
-  isMoving: boolean;
-}
+import { Army, Territory } from "@/lib/types/game";
 
 export interface BattleState {
   id: string;
@@ -72,15 +63,12 @@ export interface TerritoryState extends Territory {
 
 // Aliases for existing components that expect these names
 export type Battle = BattleState;
-export type Siege = SiegeState;
 
 // Panel types
 export type ActivePanel = "territory" | "army" | "overview" | null;
 
 // Army position tracking
-export interface ArmyPosition {
-  gridX: number;
-  gridY: number;
+export interface ArmyPosition extends Territory {
   isAnimating: boolean;
 }
 

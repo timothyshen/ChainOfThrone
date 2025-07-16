@@ -7,6 +7,14 @@ export type Territory = {
   units: bigint[];
   isCastle: boolean;
 };
+export interface Army {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  owner: string;
+  isMoving: boolean;
+}
 
 export type Move = {
   player: `0x${string}`;

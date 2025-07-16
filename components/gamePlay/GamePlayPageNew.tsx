@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/lib/hooks/use-toast"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Territory, Player, InitialPlayers } from '@/lib/types/game'
+import { Territory, Player, InitialPlayers, Army } from '@/lib/types/game'
 import {
-    Army,
     BattleState,
     BattleEffect,
     SiegeState,
@@ -36,7 +35,16 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer"
 import { ChevronDown } from 'lucide-react'
+import GameOperationPanel from '@/components/gamePlay/GameMap/GameOperationPanel'
+import BattleEffectOverlay from '@/components/gamePlay/GameMap/BattleEffectOverlay'
 
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Converts numeric game status to enum
+ */
 const getGameStatusText = (status: number): GameStatusEnum => {
     switch (status) {
         case 0:
@@ -50,15 +58,26 @@ const getGameStatusText = (status: number): GameStatusEnum => {
     }
 }
 
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: `0x${string}` }) {
-    // Game contract and address
+
+    // ========================================================================
+    // HOOKS & EXTERNAL STATE
+    // ========================================================================
+
     const { gameAddress } = useGameAddress();
     const { address } = useAccount();
     const { makeMove, error: makeMoveError, isConfirmed: isMoveConfirmed, isConfirming: isMoveConfirming } = useMakeMove();
     const { toast } = useToast();
 
-    // Game status states
+    // ========================================================================
+    // GAME STATE
+    // ========================================================================
+
+    // Core game status
     const [gameStatus, setGameStatus] = useState<GameStatusEnum>(GameStatusEnum.NOT_STARTED);
     const [totalPlayer, setTotalPlayer] = useState<number>(0);
     const [maxPlayer, setMaxPlayer] = useState<number>(0);
@@ -66,40 +85,64 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [players, setPlayers] = useState<Player[]>(InitialPlayers);
     const [playerId, setPlayerId] = useState<string | null>(null);
 
-    // Loading states
+    // ========================================================================
+    // LOADING STATES
+    // ========================================================================
+
     const [isGridLoading, setIsGridLoading] = useState(true);
     const [isStatusLoading, setIsStatusLoading] = useState(true);
 
-    // Territory and movement states
+    // ========================================================================
+    // TERRITORY & MOVEMENT STATE
+    // ========================================================================
+
+    // Territory management
     const [territories, setTerritories] = useState<Territory[][]>([]);
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null);
+
+    // Movement mechanics
     const [currentUnits, setCurrentUnits] = useState<number>(0);
     const [moveStrength, setMoveStrength] = useState<number>(0);
     const [moveAction, setMoveAction] = useState<Territory | null>(null);
     const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false);
     const [showMovementPaths, setShowMovementPaths] = useState(false);
+    const [movementMode, setMovementMode] = useState(false);
+    const [validMovementCells, setValidMovementCells] = useState<{ x: number; y: number }[]>([]);
 
-    // Advanced game state (armies, battles, sieges)
+    // ========================================================================
+    // ADVANCED GAME STATE (ARMIES, BATTLES, SIEGES)
+    // ========================================================================
+
+    // Army management
     const [armies, setArmies] = useState<Army[]>([
-        { id: "a1", gridX: 1, gridY: 0, size: 500, owner: "P1", isMoving: false },
-        { id: "a2", gridX: 0, gridY: 1, size: 800, owner: "P2", isMoving: false },
+        { id: "a1", x: 1, y: 0, size: 500, owner: "P1", isMoving: false },
+        { id: "a2", x: 0, y: 1, size: 800, owner: "P2", isMoving: false },
     ]);
     const [selectedArmy, setSelectedArmy] = useState<Army | null>(null);
-    const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
-    const [isMobile, setIsMobile] = useState(false);
-    const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false);
-    const [validMovementCells, setValidMovementCells] = useState<{ x: number; y: number }[]>([]);
-    const [movementMode, setMovementMode] = useState(false);
     const [animatingArmies, setAnimatingArmies] = useState<Set<string>>(new Set());
     const [armyPositions, setArmyPositions] = useState<Record<string, ArmyPosition>>({});
+
+    // Battle system
     const [activeBattle, setActiveBattle] = useState<BattleState | null>(null);
     const [battleEffects, setBattleEffects] = useState<BattleEffect[]>([]);
-    const [activeSiege, setActiveSiege] = useState<SiegeState | null>(null);
-    const [siegeEffects, setSiegeEffects] = useState<SiegeEffect[]>([]);
     const [showBattlePreview, setShowBattlePreview] = useState(false);
     const [battleTarget, setBattleTarget] = useState<BattleTarget | null>(null);
 
+    // ========================================================================
+    // UI STATE
+    // ========================================================================
 
+    const [activePanel, setActivePanel] = useState<ActivePanel>("overview");
+    const [isMobile, setIsMobile] = useState(false);
+    const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false);
+
+    // ========================================================================
+    // CONTRACT EVENT LISTENERS
+    // ========================================================================
+
+    /**
+     * Listen for round completion events
+     */
     useWatchContractEvent({
         address: gameAddressParam,
         abi: gameAbi,
@@ -115,6 +158,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         },
     });
 
+    /**
+     * Listen for move submission events
+     */
     useWatchContractEvent({
         address: gameAddressParam,
         abi: gameAbi,
@@ -128,6 +174,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         },
     });
 
+    /**
+     * Listen for player addition events
+     */
     useWatchContractEvent({
         address: gameAddressParam,
         abi: gameAbi,
@@ -137,6 +186,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         },
     });
 
+    /**
+     * Listen for game start events
+     */
     useWatchContractEvent({
         address: gameAddressParam,
         abi: gameAbi,
@@ -151,12 +203,19 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         },
     });
 
+    // ========================================================================
+    // DATA FETCHING FUNCTIONS
+    // ========================================================================
 
+    /**
+     * Fetch and update the game grid/territories
+     */
     const getGrids = useCallback(async () => {
         setIsGridLoading(true)
         try {
             if (!gameAddress) return;
             const gridData = await get2DGrid(gameAddress);
+            let armies: Army[] = [];
             if (!gridData) return;
             const newGridData = (gridData as any[][]).map((row: any[], rowIndex: number) =>
                 row.map((territory: any, colIndex: number) => ({
@@ -165,7 +224,26 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     y: colIndex,
                 }))
             );
+            newGridData.map((row: any[], rowIndex: number) =>
+                row.map((territory: any, colIndex: number) => (
+                    territory.units.map((unit: any, index: number) => {
+                        if (unit > 0) {
+                            armies.push({
+                                id: index.toString(),
+                                x: rowIndex,
+                                y: colIndex,
+                                size: unit,
+                                owner: territory.player,
+                                isMoving: false,
+                            });
+                        }
+                    })
+                ))
+            );
+            console.log("newGridData", newGridData);
+            console.log("armies", armies);
             setTerritories(newGridData as Territory[][]);
+            setArmies(armies as Army[]);
         } catch (error) {
             console.error('Error fetching grid:', error);
             toast({
@@ -178,12 +256,18 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         }
     }, [gameAddress, toast]);
 
+    /**
+     * Get the current player's ID from their address
+     */
     const getPlayerId = useCallback(async () => {
         if (!gameAddress || !address) return;
         const playerId = await addressToId(gameAddress, address);
         setPlayerId(playerId as string);
     }, [gameAddress, address]);
 
+    /**
+     * Fetch comprehensive game data (status, players, etc.)
+     */
     const fetchGameData = useCallback(async () => {
         setIsStatusLoading(true)
         try {
@@ -225,22 +309,33 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         }
     }, [gameAddress, toast]);
 
+    // ========================================================================
+    // INITIALIZATION EFFECTS
+    // ========================================================================
+
+    /**
+     * Initialize game data on component mount
+     */
     useEffect(() => {
         getGrids();
         getPlayerId();
         fetchGameData();
     }, [getGrids, getPlayerId, fetchGameData]);
 
-    // Initialize army positions
+    /**
+     * Initialize army positions for animations
+     */
     useEffect(() => {
         const initialPositions = armies.reduce((acc, army) => ({
             ...acc,
-            [army.id]: { gridX: army.gridX, gridY: army.gridY, isAnimating: false },
+            [army.id]: { x: army.x, y: army.y, isAnimating: false },
         }), {});
         setArmyPositions(initialPositions);
     }, [armies]);
 
-    // Mobile detection
+    /**
+     * Handle mobile/desktop responsive behavior
+     */
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -250,8 +345,13 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
+    // ========================================================================
+    // TERRITORY INTERACTION HANDLERS
+    // ========================================================================
 
-
+    /**
+     * Handle territory selection and validation
+     */
     const handleTerritoryClick = (territory: Territory) => {
         if (territory.player !== address) {
             toast({
@@ -265,7 +365,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
         setSelectedTerritory(territory);
         setSelectedArmy(null);
-        setActivePanel("territory");
         setMoveStrength(0);
         setCurrentUnits(Number(territory.units[Number(playerId)]));
 
@@ -274,46 +373,46 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         }
     }
 
-    // Army utility functions
-    const getValidMovementCells = (army: Army) => {
-        const validCells: { x: number; y: number }[] = []
-        const directions = [
-            { x: -1, y: 0 }, // Left
-            { x: 1, y: 0 }, // Right
-            { x: 0, y: -1 }, // Up
-            { x: 0, y: 1 }, // Down
-        ]
+    // ========================================================================
+    // ARMY INTERACTION HANDLERS
+    // ========================================================================
 
-        directions.forEach((dir) => {
-            const newX = army.gridX + dir.x
-            const newY = army.gridY + dir.y
-
-            // Check if the new position is within the 3x3 grid
-            if (newX >= 0 && newX < 3 && newY >= 0 && newY < 3) {
-                validCells.push({ x: newX, y: newY })
-            }
-        })
-
-        return validCells
-    }
-
+    /**
+     * Get army display position (considering animations)
+     */
     const getArmyDisplayPosition = (army: Army) => {
         const animatedPosition = armyPositions[army.id]
         if (animatedPosition && animatedPosition.isAnimating) {
-            return { gridX: animatedPosition.gridX, gridY: animatedPosition.gridY }
+            return { x: animatedPosition.x, y: animatedPosition.y }
         }
-        return { gridX: army.gridX, gridY: army.gridY }
+        return { x: army.x, y: army.y }
     }
 
-    const handleArmyClick = (army: Army) => {
+    /**
+     * Handle army selection and movement setup
+     */
+    const handleArmyClick = (territory: Territory, army: Army) => {
+        if (territory.player !== address) {
+            toast({
+                title: "Invalid Selection",
+                description: "You can only select territories that belong to you",
+                variant: "destructive",
+            });
+            return;
+        }
+        console.log("territory", territory)
+        console.log("army", army)
+        setSelectedTerritory(territory)
         setSelectedArmy(army)
-        setSelectedTerritory(null)
         setActivePanel("army")
 
-        //TODO:
         // Show movement paths for selected army
-        const validCells = getAdjacentTerritories(army)
-        setValidMovementCells(validCells)
+        // Note: Using army position to find territory, not passing army directly to getAdjacentTerritories
+        const armyTerritory = territories[army.x]?.[army.y];
+        if (armyTerritory) {
+            const validCells = getAdjacentTerritories(armyTerritory)
+            setValidMovementCells(validCells.map(t => ({ x: t.x, y: t.y })))
+        }
         setShowMovementPaths(true)
         setMovementMode(true)
 
@@ -322,13 +421,25 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         }
     }
 
+    /**
+     * Cancel movement mode
+     */
     const cancelMovement = () => {
         setMovementMode(false)
+        setSelectedTerritory(null)
+        setSelectedArmy(null)
         setShowMovementPaths(false)
         setValidMovementCells([])
         setMobileBottomPanelOpen(false)
     }
 
+    // ========================================================================
+    // TERRITORY UTILITY FUNCTIONS
+    // ========================================================================
+
+    /**
+     * Get all territories adjacent to a given territory
+     */
     const getAdjacentTerritories = (territory: Territory): Territory[] => {
         if (!territory) return [];
         const adjacentTerritories: Territory[] = [];
@@ -349,14 +460,14 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         return adjacentTerritories;
     };
 
-    // TODO: flow should be like this:
-    // 1. user click on a territory
-    // 2. check if the territory is adjacent to the selected army
-    // 3. if it is, show the movement paths
-    // 4. user click on a movement path
-    // 5. check if the movement path is valid
-    // 6. if it is, submit the move
+    // ========================================================================
+    // MOVE SUBMISSION HANDLERS
+    // ========================================================================
 
+    /**
+     * Handle move submission to blockchain
+     * Flow: territory selection → destination selection → move submission
+     */
     const handleAction = async (targetTerritory: Territory) => {
         setMoveAction(targetTerritory)
         if (!selectedTerritory || !address || !gameAddress) {
@@ -381,7 +492,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
             await makeMove(gameAddress, move);
 
-
         } catch (error) {
             console.error('Error making move:', error);
             toast({
@@ -392,11 +502,85 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         }
     };
 
+    // ========================================================================
+    // MOVE STATUS EFFECTS
+    // ========================================================================
+
+    const handleMoveToCell = async (targetTerritory: Territory) => {
+        if (!selectedTerritory || !address || !gameAddress) {
+            toast({
+                title: "Invalid Action",
+                description: "Cannot perform this action at this time.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (selectedArmy && movementMode) {
+            // Start animation
+            setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]))
+
+            // Update army position with animation flag
+            setArmyPositions((prev) => ({
+                ...prev,
+                [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
+            }))
+
+            // Wait for animation to complete
+            setTimeout(() => {
+
+                // Clear animation state
+                setAnimatingArmies((prev) => {
+                    const newSet = new Set(prev)
+                    newSet.delete(selectedArmy.id)
+                    return newSet
+                })
+
+                setArmyPositions((prev) => ({
+                    ...prev,
+                    [selectedArmy.id]: { ...targetTerritory, isAnimating: false },
+                }))
+
+
+
+                try {
+                    type Move = readonly [number, number, string, number, number, number];
+                    const move: Move = [
+                        selectedTerritory.x,
+                        selectedTerritory.y,
+                        address,
+                        targetTerritory.x,
+                        targetTerritory.y,
+                        moveStrength
+                    ] as const;
+
+                    await makeMove(gameAddress, move);
+
+                } catch (error) {
+                    console.error('Error making move:', error);
+                    toast({
+                        title: "Error",
+                        description: error instanceof Error ? error.message : "Failed to submit move to the blockchain",
+                        variant: "destructive",
+                    });
+                }
+
+
+                // Clear movement mode
+                setMovementMode(false)
+                setShowMovementPaths(false)
+                setValidMovementCells([])
+
+                console.log(`Army ${selectedArmy.id} moved to (${targetX}, ${targetY})`)
+            }, 800) // Animation duration
+        }
+    }
+    // Handle move errors
     if (makeMoveError) {
         console.error("Error making move:", makeMoveError);
     }
 
-
+    // Handle move confirmation states
     if (isMoveConfirming) {
         toast({
             title: "Move Submitting",
@@ -420,7 +604,13 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         setMoveStrength(0);
     }
 
-    // Game Status Panel
+    // ========================================================================
+    // UI COMPONENTS
+    // ========================================================================
+
+    /**
+     * Game status and player information panel
+     */
     const GameStatusPanel = () => (
         <div className="w-full space-y-6 p-4">
             <GameStatus
@@ -437,7 +627,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         </div>
     );
 
-    // Territory Info Panel
+    /**
+     * Territory information and action panel
+     */
     const TerritoryInfoPanel = () => (
         <Card className="w-full">
             <CardHeader>
@@ -491,15 +683,18 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     <p>Select a territory to view information and perform actions.</p>
                 )}
             </CardContent>
-
         </Card>
     );
+
+    // ========================================================================
+    // MAIN RENDER
+    // ========================================================================
 
     return (
         <div className="flex flex-col min-h-screen md:mt-12 bg-slate-900" onClick={() => {
             setSelectedTerritory(null)
         }}>
-            {/* Mobile tab navigation */}
+            {/* Mobile status drawer */}
             <div className="md:hidden my-1 px-4">
                 <Drawer>
                     <DrawerTrigger asChild>
@@ -514,8 +709,9 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 </Drawer>
             </div>
 
+            {/* Main game layout */}
             <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-4rem)]">
-                {/* Map section */}
+                {/* Game map section */}
                 <div className="p-4 overflow-auto md:flex-1 block">
                     {isGridLoading ? <Spinner /> : <ImprovedGameMap
                         // Territory props
@@ -543,18 +739,23 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         mobileBottomPanelOpen={mobileBottomPanelOpen}
                         isMobile={isMobile}
 
-                        // Battle props
-                        activeBattle={activeBattle}
-                        battleEffects={battleEffects}
-                        activeSiege={activeSiege}
-                        siegeEffects={siegeEffects}
-                        showBattlePreview={showBattlePreview}
-                        battleTarget={battleTarget}
                     />}
                 </div>
 
+                {mobileBottomPanelOpen && activePanel && <GameOperationPanel
+                    selectedArmy={selectedArmy}
+                    animatingArmies={animatingArmies}
+                    movementMode={movementMode}
+                    cancelMovement={cancelMovement}
+                    activeBattle={activeBattle}
+                />}
 
-                {/* Desktop: Side panel (always visible on desktop) */}
+                {/* Battle Effects Overlay */}
+                {battleEffects.length > 0 && (
+                    <BattleEffectOverlay />
+                )}
+
+                {/* Desktop side panel */}
                 <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto">
                     <GameStatusPanel />
                 </div>
