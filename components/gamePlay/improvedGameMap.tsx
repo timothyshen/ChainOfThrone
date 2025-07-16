@@ -1,7 +1,7 @@
 "use client"
 
-import { useRef } from "react"
-import { Sword, Crown, Users, Navigation, Flag } from "lucide-react"
+import { useRef, useState } from "react"
+import { Sword, Swords, Crown, Users, Navigation, Flag } from "lucide-react"
 import { Army, Territory } from "@/lib/types/game"
 import {
     BattleState,
@@ -76,6 +76,7 @@ export default function GameMap({
     setSelectedArmy,
     setSelectedTerritory,
 }: ImprovedGameMapProps) {
+    const [targetTerritory, setTargetTerritory] = useState<Territory | null>(null)
 
     // Convert 2D territories to flat array with selection state  
     const territories = territoriesProps.flat().map(territory => ({
@@ -255,9 +256,10 @@ export default function GameMap({
     }
 
     const handleMoveToCell = (gridX: number, gridY: number) => {
-        const targetTerritory = territories.find(t => t.x === gridX && t.y === gridY)
-        if (targetTerritory) {
-            onMoveToCell(targetTerritory)
+        const territory = territories.find(t => t.x === gridX && t.y === gridY)
+        if (territory) {
+            setTargetTerritory(territory)
+            onMoveToCell(territory)
         }
     }
 
@@ -467,32 +469,70 @@ export default function GameMap({
                                     const gridY = Math.floor(index / 3)
                                     const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
                                     const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
+                                    const isTargetTerritory = targetTerritory && targetTerritory.x === gridX && targetTerritory.y === gridY
+
                                     // Only check for armies in valid movement cells
                                     const hasArmy = isValidMove && armies.some((army) => army.x === gridX && army.y === gridY)
+
+                                    // Check if this destination would result in a battle (army on target territory)
+                                    const isBattleDestination = isValidMove && hasArmy &&
+                                        targetTerritory?.player !== selectedArmy?.owner
+
+                                    console.log("isBattleDestination", isBattleDestination);
+
+                                    // Priority system for styling (highest to lowest):
+                                    // 1. Battle destination (purple) 
+                                    // 2. Target territory (yellow)
+                                    // 3. Army (red)
+                                    // 4. Valid move (green)
+                                    let cellStyle = ""
+                                    let cellIcon = null
+
+                                    if (isBattleDestination && targetTerritory !== null) {
+                                        cellStyle = "bg-purple-500/30 border-2 border-purple-400 rounded-lg hover:bg-purple-500/50"
+                                        cellIcon = (
+                                            <div className="flex flex-col items-center">
+                                                <Swords className="w-6 h-6 md:w-8 md:h-8 text-purple-400 animate-pulse" />
+                                                <span className="text-xs text-purple-400 font-bold mt-1">BATTLE</span>
+                                            </div>
+                                        )
+                                    } else if (isTargetTerritory) {
+                                        cellStyle = "bg-yellow-500/30 border-2 border-yellow-400 rounded-lg hover:bg-yellow-500/50"
+                                        cellIcon = (
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-yellow-400 animate-ping" />
+                                                <span className="text-xs text-yellow-400 font-bold mt-1">TARGET</span>
+                                            </div>
+                                        )
+                                    } else if (hasArmy) {
+                                        cellStyle = "bg-red-500/30 border-2 border-red-400 rounded-lg hover:bg-red-500/50"
+                                        cellIcon = (
+                                            <div className="flex flex-col items-center">
+                                                <Sword className="w-6 h-6 md:w-8 md:h-8 text-red-400" />
+                                                <span className="text-xs text-red-400 font-bold mt-1">ARMY</span>
+                                            </div>
+                                        )
+                                    } else if (isValidMove) {
+                                        cellStyle = "bg-green-500/30 border-2 border-green-400 rounded-lg hover:bg-green-500/50"
+                                        cellIcon = (
+                                            <div className="flex flex-col items-center">
+                                                <Navigation className="w-6 h-6 md:w-8 md:h-8 text-green-400 animate-pulse" />
+                                                <span className="text-xs text-green-400 font-bold mt-1">MOVE</span>
+                                            </div>
+                                        )
+                                    }
+
+                                    // Current position styling (can overlay with other styles)
+                                    const currentPositionStyle = isCurrentPosition ? "bg-blue-500/30 border-2 border-blue-400 rounded-lg" : ""
 
                                     return (
                                         <div
                                             key={index}
                                             className={`relative flex items-center p-4 justify-center pointer-events-auto cursor-pointer transition-all duration-200 
-                                                ${isCurrentPosition ? "bg-blue-500/30 border-2 border-blue-400 rounded-lg" : ""
-                                                } ${hasArmy ? "bg-red-500/30 border-2 border-red-400 rounded-lg hover:bg-red-500/50" :
-                                                    isValidMove ? "bg-green-500/30 border-2 border-green-400 rounded-lg hover:bg-green-500/50" : ""}`}
+                                                ${currentPositionStyle} ${cellStyle}`}
                                             onClick={() => (isValidMove ? handleMoveToCell(gridX, gridY) : null)}
                                         >
-
-                                            {hasArmy ? (
-                                                <div className="flex flex-col items-center">
-                                                    <Sword className="w-6 h-6 md:w-8 md:h-8 text-red-400" />
-                                                    <span className="text-xs text-red-400 font-bold mt-1">ARMY</span>
-                                                </div>
-                                            ) : (
-                                                isValidMove && (
-                                                    <div className="flex flex-col items-center">
-                                                        <Navigation className="w-6 h-6 md:w-8 md:h-8 text-green-400 animate-pulse" />
-                                                        <span className="text-xs text-green-400 font-bold mt-1">MOVE</span>
-                                                    </div>
-                                                )
-                                            )}
+                                            {cellIcon}
                                             {isCurrentPosition && (
                                                 <div className="flex flex-col items-center">
                                                     <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-400 animate-ping" />

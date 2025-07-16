@@ -225,7 +225,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     id: "2",
                     x: 1,
                     y: 0,
-                    player: "0x123",
+                    player: "0x133",
                     units: [100n, 0n],
                     isCastle: false,
                     name: "Test",
@@ -493,6 +493,13 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
         setShowMovementPaths(false)
         setValidMovementCells([])
         setMobileBottomPanelOpen(false)
+        setArmies((prevArmies) =>
+            prevArmies.map((army) =>
+                army.id === selectedArmy?.id
+                    ? { ...army, isMoving: false }
+                    : army
+            )
+        )
     }
 
     // ========================================================================
@@ -613,6 +620,15 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
 
             // Wait for animation to complete
             setTimeout(async () => {
+                // Update the army's actual position in the armies state
+                setArmies((prevArmies) =>
+                    prevArmies.map((army) =>
+                        army.id === selectedArmy.id
+                            ? { ...army, x: targetTerritory.x, y: targetTerritory.y }
+                            : army
+                    )
+                )
+
                 // Clear animation state
                 setAnimatingArmies((prev) => {
                     const newSet = new Set(prev)
@@ -620,10 +636,12 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     return newSet
                 })
 
-                setArmyPositions((prev) => ({
-                    ...prev,
-                    [selectedArmy.id]: { ...targetTerritory, isAnimating: false },
-                }))
+                // Clear the temporary animation position since the army's actual position is now updated
+                setArmyPositions((prev) => {
+                    const newPositions = { ...prev }
+                    delete newPositions[selectedArmy.id]
+                    return newPositions
+                })
 
                 try {
                     type Move = readonly [number, number, string, number, number, number];
