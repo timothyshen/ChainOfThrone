@@ -93,7 +93,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null);
 
     // Movement mechanics
-    const [currentUnits, setCurrentUnits] = useState<number>(0);
     const [moveStrength, setMoveStrength] = useState<number>(0);
     const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false);
     const [showMovementPaths, setShowMovementPaths] = useState(false);
@@ -422,13 +421,10 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
      * Handle territory selection and validation
      */
     const handleTerritoryClick = (territory: Territory) => {
-
         console.log("Territory clicked:", territory);
-
         setSelectedTerritory(territory);
         setSelectedArmy(null);
         setMoveStrength(0);
-        setCurrentUnits(Number(territory.units[Number(playerId)]));
 
         if (isMobile) {
             setMobileBottomPanelOpen(true);
@@ -556,11 +552,33 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
     // ========================================================================
 
     /**
+     * Initialize a battle between an attacker and target
+     * This sets up the battle target and shows preview
+     */
+    const initialBattle = (attacker: Army, target: Army | Territory) => {
+        if (!attacker) {
+            toast({
+                title: "Invalid Battle",
+                description: "No army selected for battle",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setBattleTarget({
+            army: "size" in target ? (target as Army) : undefined,
+            territory: "units" in target ? (target as Territory) : undefined,
+        });
+        setShowBattlePreview(true);
+
+        console.log(`Battle initiated: ${attacker.owner} vs ${("size" in target) ? "enemy army" : "territory"}`);
+    };
+
+    /**
      * Handle move submission to blockchain
      * Flow: territory selection → destination selection → move submission
      */
-    const handleAction = async (targetTerritory: Territory) => {
-        setMoveAction(targetTerritory)
+    const handleAction = async (targetTerritory: Territory, moveStrength: number) => {
         if (!selectedTerritory || !address || !gameAddress) {
             toast({
                 title: "Invalid Action",
@@ -634,32 +652,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     newSet.delete(selectedArmy.id)
                     return newSet
                 })
-
-
-                try {
-                    type Move = readonly [number, number, string, number, number, number];
-                    const move: Move = [
-                        selectedTerritory.x,
-                        selectedTerritory.y,
-                        address,
-                        targetTerritory.x,
-                        targetTerritory.y,
-                        moveStrength
-                    ] as const;
-                    console.log("move", move);
-
-                    // await makeMove(gameAddress, move);
-
-                } catch (error) {
-                    console.error('Error making move:', error);
-                    toast({
-                        title: "Error",
-                        description: error instanceof Error ? error.message : "Failed to submit move to the blockchain",
-                        variant: "destructive",
-                    });
-                }
-                setMoveSubmitted(true);
-
                 console.log(`Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`)
             }, 800) // Animation duration
             // Clear the temporary animation position since the army's actual position is now updated
@@ -759,7 +751,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         // Territory props
                         territories={territories}
                         selectedTerritory={selectedTerritory}
-                        onTerritoryClick={handleTerritoryClick}
                         currentPlayer={address ?? ''}
 
                         // Army props
@@ -785,6 +776,7 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                         showBattlePreview={showBattlePreview}
                         setShowBattlePreview={setShowBattlePreview}
                         setBattleTarget={setBattleTarget}
+                        initialBattle={initialBattle}
 
                         // UI props
                         isMobile={isMobile}
@@ -804,7 +796,6 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     activeBattle={activeBattle}
                     armies={armies}
                     isMoveSubmitted={moveSubmitted}
-                    territories={territories.flat()}
                     setBattleTarget={setBattleTarget}
                     setShowBattlePreview={setShowBattlePreview}
                     setValidMovementCells={setValidMovementCells}
@@ -812,6 +803,11 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                     setMovementMode={setMovementMode}
                     getTerritoryColor={getTerritoryColor}
                     getValidMovementCells={getValidMovementCells}
+                    handleAction={handleAction}
+                    initialBattle={initialBattle}
+                    setMoveSubmitted={setMoveSubmitted}
+                    moveStrength={moveStrength}
+                    setMoveStrength={setMoveStrength}
                 />}
 
                 {/* Battle Effects Overlay */}

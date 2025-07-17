@@ -1,5 +1,3 @@
-import { Player } from "./game";
-
 export enum GameStatusEnum {
   NOT_STARTED = "Not Started",
   ONGOING = "Ongoing",

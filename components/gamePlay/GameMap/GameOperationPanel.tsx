@@ -14,7 +14,7 @@ interface GameOperationPanelProps {
     activeBattle: BattleState | null
     // Additional props needed for functionality
     armies: Army[]
-    territories: Territory[]
+    isMoveSubmitted: boolean
     setBattleTarget: (target: any) => void
     setShowBattlePreview: (show: boolean) => void
     setValidMovementCells: (cells: { x: number; y: number }[]) => void
@@ -22,7 +22,11 @@ interface GameOperationPanelProps {
     setMovementMode: (mode: boolean) => void
     getTerritoryColor: (owner: string) => string
     getValidMovementCells: (army: Army) => { x: number; y: number }[]
-    isMoveSubmitted: boolean
+    handleAction: (targetTerritory: Territory, moveStrength: number) => Promise<void>
+    initialBattle: (attacker: Army, target: Army | Territory) => void
+    setMoveSubmitted: (submitted: boolean) => void
+    setMoveStrength: (strength: number) => void
+    moveStrength: number
 }
 
 const GameOperationPanel = ({
@@ -31,6 +35,8 @@ const GameOperationPanel = ({
     movementMode,
     cancelMovement,
     activeBattle,
+    armies,
+    isMoveSubmitted,
     setBattleTarget,
     setShowBattlePreview,
     setValidMovementCells,
@@ -38,7 +44,11 @@ const GameOperationPanel = ({
     setMovementMode,
     getTerritoryColor,
     getValidMovementCells,
-    isMoveSubmitted,
+    handleAction,
+    initialBattle,
+    setMoveSubmitted,
+    setMoveStrength,
+    moveStrength,
 }: GameOperationPanelProps) => {
 
     const initiateBattle = (target: Army | Territory) => {
@@ -96,12 +106,26 @@ const GameOperationPanel = ({
 
                     {isMoveSubmitted ? (
                         <div className="grid grid-cols-1 gap-2">
-                            <Input
-                                type="number"
-                                placeholder="Enter army number"
-                                className="w-full text-black"
-                                maxLength={Number(selectedArmy.size)}
-                            />
+                            <div className="space-y-1">
+                                <Input
+                                    type="number"
+                                    placeholder="Enter army number"
+                                    className="w-full text-black"
+                                    maxLength={Number(selectedArmy.size)}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value)
+                                        if (value >= 0 && value <= Number(selectedArmy.size)) {
+                                            setMoveStrength(value)
+                                        }
+                                    }}
+                                />
+                                {moveStrength > Number(selectedArmy.size) && (
+                                    <p className="text-red-500 text-xs">Cannot exceed army size of {Number(selectedArmy.size)}</p>
+                                )}
+                                {moveStrength < 0 && (
+                                    <p className="text-red-500 text-xs">Army size cannot be negative</p>
+                                )}
+                            </div>
                             <Button
                                 variant="outline"
                                 className="w-full text-black"

@@ -13,7 +13,6 @@ interface ImprovedGameMapProps {
     // Territory props
     territories: Territory[][]
     selectedTerritory: Territory | null
-    onTerritoryClick: (territory: Territory) => void
     currentPlayer: string
 
     // Army props
@@ -38,6 +37,7 @@ interface ImprovedGameMapProps {
     showBattlePreview: boolean
     setShowBattlePreview: (show: boolean) => void
     setBattleTarget: (target: any) => void
+    initialBattle: (attacker: Army, target: Army | Territory) => void
 
     // UI props
     isMobile: boolean
@@ -70,13 +70,13 @@ export default function GameMap({
     showBattlePreview,
     setShowBattlePreview,
     setBattleTarget,
+    initialBattle,
     isMobile,
     mobileBottomPanelOpen,
     setMobileBottomPanelOpen,
     setSelectedArmy,
     setSelectedTerritory,
 }: ImprovedGameMapProps) {
-    const [targetTerritory, setTargetTerritory] = useState<Territory | null>(null)
 
     // Convert 2D territories to flat array with selection state  
     const territories = territoriesProps.flat().map(territory => ({
@@ -258,11 +258,11 @@ export default function GameMap({
     const handleMoveToCell = (gridX: number, gridY: number) => {
         const territory = territories.find(t => t.x === gridX && t.y === gridY)
         if (territory) {
-            setTargetTerritory(territory)
+            setSelectedTerritory(territory)
             onMoveToCell(territory)
             // Clear target territory after a delay to allow animation to complete
             setTimeout(() => {
-                setTargetTerritory(null)
+                setSelectedTerritory(null)
             }, 1000)
         }
     }
@@ -477,14 +477,14 @@ export default function GameMap({
                                     const gridY = Math.floor(index / 3)
                                     const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
                                     const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
-                                    const isTargetTerritory = targetTerritory && targetTerritory.x === gridX && targetTerritory.y === gridY
+                                    const isTargetTerritory = selectedTerritory && selectedTerritory.x === gridX && selectedTerritory.y === gridY
 
                                     // Only check for armies in valid movement cells
                                     const hasArmy = isValidMove && armies.some((army) => army.x === gridX && army.y === gridY && army.owner !== selectedArmy?.owner)
 
                                     // Check if this destination would result in a battle (army on target territory)
                                     const isBattleDestination = isValidMove && hasArmy &&
-                                        targetTerritory?.player !== selectedArmy?.owner
+                                        selectedTerritory?.player !== selectedArmy?.owner
 
                                     console.log("isBattleDestination", isBattleDestination);
 
@@ -496,7 +496,7 @@ export default function GameMap({
                                     let cellStyle = ""
                                     let cellIcon = null
 
-                                    if (isBattleDestination && targetTerritory !== null) {
+                                    if (isBattleDestination && selectedTerritory !== null) {
                                         cellStyle = "bg-purple-500/30 border-2 border-purple-400 rounded-lg hover:bg-purple-500/50"
                                         cellIcon = (
                                             <div className="flex flex-col items-center">
@@ -538,7 +538,27 @@ export default function GameMap({
                                             key={index}
                                             className={`relative flex items-center p-4 justify-center pointer-events-auto cursor-pointer transition-all duration-200 
                                                 ${currentPositionStyle} ${cellStyle}`}
-                                            onClick={() => (isValidMove ? handleMoveToCell(gridX, gridY) : null)}
+                                            onClick={() => {
+                                                if (isValidMove) {
+                                                    // Check if this is a battle destination
+                                                    if (isBattleDestination && selectedArmy) {
+                                                        // Find the enemy army at this location
+                                                        const enemyArmy = armies.find((army) =>
+                                                            army.x === gridX &&
+                                                            army.y === gridY &&
+                                                            army.owner !== selectedArmy.owner
+                                                        );
+
+                                                        if (enemyArmy) {
+                                                            console.log(`Initiating battle: ${selectedArmy.owner} vs ${enemyArmy.owner}`);
+                                                            initialBattle(selectedArmy, enemyArmy);
+                                                        }
+                                                    } else {
+                                                        // Regular move
+                                                        handleMoveToCell(gridX, gridY);
+                                                    }
+                                                }
+                                            }}
                                         >
                                             {cellIcon}
                                             {isCurrentPosition && (
