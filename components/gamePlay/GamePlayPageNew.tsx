@@ -791,13 +791,10 @@ export default function DiplomacyGame({ gameAddressParam }: { gameAddressParam: 
                 {mobileBottomPanelOpen && <GameOperationPanel
                     selectedArmy={selectedArmy}
                     animatingArmies={animatingArmies}
-                    movementMode={movementMode}
                     cancelMovement={cancelMovement}
                     activeBattle={activeBattle}
                     armies={armies}
                     isMoveSubmitted={moveSubmitted}
-                    setBattleTarget={setBattleTarget}
-                    setShowBattlePreview={setShowBattlePreview}
                     setValidMovementCells={setValidMovementCells}
                     setShowMovementPaths={setShowMovementPaths}
                     setMovementMode={setMovementMode}

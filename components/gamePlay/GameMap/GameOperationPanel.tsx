@@ -7,58 +7,61 @@ import { BattleState } from "@/lib/types/advancedGame"
 import { Input } from "@/components/ui/input"
 
 interface GameOperationPanelProps {
+    // Army selection and state
     selectedArmy: Army | null
-    animatingArmies: Set<string>
-    movementMode: boolean
-    cancelMovement: () => void
-    activeBattle: BattleState | null
-    // Additional props needed for functionality
     armies: Army[]
+    animatingArmies: Set<string>
+    
+    // Movement controls
+    moveStrength: number
     isMoveSubmitted: boolean
-    setBattleTarget: (target: any) => void
-    setShowBattlePreview: (show: boolean) => void
+    setMoveSubmitted: (submitted: boolean) => void
+    setMoveStrength: (strength: number) => void
+    cancelMovement: () => void
+    
+    // Movement visualization
     setValidMovementCells: (cells: { x: number; y: number }[]) => void
     setShowMovementPaths: (show: boolean) => void
     setMovementMode: (mode: boolean) => void
-    getTerritoryColor: (owner: string) => string
     getValidMovementCells: (army: Army) => { x: number; y: number }[]
-    handleAction: (targetTerritory: Territory, moveStrength: number) => Promise<void>
+    
+    // Battle handling
+    activeBattle: BattleState | null
     initialBattle: (attacker: Army, target: Army | Territory) => void
-    setMoveSubmitted: (submitted: boolean) => void
-    setMoveStrength: (strength: number) => void
-    moveStrength: number
+    handleAction: (targetTerritory: Territory, moveStrength: number) => Promise<void>
+    
+    // UI helpers
+    getTerritoryColor: (owner: string) => string
 }
 
 const GameOperationPanel = ({
+    // Army selection and state
     selectedArmy,
-    animatingArmies,
-    movementMode,
-    cancelMovement,
-    activeBattle,
     armies,
+    animatingArmies,
+    
+    // Movement controls
+    moveStrength,
     isMoveSubmitted,
-    setBattleTarget,
-    setShowBattlePreview,
+    setMoveSubmitted,
+    setMoveStrength,
+    cancelMovement,
+    
+    // Movement visualization
     setValidMovementCells,
     setShowMovementPaths,
     setMovementMode,
-    getTerritoryColor,
     getValidMovementCells,
-    handleAction,
+    
+    // Battle handling
+    activeBattle,
     initialBattle,
-    setMoveSubmitted,
-    setMoveStrength,
-    moveStrength,
+    handleAction,
+    
+    // UI helpers
+    getTerritoryColor,
 }: GameOperationPanelProps) => {
 
-    const initiateBattle = (target: Army | Territory) => {
-        if (!selectedArmy) return
-        setBattleTarget({
-            army: "size" in target ? (target as Army) : undefined,
-            territory: "units" in target ? (target as Territory) : undefined,
-        })
-        setShowBattlePreview(true)
-    }
 
 
     return (
