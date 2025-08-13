@@ -50,6 +50,7 @@ export default function ImprovedGameMapNew({
     ...territory,
     isSelected: selectedTerritory?.id === territory.id
   }))
+  
 
   const getTerritoryIcon = (isCastle: boolean) => {
     return isCastle ? <Crown className="w-3 h-3 md:w-4 md:h-4" /> : <Flag className="w-3 h-3 md:w-4 md:h-4" />
@@ -281,24 +282,37 @@ export default function ImprovedGameMapNew({
           {showMovementPaths && movementMode && (
             <div className="absolute inset-0 p-2 pointer-events-none">
               <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-                {Array.from({ length: 9 }).map((_, index) => {
-                  const gridX = index % 3
-                  const gridY = Math.floor(index / 3)
+                {flatTerritories.map((territory, index) => {
+                  const gridX = territory.x
+                  const gridY = territory.y
                   const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
                   const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
-                  const isTargetTerritory = selectedTerritory && selectedTerritory.x === gridX && selectedTerritory.y === gridY
+                  
+                  
 
-                  // Only check for armies in valid movement cells
-                  const hasArmy = isValidMove && armies.some((army) => army.x === gridX && army.y === gridY && army.owner !== selectedArmy?.owner)
+                  // Check for enemy armies that can be battled
+                  const hasEnemyArmy = isValidMove && armies.some((army) => 
+                    army.x === gridX && 
+                    army.y === gridY && 
+                    army.owner !== selectedArmy?.owner
+                  )
 
-                  // Check if this destination would result in a battle
-                  const isBattleDestination = isValidMove && hasArmy && selectedTerritory?.player !== selectedArmy?.owner
-
-                  // Priority system for styling
+                  // Priority system - only show one indicator per cell (highest priority first)
                   let cellStyle = ""
                   let cellIcon = null
+                  let isClickable = false
 
-                  if (isBattleDestination && selectedTerritory !== null) {
+                  if (isCurrentPosition) {
+                    // Highest Priority: Current army position
+                    cellStyle = "bg-blue-500/30 border-2 border-blue-400 rounded-lg"
+                    cellIcon = (
+                      <div className="flex flex-col items-center">
+                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-400 animate-ping" />
+                        <span className="text-xs text-blue-400 font-bold mt-1">CURRENT</span>
+                      </div>
+                    )
+                  } else if (hasEnemyArmy) {
+                    // Second Priority: Battle destinations
                     cellStyle = "bg-purple-500/30 border-2 border-purple-400 rounded-lg hover:bg-purple-500/50"
                     cellIcon = (
                       <div className="flex flex-col items-center">
@@ -306,23 +320,9 @@ export default function ImprovedGameMapNew({
                         <span className="text-xs text-purple-400 font-bold mt-1">BATTLE</span>
                       </div>
                     )
-                  } else if (isTargetTerritory) {
-                    cellStyle = "bg-yellow-500/30 border-2 border-yellow-400 rounded-lg hover:bg-yellow-500/50"
-                    cellIcon = (
-                      <div className="flex flex-col items-center">
-                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-yellow-400 animate-ping" />
-                        <span className="text-xs text-yellow-400 font-bold mt-1">TARGET</span>
-                      </div>
-                    )
-                  } else if (hasArmy) {
-                    cellStyle = "bg-red-500/30 border-2 border-red-400 rounded-lg hover:bg-red-500/50"
-                    cellIcon = (
-                      <div className="flex flex-col items-center">
-                        <Sword className="w-6 h-6 md:w-8 md:h-8 text-red-400" />
-                        <span className="text-xs text-red-400 font-bold mt-1">ARMY</span>
-                      </div>
-                    )
+                    isClickable = true
                   } else if (isValidMove) {
+                    // Third Priority: Valid movement cells
                     cellStyle = "bg-green-500/30 border-2 border-green-400 rounded-lg hover:bg-green-500/50"
                     cellIcon = (
                       <div className="flex flex-col items-center">
@@ -330,25 +330,24 @@ export default function ImprovedGameMapNew({
                         <span className="text-xs text-green-400 font-bold mt-1">MOVE</span>
                       </div>
                     )
+                    isClickable = true
                   }
 
-                  // Current position styling
-                  const currentPositionStyle = isCurrentPosition ? "bg-blue-500/30 border-2 border-blue-400 rounded-lg" : ""
+                  // Only render overlay if there's something to show
+                  if (!cellStyle) return null
 
                   return (
                     <div
-                      key={index}
-                      className={`relative flex items-center p-4 justify-center pointer-events-auto cursor-pointer transition-all duration-200 
-                        ${currentPositionStyle} ${cellStyle}`}
-                      onClick={() => handleCellClick(gridX, gridY)}
+                      key={territory.id}
+                      className={`relative flex items-center p-4 justify-center transition-all duration-200 
+                        ${cellStyle} ${isClickable ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
+                      style={{
+                        gridColumn: gridX + 1,  // CSS grid is 1-indexed
+                        gridRow: gridY + 1      // CSS grid is 1-indexed
+                      }}
+                      onClick={isClickable ? () => handleCellClick(gridX, gridY) : undefined}
                     >
                       {cellIcon}
-                      {isCurrentPosition && (
-                        <div className="flex flex-col items-center">
-                          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-400 animate-ping" />
-                          <span className="text-xs text-blue-400 font-bold mt-1">CURRENT</span>
-                        </div>
-                      )}
                     </div>
                   )
                 })}

@@ -53,17 +53,20 @@ export function useMovement(): MovementState & MovementActions {
     if (!territory) return []
     const adjacentTerritories: Territory[] = []
 
-    territories.forEach((row) => {
-      if (!row) return
-      row.forEach((currentTerritory) => {
-        if (!currentTerritory) return
+    // Direct approach: check the 4 possible adjacent positions
+    const possibleAdjacent = [
+      { x: territory.x - 1, y: territory.y },     // Left
+      { x: territory.x + 1, y: territory.y },     // Right  
+      { x: territory.x, y: territory.y - 1 },     // Up
+      { x: territory.x, y: territory.y + 1 }      // Down
+    ]
 
-        const dx = Math.abs(territory.x - currentTerritory.x)
-        const dy = Math.abs(territory.y - currentTerritory.y)
-        if (dx + dy === 1) {
-          adjacentTerritories.push(currentTerritory)
-        }
-      })
+    possibleAdjacent.forEach(pos => {
+      // Find territory at this position
+      const foundTerritory = territories.flat().find(t => t.x === pos.x && t.y === pos.y)
+      if (foundTerritory) {
+        adjacentTerritories.push(foundTerritory)
+      }
     })
 
     return adjacentTerritories
@@ -91,10 +94,21 @@ export function useMovement(): MovementState & MovementActions {
   }, [])
 
   const initializeMovement = useCallback((army: Army, territories: Territory[][]) => {
+    // Find the territory where this army is located
+    // territories[row][col] where row=y, col=x
     const armyTerritory = territories[army.y]?.[army.x]
+    
     if (armyTerritory) {
-      const validCells = getAdjacentTerritories(armyTerritory, territories)
-      setValidMovementCells(validCells.map(t => ({ x: t.x, y: t.y })))
+      // Verify the territory coordinates match the army coordinates
+      if (armyTerritory.x === army.x && armyTerritory.y === army.y) {
+        const validCells = getAdjacentTerritories(armyTerritory, territories)
+        setValidMovementCells(validCells.map(t => ({ x: t.x, y: t.y })))
+      } else {
+        console.error('❌ Coordinate mismatch:', {
+          army: { x: army.x, y: army.y },
+          territory: { x: armyTerritory.x, y: armyTerritory.y }
+        })
+      }
     }
     setShowMovementPaths(true)
     setMovementMode(true)
