@@ -47,6 +47,7 @@ interface MovementContextValue {
   validMovementCells: { x: number; y: number }[]
   moveStrength: number
   moveSubmitted: boolean
+  targetTerritory: Territory | null
   animatingArmies: Set<string>
   armyPositions: Record<string, ArmyPosition>
   
@@ -55,6 +56,7 @@ interface MovementContextValue {
   setValidMovementCells: (cells: { x: number; y: number }[]) => void
   setMoveStrength: (strength: number) => void
   setMoveSubmitted: (submitted: boolean) => void
+  setTargetTerritory: (territory: Territory | null) => void
   setAnimatingArmies: (armies: Set<string> | ((prev: Set<string>) => Set<string>)) => void
   setArmyPositions: (positions: Record<string, ArmyPosition> | ((prev: Record<string, ArmyPosition>) => Record<string, ArmyPosition>)) => void
   
@@ -80,7 +82,7 @@ interface BattleContextValue {
   calculateBattleOdds: (attacker: Army, defender: Army | Territory) => { attackerOdds: number; defenderOdds: number }
   initializeBattle: (attacker: Army, target: Army | Territory) => void
   startBattle: (attacker: Army, target: Army | Territory, getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
-  completeBattle: (battle: BattleState, winner: "attacker" | "defender") => void
+  completeBattle: (battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
   addBattleEffect: (battle: BattleState, type: "clash" | "explosion" | "victory", getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
   animateBattle: (battle: BattleState, getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
 }

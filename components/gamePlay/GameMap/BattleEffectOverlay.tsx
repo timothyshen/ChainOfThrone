@@ -6,18 +6,17 @@ interface BattleEffectOverlayProps {
 }
 
 const BattleEffectOverlay = ({ battleEffects }: BattleEffectOverlayProps) => {
-    return (<div className="absolute inset-0 p-4 pointer-events-none z-30">
-        <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-            {battleEffects.map((effect) => (
-                <div
-                    key={effect.id}
-                    className="absolute flex items-center justify-center"
-                    style={{
-                        left: `${effect.x * 33.333 + 16.666}%`,
-                        top: `${effect.y * 33.333 + 16.666}%`,
-                        transform: "translate(-50%, -50%)",
-                    }}
-                >
+    return (<div className="absolute inset-0 pointer-events-none z-30">
+        {battleEffects.map((effect) => (
+            <div
+                key={effect.id}
+                className="absolute flex items-center justify-center"
+                style={{
+                    left: `${(effect.x / 2) * 100}%`,
+                    top: `${(effect.y / 2) * 100}%`,
+                    transform: "translate(-50%, -50%)",
+                }}
+            >
                     {effect.type === "clash" && (
                         <div className="relative">
                             <div className="w-8 h-8 bg-yellow-500 rounded-full animate-ping" />
@@ -46,9 +45,8 @@ const BattleEffectOverlay = ({ battleEffects }: BattleEffectOverlayProps) => {
                             />
                         </div>
                     )}
-                </div>
-            ))}
-        </div>
+            </div>
+        ))}
     </div>
     )
 }

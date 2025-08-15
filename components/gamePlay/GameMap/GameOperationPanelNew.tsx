@@ -26,6 +26,7 @@ const GameOperationPanelNew = ({
   const { 
     moveStrength, 
     moveSubmitted, 
+    targetTerritory,
     animatingArmies,
     setMoveStrength,
     setMoveSubmitted,
@@ -35,10 +36,17 @@ const GameOperationPanelNew = ({
     getValidMovementCells,
     cancelMovement
   } = useMovementContext()
-  const { activeBattle } = useBattleContext()
+  const { 
+    activeBattle, 
+    showBattlePreview, 
+    battleTarget, 
+    calculateBattleOdds,
+    setShowBattlePreview,
+    setBattleTarget
+  } = useBattleContext()
   
   // Actions
-  const { getTerritoryColor } = useGameActions(gameAddress, isMobile, setMobileBottomPanelOpen)
+  const { getTerritoryColor, handleAction, handleStartBattle } = useGameActions(gameAddress, isMobile, setMobileBottomPanelOpen)
 
   if (!selectedArmy) {
     return (
@@ -93,8 +101,100 @@ const GameOperationPanelNew = ({
         </CardContent>
       </Card>
 
-      {moveSubmitted ? (
+      {showBattlePreview && battleTarget ? (
+        <Card className="bg-slate-700 border-slate-600 text-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sword className="w-4 h-4" />
+              Battle Preview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span>Attacker</span>
+                <Badge style={{ backgroundColor: getTerritoryColor(selectedArmy.owner) }}>
+                  {selectedArmy.owner} ({Number(selectedArmy.size).toLocaleString()})
+                </Badge>
+              </div>
+              
+              {battleTarget.army ? (
+                <div className="flex justify-between">
+                  <span>Defender</span>
+                  <Badge style={{ backgroundColor: getTerritoryColor(battleTarget.army.owner) }}>
+                    {battleTarget.army.owner} ({Number(battleTarget.army.size).toLocaleString()})
+                  </Badge>
+                </div>
+              ) : battleTarget.territory ? (
+                <div className="flex justify-between">
+                  <span>Target</span>
+                  <Badge variant="secondary">
+                    Territory ({battleTarget.territory.x}, {battleTarget.territory.y})
+                  </Badge>
+                </div>
+              ) : null}
+
+              {battleTarget.army && (
+                <div className="bg-slate-600 rounded-lg p-3 space-y-2">
+                  <div className="text-sm font-semibold">Battle Odds</div>
+                  {(() => {
+                    const odds = calculateBattleOdds(selectedArmy, battleTarget.army!)
+                    return (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>Attacker wins:</span>
+                          <span className="text-green-400">{(odds.attackerOdds * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Defender wins:</span>
+                          <span className="text-red-400">{(odds.defenderOdds * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full text-black"
+                  onClick={() => {
+                    setShowBattlePreview(false)
+                    setBattleTarget(null)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => {
+                    if (battleTarget.army) {
+                      handleStartBattle(selectedArmy, battleTarget.army)
+                    } else if (battleTarget.territory) {
+                      handleStartBattle(selectedArmy, battleTarget.territory)
+                    }
+                  }}
+                >
+                  <Sword className="w-4 h-4 mr-2" />
+                  Start Battle
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : moveSubmitted ? (
         <div className="grid grid-cols-1 gap-2">
+          {targetTerritory && (
+            <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-2 mb-2">
+              <div className="flex items-center gap-2">
+                <Navigation className="w-4 h-4 text-blue-400" />
+                <span className="text-blue-400 text-sm">
+                  Moving to ({targetTerritory.x}, {targetTerritory.y})
+                </span>
+              </div>
+            </div>
+          )}
           <div className="space-y-1">
             <Input
               type="number"
@@ -120,14 +220,11 @@ const GameOperationPanelNew = ({
           <Button
             variant="outline"
             className="w-full text-black"
-            disabled={selectedArmy && animatingArmies.has(selectedArmy.id)}
-            onClick={() => {
-              if (selectedArmy && !animatingArmies.has(selectedArmy.id)) {
-                // This would need territories context - will be handled in the refactored version
-                // const validCells = getValidMovementCells(selectedArmy)
-                // setValidMovementCells(validCells)
-                setShowMovementPaths(true)
-                setMovementMode(true)
+            disabled={selectedArmy && animatingArmies.has(selectedArmy.id) || moveStrength <= 0 || !targetTerritory}
+            onClick={async () => {
+              if (selectedArmy && !animatingArmies.has(selectedArmy.id) && moveStrength > 0 && targetTerritory) {
+                // Trigger the move with animation
+                await handleAction(targetTerritory, moveStrength)
               }
             }}
           >

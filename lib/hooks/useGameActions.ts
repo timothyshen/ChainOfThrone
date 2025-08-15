@@ -48,11 +48,12 @@ export function useGameActions(
     setAnimatingArmies, 
     setArmyPositions, 
     setMoveSubmitted,
+    setTargetTerritory,
     initializeMovement,
     getArmyDisplayPosition,
     cancelMovement
   } = useMovementContext()
-  const { initializeBattle, startBattle } = useBattleContext()
+  const { activeBattle, initializeBattle, startBattle } = useBattleContext()
 
   const handleTerritoryClick = useCallback((territory: Territory) => {
     console.log("Territory clicked:", territory)
@@ -87,7 +88,25 @@ export function useGameActions(
     }
 
     if (selectedArmy && movementMode) {
-      // Start animation
+      // Store the target territory and show the move strength input
+      setTargetTerritory(targetTerritory)
+      setMoveSubmitted(true)
+      console.log(`Move target selected: (${targetTerritory.x}, ${targetTerritory.y})`)
+    }
+  }, [selectedTerritory, selectedArmy, address, gameAddress, movementMode, setMoveSubmitted, setTargetTerritory, toast])
+
+  const handleAction = useCallback(async (targetTerritory: Territory, moveStrength: number) => {
+    if (!selectedTerritory || !address || !gameAddress || !selectedArmy) {
+      toast({
+        title: "Invalid Action", 
+        description: "Cannot perform this action at this time.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      // Start animation when user decides to move
       setAnimatingArmies(prev => new Set([...prev, selectedArmy.id]))
 
       // Update army position with animation flag
@@ -96,8 +115,21 @@ export function useGameActions(
         [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
       }))
 
+      type Move = readonly [number, number, string, number, number, number]
+      const move: Move = [
+        selectedTerritory.x,
+        selectedTerritory.y,
+        address,
+        targetTerritory.x,
+        targetTerritory.y,
+        moveStrength
+      ] as const
+
+      await makeMove(gameAddress, move)
+      await refreshAllData()
+
       // Wait for animation to complete
-      setTimeout(async () => {
+      setTimeout(() => {
         // Clear animation state
         setAnimatingArmies(prev => {
           const newSet = new Set(prev)
@@ -115,51 +147,45 @@ export function useGameActions(
         console.log(`Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`)
       }, 800) // Animation duration
 
-      setMoveSubmitted(true)
-    }
-  }, [selectedTerritory, selectedArmy, address, gameAddress, movementMode, setAnimatingArmies, setArmyPositions, setMoveSubmitted, toast])
-
-  const handleAction = useCallback(async (targetTerritory: Territory, moveStrength: number) => {
-    if (!selectedTerritory || !address || !gameAddress) {
-      toast({
-        title: "Invalid Action", 
-        description: "Cannot perform this action at this time.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      type Move = readonly [number, number, string, number, number, number]
-      const move: Move = [
-        selectedTerritory.x,
-        selectedTerritory.y,
-        address,
-        targetTerritory.x,
-        targetTerritory.y,
-        moveStrength
-      ] as const
-
-      await makeMove(gameAddress, move)
-      await refreshAllData()
+      // Reset movement state
+      cancelMovement()
       
     } catch (error) {
       console.error('Error making move:', error)
+      
+      // Clear animation on error
+      setAnimatingArmies(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(selectedArmy.id)
+        return newSet
+      })
+      
+      setArmyPositions(prev => {
+        const newPositions = { ...prev }
+        delete newPositions[selectedArmy.id]
+        return newPositions
+      })
+
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to submit move to the blockchain",
         variant: "destructive",
       })
     }
-  }, [selectedTerritory, address, gameAddress, makeMove, refreshAllData, toast])
+  }, [selectedTerritory, selectedArmy, address, gameAddress, makeMove, refreshAllData, setAnimatingArmies, setArmyPositions, cancelMovement, toast])
 
   const handleInitializeBattle = useCallback((attacker: Army, target: Army | Territory) => {
-    initializeBattle(attacker, target)
-  }, [initializeBattle])
+    // Don't start a new battle if one is already active
+    if (!activeBattle) {
+      initializeBattle(attacker, target)
+    }
+  }, [initializeBattle, activeBattle])
 
   const handleStartBattle = useCallback((attacker: Army, target: Army | Territory) => {
+    // Clear movement mode when starting battle
+    cancelMovement()
     startBattle(attacker, target, getArmyDisplayPosition)
-  }, [startBattle, getArmyDisplayPosition])
+  }, [startBattle, getArmyDisplayPosition, cancelMovement])
 
   const getTerritoryColor = useCallback((owner: string): string => {
     const colors: Record<string, string> = {

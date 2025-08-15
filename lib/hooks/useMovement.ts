@@ -11,6 +11,7 @@ interface MovementState {
   validMovementCells: { x: number; y: number }[]
   moveStrength: number
   moveSubmitted: boolean
+  targetTerritory: Territory | null
   
   // Army animations
   animatingArmies: Set<string>
@@ -24,6 +25,7 @@ interface MovementActions {
   setValidMovementCells: (cells: { x: number; y: number }[]) => void
   setMoveStrength: (strength: number) => void
   setMoveSubmitted: (submitted: boolean) => void
+  setTargetTerritory: (territory: Territory | null) => void
   
   // Animation controls
   setAnimatingArmies: (armies: Set<string> | ((prev: Set<string>) => Set<string>)) => void
@@ -44,6 +46,7 @@ export function useMovement(): MovementState & MovementActions {
   const [validMovementCells, setValidMovementCells] = useState<{ x: number; y: number }[]>([])
   const [moveStrength, setMoveStrength] = useState<number>(0)
   const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
+  const [targetTerritory, setTargetTerritory] = useState<Territory | null>(null)
   
   // Army animations
   const [animatingArmies, setAnimatingArmies] = useState<Set<string>>(new Set())
@@ -91,6 +94,8 @@ export function useMovement(): MovementState & MovementActions {
     setShowMovementPaths(false)
     setValidMovementCells([])
     setMoveStrength(0)
+    setMoveSubmitted(false)
+    setTargetTerritory(null)
   }, [])
 
   const initializeMovement = useCallback((army: Army, territories: Territory[][]) => {
@@ -121,6 +126,7 @@ export function useMovement(): MovementState & MovementActions {
     validMovementCells,
     moveStrength,
     moveSubmitted,
+    targetTerritory,
     animatingArmies,
     armyPositions,
     
@@ -130,6 +136,7 @@ export function useMovement(): MovementState & MovementActions {
     setValidMovementCells,
     setMoveStrength,
     setMoveSubmitted,
+    setTargetTerritory,
     setAnimatingArmies,
     setArmyPositions,
     getAdjacentTerritories,

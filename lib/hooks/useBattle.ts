@@ -57,6 +57,7 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       territory: "units" in target ? (target as Territory) : undefined,
     })
     setShowBattlePreview(true)
+    console.log('Battle preview initialized for', attacker.owner, 'vs', "size" in target ? target.owner : 'territory')
   }, [])
 
   const addBattleEffect = useCallback((
@@ -109,9 +110,9 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       const defenderDamage = Math.floor(progress * attackerOdds * 80)
 
       // Add battle effects
-      if (Math.random() < 0.3) {
+      if (Math.random() < 0.2) {
         addBattleEffect(battle, "clash", getArmyDisplayPosition)
-      } else if (Math.random() < 0.1) {
+      } else if (Math.random() < 0.05) {
         addBattleEffect(battle, "explosion", getArmyDisplayPosition)
       }
 
@@ -127,14 +128,14 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       if (progress >= 1) {
         clearInterval(battleInterval)
         const winner = Math.random() < attackerOdds ? "attacker" : "defender"
-        completeBattle(battle, winner)
+        completeBattle(battle, winner, getArmyDisplayPosition)
       }
     }, 100)
-  }, [calculateBattleOdds, addBattleEffect])
+  }, [calculateBattleOdds, addBattleEffect, completeBattle])
 
-  const completeBattle = useCallback((battle: BattleState, winner: "attacker" | "defender") => {
+  const completeBattle = useCallback((battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => {
     // Add final effect
-    addBattleEffect(battle, "victory", (army) => ({ gridX: army.x, gridY: army.y }))
+    addBattleEffect(battle, "victory", getArmyDisplayPosition)
 
     setActiveBattle(prev =>
       prev ? {
@@ -165,6 +166,7 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
     getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }
   ) => {
     const battleId = `battle_${Date.now()}`
+    console.log('Starting battle:', attacker.owner, 'vs', "size" in target ? target.owner : 'territory')
 
     const battle: BattleState = {
       id: battleId,
