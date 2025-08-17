@@ -94,7 +94,7 @@ export default function ImprovedGameMapNew({
 
   return (
     <div
-      className="h-max bg-slate-900 text-white flex flex-col md:flex-row"
+      className="h-full bg-slate-900 text-white flex flex-col md:flex-row"
       onClick={handleMapClick}
     >
       {/* Main Map Area */}
@@ -102,15 +102,11 @@ export default function ImprovedGameMapNew({
         {/* Map Canvas */}
         <div
           ref={mapRef}
-          className="w-full bg-gradient-to-br from-slate-800 to-slate-900"
+          className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"
           style={{
             transform: `scale(1)`,
             transformOrigin: "center center",
-            height: isMobile && mobileBottomPanelOpen
-              ? 'calc(100vh - 50vh)' // Reserve space for mobile panel
-              : 'calc(100vh - 200px)', // Reserve space for headers/navigation
             maxWidth: '100%',
-            maxHeight: 'calc(100vh - 200px)', // Constrain max height
             minHeight: '400px', // Ensure minimum usable size
             margin: '0 auto'
           }}

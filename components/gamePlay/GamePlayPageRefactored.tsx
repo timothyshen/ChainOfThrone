@@ -123,9 +123,9 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
   )
 
   return (
-    <div className="flex flex-col min-h-screen md:mt-12 bg-slate-900">
+    <div className="flex flex-col h-screen md:mt-12 bg-slate-900">
       {/* Mobile status drawer */}
-      <div className="md:hidden my-1 px-4">
+      <div className="md:hidden py-2 px-4 flex-shrink-0">
         <Drawer>
           <DrawerTrigger asChild>
             <Button variant="outline" className="w-full">
@@ -140,11 +140,13 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
       </div>
 
       {/* Main game layout */}
-      <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-4rem)]">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0">
         {/* Game map section */}
-        <div className="p-4 overflow-auto md:flex-1 block">
+        <div className="flex-1 overflow-hidden">
           {isGridLoading ? (
-            <Spinner />
+            <div className="h-full flex items-center justify-center">
+              <Spinner />
+            </div>
           ) : (
             <ImprovedGameMapNew
               gameAddress={gameAddressParam}
@@ -170,7 +172,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
         )}
 
         {/* Desktop side panel */}
-        <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto">
+        <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto flex-shrink-0">
           <GameStatusPanel />
         </div>
       </div>
