@@ -90,6 +90,34 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
     }, type === "victory" ? 2000 : type === "explosion" ? 1200 : 800)
   }, [])
 
+  const completeBattle = useCallback((battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition?: (army: Army) => { gridX: number; gridY: number }) => {
+    // Add final effect - use provided function or default
+    const positionFn = getArmyDisplayPosition || ((army: Army) => ({ gridX: army.x, gridY: army.y }))
+    addBattleEffect(battle, "victory", positionFn)
+
+    setActiveBattle(prev =>
+      prev ? {
+        ...prev,
+        winner,
+        phase: "results",
+      } : null
+    )
+
+    // Apply battle results and cleanup
+    setTimeout(() => {
+      if (winner === "attacker") {
+        console.log(`${battle.attackerArmy.owner} won the battle!`)
+      } else {
+        console.log(`${battle.attackerArmy.owner} was defeated!`)
+      }
+
+      setTimeout(() => {
+        setActiveBattle(null)
+        setBattleEffects([])
+      }, 1000)
+    }, 2000)
+  }, [addBattleEffect])
+
   const animateBattle = useCallback((
     battle: BattleState,
     getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }
@@ -132,33 +160,6 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       }
     }, 100)
   }, [calculateBattleOdds, addBattleEffect, completeBattle])
-
-  const completeBattle = useCallback((battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => {
-    // Add final effect
-    addBattleEffect(battle, "victory", getArmyDisplayPosition)
-
-    setActiveBattle(prev =>
-      prev ? {
-        ...prev,
-        winner,
-        phase: "results",
-      } : null
-    )
-
-    // Apply battle results and cleanup
-    setTimeout(() => {
-      if (winner === "attacker") {
-        console.log(`${battle.attackerArmy.owner} won the battle!`)
-      } else {
-        console.log(`${battle.attackerArmy.owner} was defeated!`)
-      }
-
-      setTimeout(() => {
-        setActiveBattle(null)
-        setBattleEffects([])
-      }, 1000)
-    }, 2000)
-  }, [addBattleEffect])
 
   const startBattle = useCallback((
     attacker: Army, 

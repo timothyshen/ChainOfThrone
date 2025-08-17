@@ -82,7 +82,7 @@ interface BattleContextValue {
   calculateBattleOdds: (attacker: Army, defender: Army | Territory) => { attackerOdds: number; defenderOdds: number }
   initializeBattle: (attacker: Army, target: Army | Territory) => void
   startBattle: (attacker: Army, target: Army | Territory, getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
-  completeBattle: (battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
+  completeBattle: (battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition?: (army: Army) => { gridX: number; gridY: number }) => void
   addBattleEffect: (battle: BattleState, type: "clash" | "explosion" | "victory", getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
   animateBattle: (battle: BattleState, getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }) => void
 }

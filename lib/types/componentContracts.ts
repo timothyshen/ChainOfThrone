@@ -122,11 +122,11 @@ export interface GameActionsContract {
 }
 
 // Hook return types
-export interface UseGameStateReturn extends GameStateContextContract {}
-export interface UseSelectionReturn extends SelectionContextContract {}
-export interface UseMovementReturn extends MovementContextContract {}
-export interface UseBattleReturn extends BattleContextContract {}
-export interface UseGameActionsReturn extends GameActionsContract {}
+export type UseGameStateReturn = GameStateContextContract
+export type UseSelectionReturn = SelectionContextContract
+export type UseMovementReturn = MovementContextContract
+export type UseBattleReturn = BattleContextContract
+export type UseGameActionsReturn = GameActionsContract
 
 // Event handler types
 export type TerritoryClickHandler = (territory: Territory) => void

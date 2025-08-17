@@ -63,7 +63,7 @@ export default function GameHistoryList({ games, isLoading, userAddress }: GameH
         return (
             <div className={cn("text-center py-8")}>
                 <h3 className={cn("text-lg font-medium")}>No games yet</h3>
-                <p className={cn("text-muted-foreground mt-2")}>You haven't played any games yet.</p>
+                <p className={cn("text-muted-foreground mt-2")}>You haven&apos;t played any games yet.</p>
                 <Button className={cn("mt-4")}>
                     <Link href="/explore">Find Games</Link>
                 </Button>

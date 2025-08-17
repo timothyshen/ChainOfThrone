@@ -90,7 +90,7 @@ export default function GameFilters({
                     <DialogHeader>
                         <DialogTitle>Filter Games</DialogTitle>
                         <DialogDescription>
-                            Apply filters to find the games you're looking for
+                            Apply filters to find the games you&apos;re looking for
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-6 space-y-4">
