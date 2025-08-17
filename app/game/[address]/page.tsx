@@ -1,8 +1,7 @@
-// import GamePlayPage from '@/components/gamePlay/GamePlayPage'
-import GamePlayPageRefactored from '@/components/gamePlay/GamePlayPageRefactored'
+import GamePlayPage from '@/components/gamePlay/GamePlayPage'
 
 export default function GamePage({ params }: { params: { address: string } }) {
   return (
-    <GamePlayPageRefactored gameAddressParam={params.address as `0x${string}`} />
+    <GamePlayPage gameAddressParam={params.address as `0x${string}`} />
   )
 }

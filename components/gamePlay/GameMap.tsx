@@ -2,31 +2,31 @@
 
 import { useRef } from "react"
 import { Sword, Swords, Crown, Users, Navigation, Flag } from "lucide-react"
-import { 
+import {
   useGameStateContext,
-  useSelectionContext, 
-  useMovementContext, 
-  useBattleContext 
+  useSelectionContext,
+  useMovementContext,
+  useBattleContext
 } from "@/lib/contexts/GameContext"
 import { useGameActions } from "@/lib/hooks/useGameActions"
 
-interface ImprovedGameMapNewProps {
+interface GameMapProps {
   gameAddress: `0x${string}` | undefined
   isMobile: boolean
   mobileBottomPanelOpen: boolean
   setMobileBottomPanelOpen: (open: boolean) => void
 }
 
-export default function ImprovedGameMapNew({
+export default function GameMap({
   gameAddress,
   isMobile,
   mobileBottomPanelOpen,
   setMobileBottomPanelOpen,
-}: ImprovedGameMapNewProps) {
+}: GameMapProps) {
   // Context hooks
   const { territories, armies } = useGameStateContext()
   const { selectedTerritory, selectedArmy, clearSelection } = useSelectionContext()
-  const { 
+  const {
     movementMode,
     showMovementPaths,
     validMovementCells,
@@ -35,9 +35,9 @@ export default function ImprovedGameMapNew({
     getArmyDisplayPosition
   } = useMovementContext()
   const { battleEffects } = useBattleContext()
-  
+
   // Actions
-  const { 
+  const {
     handleArmyClick,
     handleMoveToCell,
     handleInitializeBattle
@@ -50,7 +50,7 @@ export default function ImprovedGameMapNew({
     ...territory,
     isSelected: selectedTerritory?.id === territory.id
   }))
-  
+
 
   const getTerritoryIcon = (isCastle: boolean) => {
     return isCastle ? <Crown className="w-3 h-3 md:w-4 md:h-4" /> : <Flag className="w-3 h-3 md:w-4 md:h-4" />
@@ -67,9 +67,9 @@ export default function ImprovedGameMapNew({
       const territory = flatTerritories.find(t => t.x === gridX && t.y === gridY)
       if (territory) {
         // Check if this is a battle destination
-        const hasEnemyArmy = armies.some(army => 
-          army.x === gridX && 
-          army.y === gridY && 
+        const hasEnemyArmy = armies.some(army =>
+          army.x === gridX &&
+          army.y === gridY &&
           army.owner !== selectedArmy?.owner
         )
 
@@ -154,7 +154,7 @@ export default function ImprovedGameMapNew({
                     })
                     .map((army) => {
                       const isAnimating = animatingArmies.has(army.id)
-                      
+
                       return (
                         <div
                           key={army.id}
@@ -217,10 +217,10 @@ export default function ImprovedGameMapNew({
                   }}
                 >
                   <Users className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                  
+
                   {/* Trail Effect */}
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-                  
+
                   {/* Movement Particles */}
                   <div className="absolute -inset-2">
                     <div
@@ -283,13 +283,13 @@ export default function ImprovedGameMapNew({
                   const gridY = territory.y
                   const isValidMove = validMovementCells.some((cell) => cell.x === gridX && cell.y === gridY)
                   const isCurrentPosition = selectedArmy && selectedArmy.x === gridX && selectedArmy.y === gridY
-                  
-                  
+
+
 
                   // Check for enemy armies that can be battled
-                  const hasEnemyArmy = isValidMove && armies.some((army) => 
-                    army.x === gridX && 
-                    army.y === gridY && 
+                  const hasEnemyArmy = isValidMove && armies.some((army) =>
+                    army.x === gridX &&
+                    army.y === gridY &&
                     army.owner !== selectedArmy?.owner
                   )
 

@@ -15,8 +15,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { ChevronDown } from 'lucide-react'
-import GameOperationPanelNew from '@/components/gamePlay/GameMap/GameOperationPanelNew'
-import ImprovedGameMapNew from '@/components/gamePlay/ImprovedGameMapNew'
+import GameOperationPanel from '@/components/gamePlay/GameMap/GameOperationPanel'
+import GameMap from '@/components/gamePlay/GameMap'
 import BattleEffectOverlay from '@/components/gamePlay/GameMap/BattleEffectOverlay'
 import { GameContextProvider, useGameStateContext, useBattleContext } from '@/lib/contexts/GameContext'
 
@@ -28,16 +28,16 @@ interface GamePlayPageRefactoredProps {
 function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
   const { address } = useAccount()
   const { toast } = useToast()
-  
+
   // Context hooks
-  const { 
-    gameStatus, 
-    totalPlayer, 
-    maxPlayer, 
+  const {
+    gameStatus,
+    totalPlayer,
+    maxPlayer,
     playerAddresses,
     isGridLoading,
     isStatusLoading,
-    refreshAllData 
+    refreshAllData
   } = useGameStateContext()
   const { battleEffects } = useBattleContext()
 
@@ -114,8 +114,8 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
         totalPlayer={totalPlayer}
         maxPlayer={maxPlayer}
         playerAddresses={playerAddresses}
-        setGameStatus={() => {}} // Context will handle this
-        setTotalPlayer={() => {}} // Context will handle this
+        setGameStatus={() => { }} // Context will handle this
+        setTotalPlayer={() => { }} // Context will handle this
         fetchGameData={refreshAllData}
       />
       <GameOverview territories={[]} />
@@ -148,7 +148,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
               <Spinner />
             </div>
           ) : (
-            <ImprovedGameMapNew
+            <GameMap
               gameAddress={gameAddressParam}
               isMobile={isMobile}
               mobileBottomPanelOpen={mobileBottomPanelOpen}
@@ -159,9 +159,10 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
 
         {/* Mobile operation panel */}
         {mobileBottomPanelOpen && (
-          <GameOperationPanelNew
+          <GameOperationPanel
             gameAddress={gameAddressParam}
             isMobile={isMobile}
+            mobileBottomPanelOpen={mobileBottomPanelOpen}
             setMobileBottomPanelOpen={setMobileBottomPanelOpen}
           />
         )}
@@ -181,7 +182,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
 }
 
 // Main component with context provider
-export default function GamePlayPageRefactored({ gameAddressParam }: GamePlayPageRefactoredProps) {
+export default function GamePlayPage({ gameAddressParam }: GamePlayPageRefactoredProps) {
   return (
     <GameContextProvider gameAddress={gameAddressParam}>
       <GamePlayContent gameAddressParam={gameAddressParam} />
