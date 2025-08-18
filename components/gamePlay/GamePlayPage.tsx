@@ -118,7 +118,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
         setTotalPlayer={() => { }} // Context will handle this
         fetchGameData={refreshAllData}
       />
-      <GameOverview territories={[]} />
+      <GameOverview gameAddress={gameAddressParam} playerAddress={address} />
     </div>
   )
 
@@ -177,7 +177,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
             gameAddress={gameAddressParam}
             isMobile={false}
             mobileBottomPanelOpen={false}
-            setMobileBottomPanelOpen={() => {}}
+            setMobileBottomPanelOpen={() => { }}
           />
         </div>
       </div>

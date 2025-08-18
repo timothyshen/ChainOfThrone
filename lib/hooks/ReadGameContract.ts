@@ -42,7 +42,10 @@ export const idToAddress = async (address: `0x${string}`, id: number) => {
   return result;
 };
 
-export const addressToId = async (
+export const addressToId: (
+  address: `0x${string}`,
+  userAddress: `0x${string}`
+) => Promise<number> = async (
   address: `0x${string}`,
   userAddress: `0x${string}`
 ) => {
