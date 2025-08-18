@@ -71,11 +71,10 @@ export function useGameActions(
       console.log("Territory clicked:", territory);
       selectTerritory(territory);
 
-      if (isMobile) {
-        setMobileBottomPanelOpen(true);
-      }
+      // Don't auto-open mobile panel - let the GameOperationPanel handle drawer state
+      // based on action states (battle preview, movement input, etc.)
     },
-    [selectTerritory, isMobile, setMobileBottomPanelOpen]
+    [selectTerritory]
   );
 
   const handleArmyClick = useCallback(
@@ -87,9 +86,8 @@ export function useGameActions(
       // Initialize movement for the selected army
       initializeMovement(army, territories);
 
-      if (isMobile) {
-        setMobileBottomPanelOpen(true);
-      }
+      // Don't auto-open mobile panel - let the GameOperationPanel handle drawer state
+      // based on action states (battle preview, movement input, etc.)
 
       if (selectedArmy && movementMode) {
         cancelMovement();
@@ -100,8 +98,6 @@ export function useGameActions(
       setSelectedTerritory,
       initializeMovement,
       territories,
-      isMobile,
-      setMobileBottomPanelOpen,
       movementMode,
       selectedArmy,
       cancelMovement,

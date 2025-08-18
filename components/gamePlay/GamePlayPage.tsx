@@ -157,15 +157,13 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
           )}
         </div>
 
-        {/* Mobile operation panel */}
-        {mobileBottomPanelOpen && (
-          <GameOperationPanel
-            gameAddress={gameAddressParam}
-            isMobile={isMobile}
-            mobileBottomPanelOpen={mobileBottomPanelOpen}
-            setMobileBottomPanelOpen={setMobileBottomPanelOpen}
-          />
-        )}
+        {/* Mobile operation panel - always rendered to track state changes */}
+        <GameOperationPanel
+          gameAddress={gameAddressParam}
+          isMobile={isMobile}
+          mobileBottomPanelOpen={mobileBottomPanelOpen}
+          setMobileBottomPanelOpen={setMobileBottomPanelOpen}
+        />
 
         {/* Battle Effects Overlay */}
         {battleEffects.length > 0 && (
@@ -175,6 +173,12 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
         {/* Desktop side panel */}
         <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto flex-shrink-0">
           <GameStatusPanel />
+          <GameOperationPanel
+            gameAddress={gameAddressParam}
+            isMobile={false}
+            mobileBottomPanelOpen={false}
+            setMobileBottomPanelOpen={() => {}}
+          />
         </div>
       </div>
     </div>

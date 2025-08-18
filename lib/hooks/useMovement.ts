@@ -45,8 +45,13 @@ export function useMovement(): MovementState & MovementActions {
   const [showMovementPaths, setShowMovementPaths] = useState(false)
   const [validMovementCells, setValidMovementCells] = useState<{ x: number; y: number }[]>([])
   const [moveStrength, setMoveStrength] = useState<number>(0)
-  const [moveSubmitted, setMoveSubmitted] = useState<boolean>(false)
+  const [moveSubmitted, setMoveSubmittedInternal] = useState<boolean>(false)
   const [targetTerritory, setTargetTerritory] = useState<Territory | null>(null)
+  
+  // Wrap setMoveSubmitted for consistency
+  const setMoveSubmitted = useCallback((submitted: boolean) => {
+    setMoveSubmittedInternal(submitted);
+  }, [])
   
   // Army animations
   const [animatingArmies, setAnimatingArmies] = useState<Set<string>>(new Set())

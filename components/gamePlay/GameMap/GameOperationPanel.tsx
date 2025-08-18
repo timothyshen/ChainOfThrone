@@ -68,27 +68,6 @@ const BattlePreviewContent = ({
       </div>
     ) : null}
 
-    {battleTarget.army && (
-      <div className="bg-slate-600 rounded-lg p-3 space-y-2">
-        <div className="text-sm font-semibold">Battle Odds</div>
-        {(() => {
-          const odds = calculateBattleOdds(selectedArmy, battleTarget.army!)
-          return (
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span>Attacker wins:</span>
-                <span className="text-green-400">{(odds.attackerOdds * 100).toFixed(1)}%</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Defender wins:</span>
-                <span className="text-red-400">{(odds.defenderOdds * 100).toFixed(1)}%</span>
-              </div>
-            </div>
-          )
-        })()}
-      </div>
-    )}
-
     <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
       <Button
         variant="outline"
@@ -129,7 +108,7 @@ const MovementInputContent = ({
 }: MovementInputContentProps) => (
   <div className="grid grid-cols-1 gap-2">
     {targetTerritory && (
-      <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-2 mb-2">
+      <div className="bg-blue-200 border border-blue-600 rounded-lg p-2 mb-2">
         <div className="flex items-center gap-2">
           <Navigation className="w-4 h-4 text-blue-400" />
           <span className="text-blue-400 text-sm">
@@ -203,9 +182,8 @@ const BattleProgressContent = ({ activeBattle, isMobile = false }: BattleProgres
       {activeBattle.phase === "results" && (
         <div className="text-center">
           <div
-            className={`text-lg font-bold ${
-              activeBattle.winner === "attacker" ? "text-green-400" : "text-red-400"
-            }`}
+            className={`text-lg font-bold ${activeBattle.winner === "attacker" ? "text-green-400" : "text-red-400"
+              }`}
           >
             {activeBattle.winner === "attacker" ? "Victory!" : "Defeat!"}
           </div>
@@ -272,7 +250,7 @@ const getActionContent = (
   }
 ) => {
   const { isMobile = false } = props
-  
+
   switch (actionState) {
     case 'battlePreview':
       return props.battleTarget ? (
@@ -286,7 +264,7 @@ const getActionContent = (
           isMobile={isMobile}
         />
       ) : null
-      
+
     case 'movementInput':
       return (
         <MovementInputContent
@@ -299,7 +277,7 @@ const getActionContent = (
           isMobile={isMobile}
         />
       )
-      
+
     case 'battleProgress':
       return (
         <BattleProgressContent
@@ -307,7 +285,7 @@ const getActionContent = (
           isMobile={isMobile}
         />
       )
-      
+
     case 'movementMode':
       return (
         <MovementModeContent
@@ -315,7 +293,7 @@ const getActionContent = (
           isMobile={isMobile}
         />
       )
-      
+
     default:
       return null
   }
@@ -339,6 +317,7 @@ const GameOperationPanel = ({
 }: GameOperationPanelProps) => {
   // Context hooks
   const { selectedArmy } = useSelectionContext()
+  const movementContext = useMovementContext()
   const {
     moveStrength,
     moveSubmitted,
@@ -346,12 +325,14 @@ const GameOperationPanel = ({
     animatingArmies,
     setMoveStrength,
     setMoveSubmitted,
+    setTargetTerritory,
     setValidMovementCells,
     setShowMovementPaths,
     setMovementMode,
     getValidMovementCells,
     cancelMovement
-  } = useMovementContext()
+  } = movementContext
+  const battleContext = useBattleContext()
   const {
     activeBattle,
     showBattlePreview,
@@ -359,7 +340,8 @@ const GameOperationPanel = ({
     calculateBattleOdds,
     setShowBattlePreview,
     setBattleTarget
-  } = useBattleContext()
+  } = battleContext
+
 
   // Actions
   const { getTerritoryColor, handleAction, handleStartBattle } = useGameActions(gameAddress, isMobile, setMobileBottomPanelOpen)
@@ -369,7 +351,8 @@ const GameOperationPanel = ({
     if (showBattlePreview && battleTarget) return 'battlePreview'
     if (moveSubmitted) return 'movementInput'
     if (activeBattle && activeBattle.attackerArmy.id === selectedArmy?.id) return 'battleProgress'
-    if (selectedArmy && !moveSubmitted) return 'movementMode'
+    // Only return 'none' - movementMode state exists but doesn't trigger drawer
+    // The movement mode shows path overlays on the map, drawer only opens for specific actions
     return 'none'
   }
 
@@ -379,6 +362,10 @@ const GameOperationPanel = ({
   const handleBattleCancel = () => {
     setShowBattlePreview(false)
     setBattleTarget(null)
+  }
+
+  const handleCancelMovement = () => {
+    setShowBattlePreview(false)
   }
 
   const handleStartBattleAction = () => {
@@ -412,17 +399,18 @@ const GameOperationPanel = ({
     onCancelMovement: cancelMovement
   }
 
+
   // Auto-manage mobile drawer state based on action state
   useEffect(() => {
     if (isMobile && selectedArmy) {
-      const shouldOpenDrawer = actionState !== 'none' && actionState !== 'movementMode'
-      
+      const shouldOpenDrawer = actionState !== 'none'
+
       // Auto-open drawer for actionable states (battle preview, movement input, battle progress)
       if (shouldOpenDrawer && !mobileBottomPanelOpen) {
         setMobileBottomPanelOpen(true)
       }
-      
-      // Auto-close drawer when action completes (transitions to 'none' or 'movementMode')
+
+      // Auto-close drawer when action completes (transitions to 'none')
       if (!shouldOpenDrawer && mobileBottomPanelOpen && actionState === 'none') {
         setMobileBottomPanelOpen(false)
       }
@@ -432,13 +420,17 @@ const GameOperationPanel = ({
   // Handle drawer close for mobile - reset action states appropriately
   const handleDrawerClose = (open: boolean) => {
     setMobileBottomPanelOpen(open)
-    
+
     if (!open) {
       // Reset states when drawer is manually closed
       if (actionState === 'battlePreview') {
         handleBattleCancel()
       } else if (actionState === 'movementInput') {
-        cancelMovement()
+        // For movement input, only reset the move submission state but keep movement mode active
+        setMoveSubmitted(false)
+        setTargetTerritory(null)
+        setMoveStrength(0)
+        // Don't call cancelMovement() - keep movement paths visible
       }
     }
   }
@@ -457,9 +449,9 @@ const GameOperationPanel = ({
 
   const actionPanelDesktop = () => {
     const content = getActionContent(actionState, { ...contentProps, isMobile: false })
-    
+
     if (!content) return null
-    
+
     // For desktop, we can wrap action content in cards if needed
     if (actionState === 'battlePreview') {
       return (
@@ -476,13 +468,13 @@ const GameOperationPanel = ({
         </Card>
       )
     }
-    
+
     return content
   }
 
   const actionPanelMobile = () => {
     const content = getActionContent(actionState, { ...contentProps, isMobile: true })
-    
+
     return (
       <Drawer open={mobileBottomPanelOpen} onOpenChange={handleDrawerClose}>
         <DrawerContent className="max-h-[85vh]">
@@ -502,7 +494,7 @@ const GameOperationPanel = ({
               </div>
             )}
           </div>
-          {(actionState === 'movementMode' || actionState === 'none') && (
+          {actionState === 'none' && (
             <DrawerFooter className="pt-2">
               <DrawerClose asChild>
                 <Button variant="outline" className="h-12 w-full">Close</Button>
