@@ -364,10 +364,6 @@ const GameOperationPanel = ({
     setBattleTarget(null)
   }
 
-  const handleCancelMovement = () => {
-    setShowBattlePreview(false)
-  }
-
   const handleStartBattleAction = () => {
     if (battleTarget?.army) {
       handleStartBattle(selectedArmy!, battleTarget.army)
@@ -430,7 +426,6 @@ const GameOperationPanel = ({
         setMoveSubmitted(false)
         setTargetTerritory(null)
         setMoveStrength(0)
-        // Don't call cancelMovement() - keep movement paths visible
       }
     }
   }

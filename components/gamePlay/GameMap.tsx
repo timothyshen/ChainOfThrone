@@ -13,14 +13,12 @@ import { useGameActions } from "@/lib/hooks/useGameActions"
 interface GameMapProps {
   gameAddress: `0x${string}` | undefined
   isMobile: boolean
-  mobileBottomPanelOpen: boolean
   setMobileBottomPanelOpen: (open: boolean) => void
 }
 
 export default function GameMap({
   gameAddress,
   isMobile,
-  mobileBottomPanelOpen,
   setMobileBottomPanelOpen,
 }: GameMapProps) {
   // Context hooks
@@ -32,7 +30,8 @@ export default function GameMap({
     validMovementCells,
     animatingArmies,
     armyPositions,
-    getArmyDisplayPosition
+    getArmyDisplayPosition,
+    cancelMovement
   } = useMovementContext()
   const { battleEffects } = useBattleContext()
 
@@ -59,6 +58,10 @@ export default function GameMap({
   const handleMapClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       clearSelection()
+      cancelMovement() // Also clear movement state to remove visual indicators
+      flatTerritories.forEach(territory => {
+        territory.isSelected = false
+      })
     }
   }
 

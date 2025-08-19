@@ -112,7 +112,7 @@ export function useGameState(
             y: 0,
             player: "0x133",
             units: [100n, 0n],
-            isCastle: false,
+            isCastle: true,
             name: "Test",
           },
           {
@@ -132,7 +132,7 @@ export function useGameState(
             y: 1,
             player: "0x123",
             units: [0n, 0n],
-            isCastle: false,
+            isCastle: true,
             name: "Test",
           },
           {
@@ -150,7 +150,7 @@ export function useGameState(
             y: 1,
             player: "0x123",
             units: [0n, 0n],
-            isCastle: false,
+            isCastle: true,
             name: "Test",
           },
         ],
@@ -170,7 +170,7 @@ export function useGameState(
             y: 2,
             player: "0x123",
             units: [0n, 0n],
-            isCastle: false,
+            isCastle: true,
             name: "Test",
           },
           {
