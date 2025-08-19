@@ -42,7 +42,6 @@ export default function GameExplorer() {
     const fetchGames = useCallback(async () => {
         try {
             const gamesInfo = await getGamesInfo()
-            console.log("gamesInfo", gamesInfo)
             setGames(gamesInfo as Game[])
         } catch (error) {
             toast({

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { useAccount, useWatchContractEvent } from 'wagmi'
 import { useGameAddress } from '@/lib/hooks/useGameAddress'
@@ -44,14 +44,29 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
   // UI state
   const [isMobile, setIsMobile] = useState(false)
   const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false)
+  
+  // Rate limiting for event-triggered refreshes
+  const lastRefreshRef = useRef<number>(0)
+  const handleEventRefresh = useCallback(() => {
+    const now = Date.now()
+    const minInterval = 2000 // 2 seconds minimum between refreshes
+    
+    if (now - lastRefreshRef.current > minInterval) {
+      console.log('🐛 Event-triggered refresh allowed')
+      lastRefreshRef.current = now
+      refreshAllData()
+    } else {
+      console.log('🐛 Event-triggered refresh rate limited')
+    }
+  }, [refreshAllData])
 
-  // Contract event listeners
+  // Contract event listeners - now rate limited
   useWatchContractEvent({
     address: gameAddressParam,
     abi: gameAbi,
     eventName: 'RoundCompleted',
     onLogs: () => {
-      refreshAllData()
+      handleEventRefresh()
       toast({
         title: "Round Completed",
         description: `Round has been completed`,
@@ -64,7 +79,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
     abi: gameAbi,
     eventName: "MoveSubmitted",
     onLogs() {
-      refreshAllData()
+      handleEventRefresh()
       toast({
         title: "Move Submitted",
         description: "A move has been submitted",
@@ -77,7 +92,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
     abi: gameAbi,
     eventName: "PlayerAdded",
     onLogs() {
-      refreshAllData()
+      handleEventRefresh()
     },
   })
 
@@ -86,7 +101,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
     abi: gameAbi,
     eventName: "GameStarted",
     onLogs() {
-      refreshAllData()
+      handleEventRefresh()
       toast({
         title: "Game Started",
         description: "The game has begun!",

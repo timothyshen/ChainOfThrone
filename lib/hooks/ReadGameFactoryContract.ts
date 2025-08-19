@@ -26,7 +26,6 @@ export const getGamesInfo = async () => {
     abi: gameFactoryAbi,
     functionName: "getGamesInfo",
   });
-  console.log("result", result);
   return result;
 };
 

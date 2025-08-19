@@ -95,97 +95,8 @@ export function useGameState(
       );
 
       // Mock data for development - replace with actual gridData when ready
-      const data: Territory[][] = [
-        [
-          {
-            id: "1",
-            x: 0,
-            y: 0,
-            player: "0x123",
-            units: [0n, 100n],
-            isCastle: false,
-            name: "Test",
-          },
-          {
-            id: "2",
-            x: 1,
-            y: 0,
-            player: "0x133",
-            units: [100n, 0n],
-            isCastle: true,
-            name: "Test",
-          },
-          {
-            id: "3",
-            x: 2,
-            y: 0,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: false,
-            name: "Test",
-          },
-        ],
-        [
-          {
-            id: "4",
-            x: 0,
-            y: 1,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: true,
-            name: "Test",
-          },
-          {
-            id: "5",
-            x: 1,
-            y: 1,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: false,
-            name: "Test",
-          },
-          {
-            id: "6",
-            x: 2,
-            y: 1,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: true,
-            name: "Test",
-          },
-        ],
-        [
-          {
-            id: "7",
-            x: 0,
-            y: 2,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: false,
-            name: "Test",
-          },
-          {
-            id: "8",
-            x: 1,
-            y: 2,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: true,
-            name: "Test",
-          },
-          {
-            id: "9",
-            x: 2,
-            y: 2,
-            player: "0x123",
-            units: [0n, 0n],
-            isCastle: false,
-            name: "Test",
-          },
-        ],
-      ];
 
-      data.forEach((row: Territory[], rowIndex: number) => {
+      newGridData.forEach((row: Territory[], rowIndex: number) => {
         row.forEach((territory: Territory, colIndex: number) => {
           territory.units.forEach((unit: bigint, index: number) => {
             if (unit > 0) {
@@ -202,7 +113,7 @@ export function useGameState(
         });
       });
 
-      setTerritories(data);
+      setTerritories(newGridData);
       setArmies(armies);
     } catch (error) {
       console.error("Error fetching grid:", error);

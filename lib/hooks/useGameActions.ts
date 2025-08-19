@@ -36,21 +36,19 @@ interface GameActions {
 
 export function useGameActions(
   gameAddress: `0x${string}` | undefined,
-  isMobile: boolean,
-  setMobileBottomPanelOpen: (open: boolean) => void
+  isMobile?: boolean,
+  setMobileBottomPanelOpen?: (open: boolean) => void
 ): GameActions {
   const { address } = useAccount();
   const { makeMove } = useMakeMove();
   const { toast } = useToast();
 
   // Contexts
-  const { territories, armies, refreshAllData } = useGameStateContext();
+  const { territories, armies } = useGameStateContext();
   const {
     selectedTerritory,
     selectedArmy,
     setSelectedTerritory,
-    setSelectedArmy,
-    clearSelection,
     selectTerritory,
     selectArmy,
   } = useSelectionContext();
@@ -69,17 +67,47 @@ export function useGameActions(
   const handleTerritoryClick = useCallback(
     (territory: Territory) => {
       console.log("Territory clicked:", territory);
+
+      // Check if the player has an army on this territory
+      const playerHasArmyOnTerritory = armies.some(
+        (army) =>
+          army.x === territory.x &&
+          army.y === territory.y &&
+          army.owner === address
+      );
+
+      if (!address || !playerHasArmyOnTerritory) {
+        toast({
+          title: "Cannot Select Territory",
+          description:
+            "You can only select territories where you have an army stationed.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       selectTerritory(territory);
 
       // Don't auto-open mobile panel - let the GameOperationPanel handle drawer state
       // based on action states (battle preview, movement input, etc.)
     },
-    [selectTerritory]
+    [selectTerritory, armies, address, toast]
   );
 
   const handleArmyClick = useCallback(
     (territory: Territory, army: Army) => {
       console.log("Army clicked:", territory, army);
+
+      // Check if the player owns this army
+      if (!address || army.owner !== address) {
+        toast({
+          title: "Cannot Select Army",
+          description: "You can only select armies that you own.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setSelectedTerritory(territory);
       selectArmy(army);
 
@@ -101,6 +129,8 @@ export function useGameActions(
       movementMode,
       selectedArmy,
       cancelMovement,
+      address,
+      toast,
     ]
   );
 
@@ -148,9 +178,6 @@ export function useGameActions(
       }
 
       try {
-        // Start animation when user decides to move
-        setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]));
-
         // Update army position with animation flag
         setArmyPositions((prev) => ({
           ...prev,
@@ -166,10 +193,12 @@ export function useGameActions(
           targetTerritory.y,
           moveStrength,
         ] as const;
-
+        console.log("🐛 Move:", move);
         await makeMove(gameAddress, move);
-        await refreshAllData();
+        // Removed automatic refresh - event watchers will handle this
 
+        // Start animation when user decides to move
+        setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]));
         // Wait for animation to complete
         setTimeout(() => {
           // Clear animation state
@@ -225,7 +254,6 @@ export function useGameActions(
       address,
       gameAddress,
       makeMove,
-      refreshAllData,
       setAnimatingArmies,
       setArmyPositions,
       cancelMovement,

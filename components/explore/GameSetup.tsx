@@ -20,9 +20,7 @@ export function CreateGameModal({ isOpen, onClose }: CreateGameModalProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // Here you would typically send this data to your backend
     console.log('Creating game:', { gameName, playerCount, password })
-    // Reset form
     setGameName('')
     setPlayerCount('')
     setPassword('')

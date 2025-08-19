@@ -315,7 +315,6 @@ export function DiplomacyResultModal({
 
     const handleSecondaryAction = useCallback(() => {
         // Start new game
-        console.log("Starting new game")
         onOpenChange(false)
     }, [onOpenChange])
 

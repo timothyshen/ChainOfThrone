@@ -38,6 +38,7 @@ export default function GameMap({
   // Actions
   const {
     handleArmyClick,
+    handleTerritoryClick,
     handleMoveToCell,
     handleInitializeBattle
   } = useGameActions(gameAddress, isMobile, setMobileBottomPanelOpen)
@@ -127,13 +128,16 @@ export default function GameMap({
               {flatTerritories.map((territory) => (
                 <div
                   key={territory.id}
-                  className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50 
-                    ${territory.isSelected
-                      ? "border-red-400 shadow-lg shadow-red-400/50"
-                      : "border-slate-600"
-                    }`}
+                  className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50 border-slate-600`}
                   style={{
                     minHeight: isMobile ? "80px" : "120px",
+                  }}
+                  onClick={(e) => {
+                    // Only handle territory clicks if not clicking on an army
+                    const isArmyClick = e.target !== e.currentTarget;
+                    if (!isArmyClick) {
+                      handleTerritoryClick(territory);
+                    }
                   }}
                 >
                   <div className="p-2 md:p-3 h-full flex flex-col justify-between">
