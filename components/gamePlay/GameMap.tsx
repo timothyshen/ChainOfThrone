@@ -141,11 +141,15 @@ export default function GameMap({
                       {getTerritoryIcon(territory.isCastle)}
                       <span className="text-xs md:text-sm font-bold truncate">{territory.name}</span>
                     </div>
-                    <div className="text-xs">
-                      <div className="flex items-center gap-1">
-                        <Sword className="w-3 h-3" />
-                        <span>{territory.units.reduce((acc, curr) => acc + Number(curr), 0)}</span>
-                      </div>
+                    <div className="text-xs flex flex-row justify-between gap-1">
+                      {
+                        territory.units.map((unit, index) => (
+                          <div key={index} className="flex items-center gap-1">
+                            <Sword className="w-3 h-3" />
+                            <span>{Number(unit)}</span>
+                          </div>
+                        ))
+                      }
                     </div>
                   </div>
 

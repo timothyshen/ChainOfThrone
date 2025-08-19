@@ -220,7 +220,7 @@ export function useGameState(
     if (!gameAddress || !address) return;
     try {
       const playerId = await addressToId(gameAddress, address);
-      setPlayerId(playerId as string);
+      setPlayerId(playerId.toString());
     } catch (error) {
       console.error("Error fetching player ID:", error);
     }

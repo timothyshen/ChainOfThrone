@@ -30,15 +30,6 @@ export const GameOverview = ({
                 )
                 return hasPlayerArmy
             })
-
-            console.log('🐛 Player controlled territories:', {
-                playerAddress,
-                totalTerritories: gameTerritories.flat().length,
-                totalArmies: armies.length,
-                playerArmies: armies.filter(army => army.owner === playerAddress),
-                controlledTerritories: controlledTerritories.length,
-                territories: controlledTerritories
-            })
             setPlayerTerritories(controlledTerritories)
         }
         fetchPlayerTerritories()

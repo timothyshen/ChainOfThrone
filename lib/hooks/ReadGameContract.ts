@@ -42,20 +42,17 @@ export const idToAddress = async (address: `0x${string}`, id: number) => {
   return result;
 };
 
-export const addressToId: (
+export const addressToId = async (
   address: `0x${string}`,
   userAddress: `0x${string}`
-) => Promise<number> = async (
-  address: `0x${string}`,
-  userAddress: `0x${string}`
-) => {
+): Promise<number> => {
   const result = await contractClient.readContract({
     address: address,
     abi: gameAbi,
     functionName: "addressToId",
     args: [userAddress],
   });
-  return result;
+  return result as number;
 };
 
 export const getGameStatus = async (address: `0x${string}`) => {
