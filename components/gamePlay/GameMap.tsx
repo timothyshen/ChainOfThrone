@@ -51,6 +51,7 @@ export default function GameMap({
     isSelected: selectedTerritory?.id === territory.id
   }))
 
+  console.log("flatTerritories", flatTerritories)
 
   const getTerritoryIcon = (isCastle: boolean) => {
     return isCastle ? <Crown className="w-3 h-3 md:w-4 md:h-4" /> : <Flag className="w-3 h-3 md:w-4 md:h-4" />

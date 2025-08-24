@@ -85,14 +85,18 @@ export function useGameState(
 
       if (!gridData) return;
 
+      // console.log("gridData", gridData);
+
       const newGridData = (gridData as any[][]).map(
         (row: any[], rowIndex: number) =>
           row.map((territory: any, colIndex: number) => ({
             ...territory,
-            x: colIndex,
-            y: rowIndex,
+            x: rowIndex,
+            y: colIndex,
           }))
       );
+
+      console.log("newGridData", newGridData);
 
       // Mock data for development - replace with actual gridData when ready
 
@@ -102,8 +106,8 @@ export function useGameState(
             if (unit > 0) {
               armies.push({
                 id: `${rowIndex}-${colIndex}-${index}`,
-                x: colIndex,
-                y: rowIndex,
+                x: rowIndex,
+                y: colIndex,
                 size: Number(unit),
                 owner: territory.player,
                 isMoving: false,
