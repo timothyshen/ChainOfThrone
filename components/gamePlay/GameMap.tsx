@@ -51,7 +51,6 @@ export default function GameMap({
     isSelected: selectedTerritory?.id === territory.id
   }))
 
-  console.log("flatTerritories", flatTerritories)
 
   const getTerritoryIcon = (isCastle: boolean) => {
     return isCastle ? <Crown className="w-3 h-3 md:w-4 md:h-4" /> : <Flag className="w-3 h-3 md:w-4 md:h-4" />
@@ -222,8 +221,8 @@ export default function GameMap({
                   className="absolute w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/50 z-10"
                   style={{
                     backgroundColor: "#9B9B9B",
-                    left: `${startPos.x * 33.333 + 16.666}%`,
-                    top: `${startPos.y * 33.333 + 16.666}%`,
+                    left: `${startPos.y * 33.333 + 16.666}%`,
+                    top: `${startPos.x * 33.333 + 16.666}%`,
                     transform: "translate(-50%, -50%)",
                     animation: `moveArmy-${army.id} 0.8s ease-in-out forwards`,
                   }}
@@ -265,8 +264,8 @@ export default function GameMap({
                 return `
                   @keyframes moveArmy-${army.id} {
                     0% {
-                      left: ${startPos.x * 33.333 + 16.666}%;
-                      top: ${startPos.y * 33.333 + 16.666}%;
+                      left: ${startPos.y * 33.333 + 16.666}%;
+                      top: ${startPos.x * 33.333 + 16.666}%;
                       transform: translate(-50%, -50%) scale(1);
                       opacity: 1;
                     }
@@ -275,8 +274,8 @@ export default function GameMap({
                       opacity: 0.9;
                     }
                     100% {
-                      left: ${endPos.x * 33.333 + 16.666}%;
-                      top: ${endPos.y * 33.333 + 16.666}%;
+                      left: ${endPos.y * 33.333 + 16.666}%;
+                      top: ${endPos.x * 33.333 + 16.666}%;
                       transform: translate(-50%, -50%) scale(1);
                       opacity: 1;
                     }
@@ -350,8 +349,8 @@ export default function GameMap({
                       className={`relative flex items-center p-4 justify-center transition-all duration-200 
                         ${cellStyle} ${isClickable ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none'}`}
                       style={{
-                        gridColumn: gridX + 1,  // CSS grid is 1-indexed
-                        gridRow: gridY + 1      // CSS grid is 1-indexed
+                        gridColumn: gridY + 1,  // CSS grid is 1-indexed - gridY is column
+                        gridRow: gridX + 1      // CSS grid is 1-indexed - gridX is row
                       }}
                       onClick={isClickable ? () => handleCellClick(gridX, gridY) : undefined}
                     >

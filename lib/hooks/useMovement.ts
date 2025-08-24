@@ -81,7 +81,7 @@ export function useMovement(): MovementState & MovementActions {
   }, [])
 
   const getValidMovementCells = useCallback((army: Army, territories: Territory[][]): { x: number; y: number }[] => {
-    const armyTerritory = territories[army.y]?.[army.x]
+    const armyTerritory = territories[army.x]?.[army.y]
     if (!armyTerritory) return []
     return getAdjacentTerritories(armyTerritory, territories).map(t => ({ x: t.x, y: t.y }))
   }, [getAdjacentTerritories])
@@ -105,8 +105,8 @@ export function useMovement(): MovementState & MovementActions {
 
   const initializeMovement = useCallback((army: Army, territories: Territory[][]) => {
     // Find the territory where this army is located
-    // territories[row][col] where row=y, col=x
-    const armyTerritory = territories[army.y]?.[army.x]
+    // territories[row][col] where row=x, col=y
+    const armyTerritory = territories[army.x]?.[army.y]
     
     if (armyTerritory) {
       // Verify the territory coordinates match the army coordinates
