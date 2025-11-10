@@ -150,7 +150,8 @@ const StatsSection = memo(({ gameAddress, type, stats, year }: StatsSectionProps
     useEffect(() => {
         const fetchReward = async () => {
             const reward = await getWinnerAmount(gameAddress)
-            setReward(reward as number)
+            // Convert bigint to number safely, fallback to 0 if null
+            setReward(reward ? Number(reward) : 0)
         }
         fetchReward()
     }, [gameAddress])

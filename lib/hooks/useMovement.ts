@@ -61,19 +61,26 @@ export function useMovement(): MovementState & MovementActions {
     if (!territory) return []
     const adjacentTerritories: Territory[] = []
 
+    // SCALABLE: Derive grid dimensions from territories array
+    const gridRows = territories.length
+    const gridCols = territories[0]?.length || 0
+
     // Direct approach: check the 4 possible adjacent positions
     const possibleAdjacent = [
       { x: territory.x - 1, y: territory.y },     // Left
-      { x: territory.x + 1, y: territory.y },     // Right  
+      { x: territory.x + 1, y: territory.y },     // Right
       { x: territory.x, y: territory.y - 1 },     // Up
       { x: territory.x, y: territory.y + 1 }      // Down
     ]
 
     possibleAdjacent.forEach(pos => {
-      // Find territory at this position
-      const foundTerritory = territories.flat().find(t => t.x === pos.x && t.y === pos.y)
-      if (foundTerritory) {
-        adjacentTerritories.push(foundTerritory)
+      // OPTIMIZED: Direct array access O(1) instead of .flat().find() O(n)
+      // SCALABLE: Validate bounds dynamically based on grid size
+      if (pos.x >= 0 && pos.x < gridRows && pos.y >= 0 && pos.y < gridCols) {
+        const foundTerritory = territories[pos.x]?.[pos.y]
+        if (foundTerritory) {
+          adjacentTerritories.push(foundTerritory)
+        }
       }
     })
 
@@ -101,7 +108,7 @@ export function useMovement(): MovementState & MovementActions {
     setMoveStrength(0)
     setMoveSubmitted(false)
     setTargetTerritory(null)
-  }, [])
+  }, [setMoveSubmitted])
 
   const initializeMovement = useCallback((army: Army, territories: Territory[][]) => {
     // Find the territory where this army is located

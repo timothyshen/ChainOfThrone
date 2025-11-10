@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useWatchContractEvent, usePublicClient } from "wagmi";
 import { watchContractEvent } from "wagmi/actions";
 import { gameAbi } from "@/lib/contract/gameAbi";
@@ -12,6 +12,7 @@ import {
   getMaxPlayer,
 } from "@/lib/hooks/ReadGameContract";
 import { toast } from "@/lib/hooks/use-toast";
+import { debounce } from "@/lib/utils/debounce";
 
 enum GameStatus {
   NOT_STARTED = 0,
@@ -38,12 +39,19 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Debounced fetch function to prevent multiple simultaneous refreshes
+  // when multiple contract events fire at once
+  const debouncedFetchGameState = useMemo(
+    () => debounce((address?: `0x${string}`) => fetchGameState(address), 200),
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   useWatchContractEvent({
     address: gameAddress,
     abi: gameAbi,
     eventName: "GameStarted",
     onLogs() {
-      fetchGameState(gameAddress);
+      debouncedFetchGameState(gameAddress);
       toast({
         title: "Game Started",
         description: "The game has begun!",
@@ -56,7 +64,7 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     abi: gameAbi,
     eventName: "GameFinalized",
     onLogs() {
-      fetchGameState(gameAddress);
+      debouncedFetchGameState(gameAddress);
       toast({
         title: "Game Finished",
         description: `Winner`,
@@ -69,7 +77,7 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     abi: gameAbi,
     eventName: "PlayerAdded",
     onLogs() {
-      fetchGameState(gameAddress);
+      debouncedFetchGameState(gameAddress);
       toast({
         title: "Player Added",
         description: "A new player has joined the game",
@@ -83,7 +91,7 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     eventName: "MoveSubmitted",
     onLogs(logs) {
       console.log("MoveSubmitted", logs);
-      fetchGameState(gameAddress);
+      debouncedFetchGameState(gameAddress);
       toast({
         title: "Move Submitted",
         description: "A move has been submitted",
@@ -97,7 +105,7 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
     eventName: "RoundCompleted",
     onLogs(logs) {
       console.log("RoundCompleted", logs);
-      fetchGameState(gameAddress);
+      debouncedFetchGameState(gameAddress);
       toast({
         title: "Round Completed",
         description: `Round has been completed`,
@@ -127,10 +135,11 @@ export const useGameStateUpdates = (gameAddress?: `0x${string}`) => {
         getMaxPlayer(gameAddress),
       ]);
 
+      // SCALABLE: Use actual totalPlayers count instead of hardcoded value
       let addresses;
       if ((totalPlayerCount as number) > 0) {
         addresses = await Promise.all(
-          Array.from({ length: 2 }, (_, i) =>
+          Array.from({ length: totalPlayerCount as number }, (_, i) =>
             Promise.all([
               idToAddress(gameAddress, i),
               getRoundSubmitted(gameAddress, i),

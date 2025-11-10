@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useMemo, useCallback } from "react"
 import { Sword, Swords, Crown, Users, Navigation, Flag } from "lucide-react"
 import {
   useGameStateContext,
@@ -9,6 +9,7 @@ import {
   useBattleContext
 } from "@/lib/contexts/GameContext"
 import { useGameActions } from "@/lib/hooks/useGameActions"
+import { GRID_CONFIG, getGridCellPosition } from "@/lib/constants/grid"
 
 interface GameMapProps {
   gameAddress: `0x${string}` | undefined
@@ -45,16 +46,19 @@ export default function GameMap({
 
   const mapRef = useRef<HTMLDivElement>(null)
 
-  // Convert 2D territories to flat array with selection state  
-  const flatTerritories = territories.flat().map(territory => ({
-    ...territory,
-    isSelected: selectedTerritory?.id === territory.id
-  }))
+  // Convert 2D territories to flat array with selection state - OPTIMIZED: Memoized to prevent unnecessary re-renders
+  const flatTerritories = useMemo(() =>
+    territories.flat().map(territory => ({
+      ...territory,
+      isSelected: selectedTerritory?.id === territory.id
+    })),
+    [territories, selectedTerritory?.id]
+  )
 
-
-  const getTerritoryIcon = (isCastle: boolean) => {
+  // OPTIMIZED: Memoize icon function to prevent recreation on every render
+  const getTerritoryIcon = useCallback((isCastle: boolean) => {
     return isCastle ? <Crown className="w-3 h-3 md:w-4 md:h-4" /> : <Flag className="w-3 h-3 md:w-4 md:h-4" />
-  }
+  }, [])
 
   const handleMapClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -96,6 +100,60 @@ export default function GameMap({
     }
   }
 
+  // OPTIMIZED: Create army position lookup map O(n) instead of O(9n) filtering per cell
+  const armiesByPosition = useMemo(() => {
+    const map = new Map<string, typeof armies>()
+
+    armies.forEach(army => {
+      const displayPos = getArmyDisplayPosition(army)
+      const key = `${displayPos.gridX}-${displayPos.gridY}`
+
+      if (!map.has(key)) {
+        map.set(key, [])
+      }
+      map.get(key)!.push(army)
+    })
+
+    return map
+  }, [armies, getArmyDisplayPosition])
+
+  // OPTIMIZED: Memoize CSS animation generation to prevent recreation on every render
+  const animationStyles = useMemo(() => {
+    return armies
+      .filter((army) => animatingArmies.has(army.id))
+      .map((army) => {
+        const startPos = { x: army.x, y: army.y }
+        const endPos = armyPositions[army.id]
+
+        if (!endPos) return ''
+
+        const startPosition = getGridCellPosition(startPos.x, startPos.y)
+        const endPosition = getGridCellPosition(endPos.x, endPos.y)
+
+        return `
+          @keyframes moveArmy-${army.id} {
+            0% {
+              left: ${startPosition.left};
+              top: ${startPosition.top};
+              transform: translate(-50%, -50%) scale(1);
+              opacity: 1;
+            }
+            50% {
+              transform: translate(-50%, -50%) scale(1.2);
+              opacity: 0.9;
+            }
+            100% {
+              left: ${endPosition.left};
+              top: ${endPosition.top};
+              transform: translate(-50%, -50%) scale(1);
+              opacity: 1;
+            }
+          }
+        `
+      })
+      .join("\n")
+  }, [armies, animatingArmies, armyPositions])
+
   return (
     <div
       className="h-full bg-slate-900 text-white flex flex-col md:flex-row"
@@ -115,9 +173,9 @@ export default function GameMap({
             margin: '0 auto'
           }}
         >
-          {/* 3x3 Grid Background */}
+          {/* Dynamic Grid Background - SCALABLE */}
           <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1">
-            {Array.from({ length: 9 }).map((_, index) => (
+            {Array.from({ length: GRID_CONFIG.totalCells }).map((_, index) => (
               <div key={index} className="border border-slate-600/30 rounded-lg bg-slate-800/20" />
             ))}
           </div>
@@ -157,12 +215,8 @@ export default function GameMap({
                     </div>
                   </div>
 
-                  {/* Army on Territory */}
-                  {armies
-                    .filter((army) => {
-                      const displayPos = getArmyDisplayPosition(army)
-                      return displayPos.gridX === territory.x && displayPos.gridY === territory.y
-                    })
+                  {/* Army on Territory - OPTIMIZED: Using position lookup map */}
+                  {(armiesByPosition.get(`${territory.x}-${territory.y}`) || [])
                     .map((army) => {
                       const isAnimating = animatingArmies.has(army.id)
 
@@ -215,14 +269,16 @@ export default function GameMap({
 
               if (!endPos) return null
 
+              const startPosition = getGridCellPosition(startPos.x, startPos.y)
+
               return (
                 <div
                   key={`floating-${army.id}`}
                   className="absolute w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/50 z-10"
                   style={{
                     backgroundColor: "#9B9B9B",
-                    left: `${startPos.y * 33.333 + 16.666}%`,
-                    top: `${startPos.x * 33.333 + 16.666}%`,
+                    left: startPosition.left,
+                    top: startPosition.top,
                     transform: "translate(-50%, -50%)",
                     animation: `moveArmy-${army.id} 0.8s ease-in-out forwards`,
                   }}
@@ -251,39 +307,8 @@ export default function GameMap({
               )
             })}
 
-          {/* Dynamic CSS for movement animations */}
-          <style jsx>{`
-            ${armies
-              .filter((army) => animatingArmies.has(army.id))
-              .map((army) => {
-                const startPos = { x: army.x, y: army.y }
-                const endPos = armyPositions[army.id]
-
-                if (!endPos) return ''
-
-                return `
-                  @keyframes moveArmy-${army.id} {
-                    0% {
-                      left: ${startPos.y * 33.333 + 16.666}%;
-                      top: ${startPos.x * 33.333 + 16.666}%;
-                      transform: translate(-50%, -50%) scale(1);
-                      opacity: 1;
-                    }
-                    50% {
-                      transform: translate(-50%, -50%) scale(1.2);
-                      opacity: 0.9;
-                    }
-                    100% {
-                      left: ${endPos.y * 33.333 + 16.666}%;
-                      top: ${endPos.x * 33.333 + 16.666}%;
-                      transform: translate(-50%, -50%) scale(1);
-                      opacity: 1;
-                    }
-                  }
-                `
-              })
-              .join("\n")}
-          `}</style>
+          {/* Dynamic CSS for movement animations - OPTIMIZED: Using memoized styles */}
+          <style jsx>{`${animationStyles}`}</style>
 
           {/* Movement Path Overlays */}
           {showMovementPaths && movementMode && (

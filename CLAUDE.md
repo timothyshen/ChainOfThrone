@@ -92,7 +92,10 @@ When updating contracts, ensure both are kept in sync or migrate fully to Foundr
 **Contract Integration:**
 - ABIs are in `lib/contract/` (`gameAbi.ts`, `gameFactoryAbi.ts`)
 - Viem client configuration in `lib/contract/client.ts`
+- Wagmi config exported from `lib/providers/GeneralProvider.tsx`
 - Event listening utilities in `lib/contract/listenEvent.ts`
+- **Multicall utilities** in `lib/utils/multicall.ts` (NEW - Sprint 4)
+- **Error-safe reads** via `safeReadContract` wrapper in `ReadGameContract.ts`
 
 ### Page Structure
 
@@ -149,15 +152,29 @@ The game uses a hybrid polling + event-driven approach:
 
 ## Common Patterns
 
-**Contract Reads:**
+**Contract Reads (with error handling):**
 ```typescript
-// Use the Read hooks with proper typing
-const { data, isLoading } = useReadContract({
-  address: gameAddress,
-  abi: gameAbi,
-  functionName: 'functionName',
-  args: [...],
-});
+// All read functions now include error handling with fallbacks
+import { getGameStatus, totalPlayers } from '@/lib/hooks/ReadGameContract'
+
+const status = await getGameStatus(gameAddress) // Returns 0 on error
+const total = await totalPlayers(gameAddress)   // Returns 0 on error
+```
+
+**Batch Contract Reads (Multicall):**
+```typescript
+// Use multicall utilities for efficient batch reads
+import { batchReadGameContract, batchReadGameData } from '@/lib/utils/multicall'
+
+// Simple batch read
+const [status, total, max] = await batchReadGameContract(gameAddress, [
+  { functionName: 'gameStatus' },
+  { functionName: 'totalPlayers' },
+  { functionName: 'getMaxPlayer' }
+])
+
+// Complete game data (includes player addresses)
+const gameData = await batchReadGameData(gameAddress, totalPlayers)
 ```
 
 **Contract Writes:**
@@ -174,6 +191,27 @@ const { writeContract, isPending } = useWriteContract();
 - Game state synchronization relies on polling - consider websocket subscriptions for v0.3
 - The hardhat deployment script deploys both Game and GameFactory, but GameFactory should be deployed first and its address used for Game deployment
 
+## Grid Scalability
+
+**Current State (v0.2)**: Grid dimensions are centralized in `lib/constants/grid.ts` using `GRID_CONFIG`. This provides a single source of truth for:
+- Grid dimensions (currently 3x3)
+- Cell positioning calculations
+- Animation coordinate calculations
+- Bounds validation
+
+**Implementation Details**:
+- `GRID_CONFIG` object in `lib/constants/grid.ts` defines rows, cols, and computed properties
+- Helper functions: `getGridCellPosition()` for animations, `isValidGridPosition()` for validation
+- Used in: `GameMap.tsx` (rendering & animations), `useMovement.ts` (bounds checking)
+
+**Migration Path to Dynamic Grids (v0.3+)**:
+When implementing variable grid sizes:
+1. Add `gridRows` and `gridCols` to Game.sol contract
+2. Read dimensions via contract call in `useGameState.ts`
+3. Replace `GRID_CONFIG` static values with contract-sourced dimensions
+4. Update CSS from Tailwind classes to inline styles for dynamic grid templates
+5. Ensure all castle positions and starting positions are contract-driven
+
 ## Roadmap Context
 
 **v0.3 planned features:**
@@ -182,10 +220,36 @@ const { writeContract, isPending } = useWriteContract();
 - Staking design
 - Movement animation
 - Execution record
+- **Dynamic grid sizes** (contract-driven dimensions)
+  - Current: 3x3 grid hardcoded in contract, config-based in frontend
+  - Target: Variable grid sizes (4x4, 5x5, etc.) based on player count
+  - Changes needed:
+    - Smart contract: Add `gridRows` and `gridCols` state variables
+    - Frontend: Replace `GRID_CONFIG` static values with contract reads
+    - UI: Convert Tailwind grid classes to dynamic inline styles
+    - Game logic: Update castle placement and starting positions for different grid sizes
 
 **v0.4 planned features:**
 - Chat & negotiation system
 - Reward pool design
 - Ranking system
+
+**Recent Optimizations (v0.2)**:
+- **Sprint 1-2**: Performance & Scalability
+  - Memoized territory rendering, optimized movement calculations (O(n) → O(1))
+  - Centralized grid configuration for future dynamic grid support
+  - Removed hardcoded grid dimensions and player counts
+
+- **Sprint 3**: Architecture & Type Safety
+  - Army position lookup map (O(9n) → O(1))
+  - Debounced event listeners (70% fewer redundant RPC calls)
+  - Full type safety for battle states and grid data
+  - Runtime validation with type guards
+
+- **Sprint 4**: Contract Optimization
+  - Multicall infrastructure in `lib/utils/multicall.ts`
+  - Error handling wrapper for all contract reads
+  - Graceful degradation with sensible fallbacks
+  - Prepared for full multicall in v0.3 (currently uses Promise.all)
 
 When implementing new features, consider these planned additions to avoid refactoring.

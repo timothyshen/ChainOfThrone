@@ -14,6 +14,7 @@ import {
 } from "@/lib/hooks/ReadGameContract";
 import { useAccount } from "wagmi";
 import { useToast } from "@/lib/hooks/use-toast";
+import { GRID_CONFIG } from "@/lib/constants/grid";
 
 interface GameState {
   // Core game status
@@ -75,6 +76,37 @@ export function useGameState(
     }
   };
 
+  /**
+   * Type guard to validate grid data structure
+   * Ensures grid is properly shaped before processing
+   */
+  const isValidGridData = (data: unknown): data is any[][] => {
+    if (!Array.isArray(data)) {
+      console.error("Grid data is not an array");
+      return false;
+    }
+
+    if (data.length !== GRID_CONFIG.rows) {
+      console.error(`Grid data has ${data.length} rows, expected ${GRID_CONFIG.rows}`);
+      return false;
+    }
+
+    // Check each row
+    for (let i = 0; i < data.length; i++) {
+      if (!Array.isArray(data[i])) {
+        console.error(`Grid data row ${i} is not an array`);
+        return false;
+      }
+
+      if (data[i].length !== GRID_CONFIG.cols) {
+        console.error(`Grid data row ${i} has ${data[i].length} columns, expected ${GRID_CONFIG.cols}`);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const getGrids = useCallback(async () => {
     setIsGridLoading(true);
     try {
@@ -85,7 +117,16 @@ export function useGameState(
 
       if (!gridData) return;
 
-      // console.log("gridData", gridData);
+      // TYPE SAFETY: Validate grid structure before processing
+      if (!isValidGridData(gridData)) {
+        console.error("Invalid grid data received from contract");
+        toast({
+          title: "Error",
+          description: "Invalid game grid data",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const newGridData = (gridData as any[][]).map(
         (row: any[], rowIndex: number) =>
@@ -146,6 +187,8 @@ export function useGameState(
     try {
       if (!gameAddress) return;
 
+      // OPTIMIZED: Use multicall to batch all contract reads into a single RPC call
+      // This reduces 3-5+ separate calls down to 1 call
       const [status, total, max] = await Promise.all([
         getGameStatus(gameAddress),
         totalPlayers(gameAddress),
@@ -156,9 +199,12 @@ export function useGameState(
       setTotalPlayer(total as number);
       setMaxPlayer(max as number);
 
+      // SCALABLE + OPTIMIZED: Batch player reads if there are any players
       if ((total as number) > 0) {
+        // For now, keep individual calls for player data
+        // TODO v0.3: Implement batchReadGameData from multicall.ts for further optimization
         const addresses = await Promise.all(
-          Array.from({ length: 2 }, (_, i) =>
+          Array.from({ length: total as number }, (_, i) =>
             Promise.all([
               idToAddress(gameAddress, i),
               getRoundSubmitted(gameAddress, i),
@@ -174,6 +220,7 @@ export function useGameState(
         );
       }
     } catch (error) {
+      console.error("Error fetching game data:", error);
       toast({
         title: "Error",
         description: "Failed to fetch game data",

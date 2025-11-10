@@ -18,6 +18,7 @@ import {
   useMovementContext,
   useBattleContext
 } from "@/lib/contexts/GameContext"
+import type { BattleState } from "@/lib/types/advancedGame"
 import { useGameActions } from "@/lib/hooks/useGameActions"
 import { Army, Territory } from "@/lib/types/game"
 import { BattleTarget } from "@/lib/types/advancedGame"
@@ -152,46 +153,50 @@ const MovementInputContent = ({
 )
 
 interface BattleProgressContentProps {
-  activeBattle: any // BattleState type
+  activeBattle: BattleState | null
   isMobile?: boolean
 }
 
-const BattleProgressContent = ({ activeBattle, isMobile = false }: BattleProgressContentProps) => (
-  <div className="space-y-2">
-    <div className="bg-red-900/50 border border-red-600 rounded-lg p-3">
-      <div className="flex items-center gap-2 mb-2">
-        <Sword className="w-4 h-4 text-red-400" />
-        <span className="text-red-400 font-semibold">Battle in Progress</span>
-      </div>
+const BattleProgressContent = ({ activeBattle, isMobile = false }: BattleProgressContentProps) => {
+  if (!activeBattle) return null
 
-      {activeBattle.phase === "combat" && (
-        <>
-          <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
-            <div
-              className="bg-red-500 h-2 rounded-full transition-all duration-100"
-              style={{ width: `${activeBattle.progress * 100}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-xs">
-            <span>Attacker: -{activeBattle.attackerDamage}</span>
-            <span>Defender: -{activeBattle.defenderDamage}</span>
-          </div>
-        </>
-      )}
-
-      {activeBattle.phase === "results" && (
-        <div className="text-center">
-          <div
-            className={`text-lg font-bold ${activeBattle.winner === "attacker" ? "text-green-400" : "text-red-400"
-              }`}
-          >
-            {activeBattle.winner === "attacker" ? "Victory!" : "Defeat!"}
-          </div>
+  return (
+    <div className="space-y-2">
+      <div className="bg-red-900/50 border border-red-600 rounded-lg p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Sword className="w-4 h-4 text-red-400" />
+          <span className="text-red-400 font-semibold">Battle in Progress</span>
         </div>
-      )}
+
+        {activeBattle.phase === "combat" && (
+          <>
+            <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+              <div
+                className="bg-red-500 h-2 rounded-full transition-all duration-100"
+                style={{ width: `${activeBattle.progress * 100}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs">
+              <span>Attacker: -{activeBattle.attackerDamage}</span>
+              <span>Defender: -{activeBattle.defenderDamage}</span>
+            </div>
+          </>
+        )}
+
+        {activeBattle.phase === "results" && (
+          <div className="text-center">
+            <div
+              className={`text-lg font-bold ${activeBattle.winner === "attacker" ? "text-green-400" : "text-red-400"
+                }`}
+            >
+              {activeBattle.winner === "attacker" ? "Victory!" : "Defeat!"}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 interface MovementModeContentProps {
   onCancel: () => void
@@ -238,7 +243,7 @@ const getActionContent = (
     targetTerritory: Territory | null
     moveStrength: number
     animatingArmies: Set<string>
-    activeBattle: any
+    activeBattle: BattleState | null
     getTerritoryColor: (owner: string) => string
     calculateBattleOdds: (attacker: Army, defender: Army | Territory) => { attackerOdds: number; defenderOdds: number }
     onBattleCancel: () => void

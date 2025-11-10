@@ -1,120 +1,133 @@
 import { contractClient } from "@/lib/contract/client";
 import { gameAbi } from "@/lib/contract/gameAbi";
 
+/**
+ * Wrapper for contract reads with error handling
+ * Provides graceful degradation and useful error messages
+ */
+async function safeReadContract<T>(
+  params: {
+    address: `0x${string}`;
+    functionName: string;
+    args?: readonly unknown[];
+  },
+  fallback?: T
+): Promise<T | null> {
+  try {
+    const result = await contractClient.readContract({
+      address: params.address,
+      abi: gameAbi,
+      functionName: params.functionName,
+      args: params.args,
+    });
+    return result as T;
+  } catch (error) {
+    console.error(
+      `Error reading ${params.functionName} from contract ${params.address}:`,
+      error
+    );
+    return fallback !== undefined ? fallback : null;
+  }
+}
+
 // View functions
 
 export const getGrid = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract({
+    address,
     functionName: "getGrid",
   });
-  return result;
 };
 
 export const get2DGrid = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract({
+    address,
     functionName: "get2dGrid",
   });
-  return result;
 };
 
 // Public view variables
 
 export const totalPlayers = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<number>({
+    address,
     functionName: "totalPlayers",
-  });
-  return result;
+  }, 0);
 };
 
 export const idToAddress = async (address: `0x${string}`, id: number) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<`0x${string}`>({
+    address,
     functionName: "idToAddress",
     args: [id],
   });
-  return result;
 };
 
 export const addressToId = async (
   address: `0x${string}`,
   userAddress: `0x${string}`
 ): Promise<number> => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  const result = await safeReadContract<number>({
+    address,
     functionName: "addressToId",
     args: [userAddress],
-  });
-  return result as number;
+  }, 0);
+  return result ?? 0;
 };
 
 export const getGameStatus = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<number>({
+    address,
     functionName: "gameStatus",
-  });
-  return result;
+  }, 0);
 };
 
 export const getRoundNumber = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<number>({
+    address,
     functionName: "roundNumber",
-  });
-  return result;
+  }, 0);
 };
 
 export const getMaxPlayer = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<number>({
+    address,
     functionName: "MAX_PLAYERS",
-  });
-  return result;
+  }, 2);
 };
 
 export const getRoundSubmitted = async (address: `0x${string}`, id: number) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<boolean>({
+    address,
     functionName: "roundSubmitted",
     args: [id],
-  });
-  return result;
+  }, false);
 };
 
 export const getPlayerState = async (
   address: `0x${string}`,
   userAddress: `0x${string}`
 ) => {
-  const playerId = await addressToId(address, userAddress);
-  const playerState = await getRoundSubmitted(address, playerId as number);
-  return playerState;
+  try {
+    const playerId = await addressToId(address, userAddress);
+    const playerState = await getRoundSubmitted(address, playerId as number);
+    return playerState;
+  } catch (error) {
+    console.error(`Error fetching player state for ${userAddress}:`, error);
+    return false;
+  }
 };
 
 export const getWinner = async (address: `0x${string}`) => {
-  const winnerAddress = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<`0x${string}`>({
+    address,
     functionName: "getWinner",
   });
-  return winnerAddress;
 };
 
 export const getWinnerAmount = async (address: `0x${string}`) => {
-  const result = await contractClient.readContract({
-    address: address,
-    abi: gameAbi,
+  return safeReadContract<bigint>({
+    address,
     functionName: "getWinnerAmount",
-  });
-  return result;
+  }, BigInt(0));
 };
