@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import DynamicProvider from "@/lib/providers/FarcasterWalletProvider";
-import { Header, Footer } from "@/components/layout";
+import FrameWalletProvider from "@/lib/providers/FarcasterWalletProvider";
+import DynamicProvider from "@/lib/providers/GeneralProvider";
 import { Toaster } from "@/components/ui/toaster"
 import { FrameProvider } from "@/lib/providers/FarcasterProvider";
 
@@ -34,21 +34,38 @@ export const viewport: Viewport = {
   ]
 };
 
+// export default function RootLayout({
+//   children,
+// }: Readonly<{
+//   children: React.ReactNode;
+// }>) {
+//   return (
+//     <html lang="en">
+//       <body
+//         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+//       >
+//         <FrameWalletProvider>
+//           <FrameProvider>
+//             {children}
+//             <Toaster />
+//           </FrameProvider>
+//         </FrameWalletProvider>
+//       </body>
+//     </html>
+//   );
+// }
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <DynamicProvider>
-          <FrameProvider>
-            {children}
-            <Toaster />
-          </FrameProvider>
+          {children}
+          <Toaster />
         </DynamicProvider>
       </body>
     </html>
