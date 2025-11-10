@@ -8,7 +8,7 @@ import {
   useMovementContext,
   useBattleContext
 } from "@/lib/contexts/GameContext"
-import { useGameActions } from "@/lib/hooks/useGameActions"
+import { useGameActions } from "@/lib/hooks/gameActions"
 import { GRID_CONFIG, getGridCellPosition } from "@/lib/constants/grid"
 
 interface GameMapProps {
