@@ -29,13 +29,23 @@ export function useTerritoryActions() {
 
   /**
    * Handle territory click
-   * Validates player has an army on the territory before selecting
+   * Validates player ownership and army presence before selecting
    */
   const handleTerritoryClick = useCallback(
     (territory: Territory) => {
       console.log("Territory clicked:", territory)
 
-      // Check if the player has an army on this territory
+      if (!address) {
+        toast({
+          title: "Wallet Not Connected",
+          description: "Please connect your wallet to interact with the game.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Check if the player owns this territory or has an army on it
+      const playerOwnsTerritory = territory.player === address
       const playerHasArmyOnTerritory = armies.some(
         (army) =>
           army.x === territory.x &&
@@ -43,11 +53,11 @@ export function useTerritoryActions() {
           army.owner === address
       )
 
-      if (!address || !playerHasArmyOnTerritory) {
+      if (!playerOwnsTerritory && !playerHasArmyOnTerritory) {
         toast({
           title: "Cannot Select Territory",
           description:
-            "You can only select territories where you have an army stationed.",
+            "You can only select territories that you own or where you have an army stationed.",
           variant: "destructive",
         })
         return

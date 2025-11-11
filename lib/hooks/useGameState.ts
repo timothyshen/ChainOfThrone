@@ -132,12 +132,11 @@ export function useGameState(
         (row: any[], rowIndex: number) =>
           row.map((territory: any, colIndex: number) => ({
             ...territory,
+            id: `${rowIndex}-${colIndex}`,
             x: rowIndex,
             y: colIndex,
           }))
       );
-
-      console.log("newGridData", newGridData);
 
       // Mock data for development - replace with actual gridData when ready
 

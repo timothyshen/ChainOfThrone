@@ -1,6 +1,7 @@
 "use client"
 
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, useEffect } from "react"
+import { useAccount } from "wagmi"
 import {
   useGameStateContext,
   useSelectionContext,
@@ -36,6 +37,9 @@ export default function GameMap({
   isMobile,
   setMobileBottomPanelOpen,
 }: GameMapProps) {
+  // Wallet connection
+  const { address } = useAccount()
+
   // Context hooks
   const { territories, armies } = useGameStateContext()
   const { selectedTerritory, selectedArmy, clearSelection } =
@@ -86,14 +90,27 @@ export default function GameMap({
       cancelMovement,
     })
 
-  // Army layer renderer
-  const { renderArmiesAt } = useArmyLayer({
-    armies,
-    selectedArmy,
-    animatingArmies,
-    getArmyDisplayPosition,
-    onArmyClick: handleArmyClick,
-  })
+  // Army layer renderer - DISABLED: Army info now shown in territory grid
+  // const { renderArmiesAt } = useArmyLayer({
+  //   armies,
+  //   selectedArmy,
+  //   animatingArmies,
+  //   getArmyDisplayPosition,
+  //   onArmyClick: handleArmyClick,
+  // })
+
+  // ESC key to cancel operation
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && (movementMode || selectedArmy || selectedTerritory)) {
+        clearSelection()
+        cancelMovement()
+      }
+    }
+
+    window.addEventListener('keydown', handleEscKey)
+    return () => window.removeEventListener('keydown', handleEscKey)
+  }, [movementMode, selectedArmy, selectedTerritory, clearSelection, cancelMovement])
 
   return (
     <div
@@ -114,12 +131,27 @@ export default function GameMap({
             margin: "0 auto",
           }}
         >
-          {/* Grid Background */}
-          <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1">
+          {/* Grid Background - Click to cancel */}
+          <div
+            className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1"
+            onClick={(e) => {
+              // Only cancel if clicking the grid background itself
+              if (e.target === e.currentTarget) {
+                clearSelection()
+                cancelMovement()
+              }
+            }}
+          >
             {Array.from({ length: GRID_CONFIG.totalCells }).map((_, index) => (
               <div
                 key={index}
                 className="border border-slate-600/30 rounded-lg bg-slate-800/20"
+                onClick={(e) => {
+                  // Click on grid cell = cancel operation
+                  e.stopPropagation()
+                  clearSelection()
+                  cancelMovement()
+                }}
               />
             ))}
           </div>
@@ -128,10 +160,11 @@ export default function GameMap({
           <TerritoryGrid
             flatTerritories={flatTerritories}
             isMobile={isMobile}
+            armies={armies}
+            currentPlayerAddress={address}
             onTerritoryClick={handleTerritoryCellClick}
-          >
-            {(territory) => renderArmiesAt(territory.x, territory.y)}
-          </TerritoryGrid>
+            onArmyClick={handleArmyClick}
+          />
 
           {/* Animation Layer */}
           <AnimationLayer
@@ -150,6 +183,23 @@ export default function GameMap({
             armies={armies}
             onCellClick={handleCellClick}
           />
+
+          {/* Cancel Button - Show when in movement mode */}
+          {movementMode && selectedArmy && (
+            <div className="absolute top-4 right-4 z-30">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  clearSelection()
+                  cancelMovement()
+                }}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2 font-bold"
+              >
+                <span className="text-lg">✕</span>
+                Cancel (ESC)
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

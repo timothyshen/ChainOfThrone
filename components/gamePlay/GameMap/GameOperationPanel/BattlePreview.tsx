@@ -2,6 +2,7 @@ import { memo } from "react"
 import { Sword } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { truncateAddress } from "@/lib/utils"
 import type { BattlePreviewProps } from "@/lib/types/gameOperationPanel"
 
 /**
@@ -23,7 +24,7 @@ export const BattlePreview = memo(({
     <div className="flex justify-between">
       <span>Attacker</span>
       <Badge style={{ backgroundColor: getTerritoryColor(selectedArmy.owner) }}>
-        {selectedArmy.owner} ({Number(selectedArmy.size).toLocaleString()})
+        {truncateAddress(selectedArmy.owner)} ({Number(selectedArmy.size).toLocaleString()})
       </Badge>
     </div>
 
@@ -31,7 +32,7 @@ export const BattlePreview = memo(({
       <div className="flex justify-between">
         <span>Defender</span>
         <Badge style={{ backgroundColor: getTerritoryColor(battleTarget.army.owner) }}>
-          {battleTarget.army.owner} ({Number(battleTarget.army.size).toLocaleString()})
+          {truncateAddress(battleTarget.army.owner)} ({Number(battleTarget.army.size).toLocaleString()})
         </Badge>
       </div>
     ) : battleTarget.territory ? (

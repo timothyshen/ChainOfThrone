@@ -20,15 +20,16 @@ export const GameOverview = ({
         const fetchPlayerTerritories = () => {
             if (!playerAddress) return
 
-            // Find territories controlled by player's armies
+            // Find territories controlled by player
             const controlledTerritories = gameTerritories.flat().filter((territory: Territory) => {
-                // Check if player has an army on this territory
-                const hasPlayerArmy = territory.isCastle || armies.some(army =>
+                // Check if player owns this territory OR has an army on this territory
+                const ownsTerritory = territory.player.toLowerCase() === playerAddress.toLowerCase()
+                const hasPlayerArmy = armies.some(army =>
                     army.x === territory.x &&
                     army.y === territory.y &&
-                    army.owner === playerAddress
+                    army.owner.toLowerCase() === playerAddress.toLowerCase()
                 )
-                return hasPlayerArmy
+                return ownsTerritory || hasPlayerArmy
             })
             setPlayerTerritories(controlledTerritories)
         }

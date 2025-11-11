@@ -68,7 +68,7 @@ export function useArmyLayer({
         return (
           <div
             key={army.id}
-            className={`absolute top-1 right-1 w-6 h-6 md:w-8 md:h-8 rounded-full border-2 cursor-pointer flex items-center justify-center transition-all duration-800 ease-in-out
+            className={`absolute top-1 right-1 w-6 h-6 md:w-8 md:h-8 rounded-full border-2 cursor-pointer flex items-center justify-center transition-all duration-800 ease-in-out z-20
               ${
                 isSelected
                   ? "border-yellow-400 shadow-lg shadow-yellow-400/50"
@@ -90,7 +90,7 @@ export function useArmyLayer({
             }}
           >
             <Users className="w-3 h-3 md:w-4 md:h-4 text-white" />
-            <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs bg-slate-800 px-1 rounded whitespace-nowrap">
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 text-[10px] bg-slate-800/90 px-1 rounded whitespace-nowrap">
               {army.size.toString()}
             </div>
 

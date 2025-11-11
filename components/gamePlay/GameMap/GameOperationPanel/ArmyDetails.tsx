@@ -2,6 +2,7 @@ import { memo } from "react"
 import { Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { truncateAddress } from "@/lib/utils"
 import type { ArmyDetailsProps } from "@/lib/types/gameOperationPanel"
 
 /**
@@ -27,7 +28,7 @@ export const ArmyDetails = memo(({
         <div className="flex justify-between">
           <span>Owner</span>
           <Badge style={{ backgroundColor: getTerritoryColor(selectedArmy.owner) }}>
-            {selectedArmy.owner}
+            {truncateAddress(selectedArmy.owner)}
           </Badge>
         </div>
         <div className="flex justify-between">

@@ -33,7 +33,7 @@ export const MovementOverlay = memo(
     }
 
     return (
-      <div className="absolute inset-0 p-2 pointer-events-none">
+      <div className="absolute inset-0 p-2 pointer-events-none z-10">
         <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
           {flatTerritories.map((territory) => {
             const gridX = territory.x

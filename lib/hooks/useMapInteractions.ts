@@ -41,12 +41,10 @@ export function useMapInteractions({
       if (e.target === e.currentTarget) {
         clearSelection()
         cancelMovement()
-        flatTerritories.forEach((territory) => {
-          territory.isSelected = false
-        })
+        // Don't mutate flatTerritories - selection state is managed by useMemo
       }
     },
-    [clearSelection, cancelMovement, flatTerritories]
+    [clearSelection, cancelMovement]
   )
 
   /**
@@ -63,32 +61,9 @@ export function useMapInteractions({
           (t) => t.x === gridX && t.y === gridY
         )
         if (territory) {
-          // Check if this is a battle destination
-          const hasEnemyArmy = armies.some(
-            (army) =>
-              army.x === gridX &&
-              army.y === gridY &&
-              army.owner !== selectedArmy?.owner
-          )
-
-          if (hasEnemyArmy && selectedArmy) {
-            const enemyArmy = armies.find(
-              (army) =>
-                army.x === gridX &&
-                army.y === gridY &&
-                army.owner !== selectedArmy.owner
-            )
-
-            if (enemyArmy) {
-              console.log(
-                `Initiating battle: ${selectedArmy.owner} vs ${enemyArmy.owner}`
-              )
-              handleInitializeBattle(selectedArmy, enemyArmy)
-            }
-          } else {
-            // Regular move
-            handleMoveToCell(territory)
-          }
+          // Both movement and battle require unit input
+          // Battle is treated as a special case of movement (moving to enemy position)
+          handleMoveToCell(territory)
         }
       }
     },
