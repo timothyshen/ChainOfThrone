@@ -7,10 +7,9 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
 import { monadTestnet } from 'viem/chains';
-import { injected, metaMask, walletConnect } from 'wagmi/connectors';
+import { injected, metaMask, walletConnect } from 'wagmi/connectors'
 
-// Export wagmi config for use in actions (multicall, etc.)
-export const wagmiConfig = createConfig({
+const config = createConfig({
     chains: [monadTestnet],
     connectors: [
         injected(),
@@ -23,16 +22,16 @@ export const wagmiConfig = createConfig({
 
 const queryClient = new QueryClient();
 
-export default function GeneralProvider({
-    children,
-}: {
+interface WalletsProviderWrapperProps {
     children: React.ReactNode;
-}) {
+}
+
+export default function DynamicProvider({ children }: WalletsProviderWrapperProps): JSX.Element {
     return (
-        <WagmiProvider config={wagmiConfig}>
+        <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
                 {children}
             </QueryClientProvider>
         </WagmiProvider>
     );
-};
+}

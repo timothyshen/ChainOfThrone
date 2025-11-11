@@ -5,11 +5,11 @@ import { useToast } from '@/lib/hooks/use-toast'
 import type { TxState, TxToastMessages } from '@/lib/types/transaction'
 
 /**
- * 自动显示 Transaction Toast 通知
+ * Automatically display Transaction Toast notifications
  *
- * 监听 transaction state 变化，自动显示对应的 toast
+ * Listens to transaction state changes and automatically displays corresponding toasts
  *
- * 使用方法:
+ * Usage:
  * ```tsx
  * const tx = useTransaction()
  * useTransactionToast(tx.state, {
@@ -26,20 +26,20 @@ export function useTransactionToast(
   const prevStatusRef = useRef<TxState['status']>('idle')
 
   useEffect(() => {
-    // 只在状态变化时触发，避免重复 toast
+    // Only trigger on status change to avoid duplicate toasts
     if (prevStatusRef.current === state.status) return
     prevStatusRef.current = state.status
 
     if (state.status === 'submitted') {
       toast({
-        title: '交易已提交',
+        title: 'Transaction Submitted',
         description: messages?.submitted || 'Waiting for blockchain confirmation...',
       })
     }
 
     if (state.status === 'success') {
       toast({
-        title: '✓ 成功',
+        title: '✓ Success',
         description: messages?.success || 'Transaction confirmed successfully!',
         variant: 'default',
       })
@@ -47,7 +47,7 @@ export function useTransactionToast(
 
     if (state.status === 'error') {
       toast({
-        title: '失败',
+        title: 'Failed',
         description: messages?.error || state.error.message || 'Transaction failed',
         variant: 'destructive',
       })

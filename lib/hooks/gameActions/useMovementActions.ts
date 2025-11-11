@@ -29,7 +29,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
     cancelMovement,
   } = useMovementContext()
 
-  // 自动显示交易状态通知
+  // Automatically display transaction status notifications
   useTransactionToast(tx.state, {
     success: "Army moved successfully!",
     error: "Failed to move army"
@@ -68,10 +68,10 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
   /**
    * Handle action (execute move)
    *
-   * 正确的执行顺序：
-   * 1. 用户选择军队数量
-   * 2. 提交交易到区块链并等待确认
-   * 3. 交易确认成功后，执行前端动画
+   * Correct execution order:
+   * 1. User selects army size
+   * 2. Submit transaction to blockchain and wait for confirmation
+   * 3. After transaction is confirmed, execute frontend animation
    */
   const handleAction = useCallback(
     async (targetTerritory: Territory, moveStrength: number) => {
@@ -92,11 +92,11 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
       console.log("🐛 Move:", move)
 
       try {
-        // 执行交易并等待区块链确认
-        // tx.execute() 会等待交易完全确认后才返回
+        // Execute transaction and wait for blockchain confirmation
+        // tx.execute() waits for transaction to be fully confirmed before returning
         await tx.execute(() => makeMove(gameAddress, move))
 
-        // ✅ 交易已确认！现在可以安全地执行动画
+        // ✅ Transaction confirmed! Now safe to execute animation
         console.log(`✅ Transaction confirmed! Starting animation...`)
 
         // Update army position with animation flag
@@ -136,7 +136,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
         }, 800) // Animation duration
 
       } catch (error) {
-        // 交易失败，不执行动画
+        // Transaction failed, do not execute animation
         console.error("❌ Transaction failed, animation cancelled:", error)
 
         // Reset movement state

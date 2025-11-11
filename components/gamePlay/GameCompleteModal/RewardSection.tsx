@@ -23,7 +23,7 @@ export const RewardSection = memo(({ type, gameAddress }: RewardSectionProps) =>
   const { claimReward } = useClaimReward()
   const tx = useTransaction()
 
-  // 自动显示交易状态通知
+  // Automatically display transaction status notifications
   useTransactionToast(tx.state, {
     success: "Reward claimed successfully!",
     error: "Failed to claim reward"

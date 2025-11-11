@@ -9,9 +9,11 @@ import { toast } from "@/lib/hooks/use-toast";
 import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
 import { getGameStatus, totalPlayers, getWinner } from "@/lib/hooks/ReadGameContract";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
+import { useTransaction } from "@/lib/hooks/useTransaction";
+import { useTransactionToast } from "@/lib/hooks/useTransactionToast";
 import { useGameAddress } from '@/lib/hooks/useGameAddress';
 import { DiplomacyResultModal } from "../GameCompleteModal";
-import { Spinner } from "@/components/ui/spinner";
+import { TransactionButton } from "@/components/shared/TransactionButton";
 import { useWatchContractEvent } from "wagmi"
 import { gameAbi } from '@/lib/contract/gameAbi'
 
@@ -81,9 +83,16 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
 
 export default function GameStatus({ isLoading, currentPlayer, gameStatus, totalPlayer, maxPlayer, playerAddresses, setGameStatus, setTotalPlayer, fetchGameData }: GameStatusProps) {
     const { gameAddress } = useGameAddress();
-    const { addPlayer, isPending, isConfirming, error, isConfirmed } = useAddPlayer();
+    const { addPlayer } = useAddPlayer();
+    const tx = useTransaction();
     const [showCompleteModal, setShowCompleteModal] = useState(true);
     const [winer, setWinner] = useState(String)
+
+    // Automatically display transaction status notifications
+    useTransactionToast(tx.state, {
+        success: "You have successfully joined the game!",
+        error: "Failed to join game"
+    })
 
     useEffect(() => {
         async function checkWinner() {
@@ -99,30 +108,12 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
         checkWinner();
     }, [gameStatus, gameAddress, currentPlayer]);
 
+    // Refresh game data after transaction success
     useEffect(() => {
-        if (isConfirming) {
-            toast({
-                title: "Joining Game",
-                description: (
-                    <div className="flex items-center">
-                        <Spinner className="mr-2" />
-                        Joining game...
-                    </div>
-                ),
-            })
-        }
-    }, [isConfirming]);
-
-    useEffect(() => {
-        if (isConfirmed) {
-            toast({
-                title: "Joined Game",
-                description: "You have successfully joined the game",
-            });
+        if (tx.isSuccess) {
             fetchGameData();
         }
-
-    }, [fetchGameData, isConfirmed]);
+    }, [tx.isSuccess, fetchGameData]);
 
 
 
@@ -157,28 +148,21 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
         if (!gameAddress) return;
 
         try {
-            await addPlayer(gameAddress);
+            // Execute transaction and wait for confirmation
+            await tx.execute(() => addPlayer(gameAddress));
 
-            if (isConfirmed) {
-                const [status, total] = await Promise.all([
-                    getGameStatus(gameAddress),
-                    totalPlayers(gameAddress)
-                ]);
+            // After transaction is confirmed, update game state
+            const [status, total] = await Promise.all([
+                getGameStatus(gameAddress),
+                totalPlayers(gameAddress)
+            ]);
 
-                setGameStatus(getGameStatusText(status as number));
-                setTotalPlayer(total as number);
+            setGameStatus(getGameStatusText(status as number));
+            setTotalPlayer(total as number);
 
-                toast({
-                    title: "Joined game",
-                    description: "You have successfully joined the game",
-                });
-            }
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to join game",
-                variant: "destructive",
-            });
+            // Error already displayed via useTransactionToast
+            console.error("Failed to join game:", error);
         }
     };
 
@@ -258,33 +242,38 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                     </CardContent>
                 </Card>
 
-                <Button
-                    onClick={handlePlayerJoin}
-                    disabled={isPending || totalPlayer === maxPlayer}
-                    className="w-full"
-                >
-                    {totalPlayer === maxPlayer ? (
-                        <>
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Game is full
-                        </>
-                    ) : (
-                        isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Joining...
-                            </>
-                        ) : (
+                {totalPlayer === maxPlayer ? (
+                    <Button disabled className="w-full">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Game is full
+                    </Button>
+                ) : (
+                    <TransactionButton
+                        state={tx.state}
+                        onClick={handlePlayerJoin}
+                        idleText={
                             <>
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 Join Game
                             </>
-                        )
-                    )}
-                </Button>
-
-                {error && (
-                    <p className="text-sm text-center text-red-500">Error: {error.message}</p>
+                        }
+                        signingText="Sign in Wallet"
+                        submittedText={
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Joining...
+                            </>
+                        }
+                        confirmingText={
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Confirming...
+                            </>
+                        }
+                        successText="✓ Joined!"
+                        errorText="Try Again"
+                        className="w-full"
+                    />
                 )}
             </div>
 

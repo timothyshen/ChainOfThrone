@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import FrameWalletProvider from "@/lib/providers/FarcasterWalletProvider";
-import DynamicProvider from "@/lib/providers/GeneralProvider";
+import DynamicProvider from "@/lib/providers/DynamicProvider";
 import { Toaster } from "@/components/ui/toaster"
 import { FrameProvider } from "@/lib/providers/FarcasterProvider";
 

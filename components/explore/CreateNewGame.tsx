@@ -10,7 +10,7 @@ const CreateNewGame = () => {
     const { createGame } = useGameCreate()
     const tx = useTransaction()
 
-    // 自动显示交易状态通知
+    // Automatically display transaction status notifications
     useTransactionToast(tx.state, {
         success: "Game created successfully!",
         error: "Failed to create game"

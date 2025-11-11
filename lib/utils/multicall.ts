@@ -8,7 +8,7 @@
  */
 
 import { readContracts } from "wagmi/actions";
-import { wagmiConfig } from "@/lib/providers/GeneralProvider";
+import { wagmiConfig } from "@/lib/providers/DynamicProvider";
 import { gameAbi } from "@/lib/contract/gameAbi";
 
 /**
@@ -43,8 +43,8 @@ export async function batchReadGameContract(
     return results.map((result, index) => {
       if (!result || result.status === "failure") {
         console.error(
-          `Multicall failed for ${calls[index]?.functionName || 'unknown'}:`,
-          result?.error || 'No result'
+          `Multicall failed for ${calls[index]?.functionName || "unknown"}:`,
+          result?.error || "No result"
         );
         return null;
       }

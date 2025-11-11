@@ -6,11 +6,11 @@ import { waitForTransactionReceipt } from 'wagmi/actions'
 import type { TxState, UseTransactionReturn } from '@/lib/types/transaction'
 
 /**
- * 统一的 Transaction 状态管理 Hook
+ * Unified Transaction State Management Hook
  *
- * 基于状态机设计，消除状态分裂问题
+ * Based on state machine design to eliminate state splitting issues
  *
- * 使用方法:
+ * Usage:
  * ```tsx
  * const tx = useTransaction()
  * const { makeMove } = useMakeMove()
@@ -18,31 +18,31 @@ import type { TxState, UseTransactionReturn } from '@/lib/types/transaction'
  * const handleMove = async () => {
  *   tx.prepare({ armyId: '123' })
  *   await tx.execute(() => makeMove(gameAddress, move))
- *   // 这里交易已经确认完成！可以安全地执行后续逻辑（如动画）
+ *   // Transaction is confirmed here! Safe to execute subsequent logic (e.g., animations)
  * }
  * ```
  *
- * @template TData - preparing 阶段携带的数据类型
+ * @template TData - Data type carried during the preparing phase
  */
 export function useTransaction<TData = any>(): UseTransactionReturn<TData> {
   const [state, setState] = useState<TxState<TData>>({ status: 'idle' })
   const config = useConfig()
 
   /**
-   * 设置 preparing 状态（可选）
-   * 用于开始验证等准备工作
+   * Set preparing state (optional)
+   * Used for starting validation and preparation work
    */
   const prepare = useCallback((data?: TData) => {
     setState({ status: 'preparing', data })
   }, [])
 
   /**
-   * 执行交易并等待确认
+   * Execute transaction and wait for confirmation
    *
-   * 重要：此函数会等待交易完全确认后才返回
-   * 这样调用者可以在 await 之后安全地执行后续逻辑（如动画）
+   * Important: This function waits for the transaction to be fully confirmed before returning
+   * This allows callers to safely execute subsequent logic (e.g., animations) after await
    *
-   * @param fn - 返回 transaction hash 的异步函数
+   * @param fn - Async function that returns a transaction hash
    */
   const execute = useCallback(async (fn: () => Promise<`0x${string}`>) => {
     try {
@@ -52,7 +52,7 @@ export function useTransaction<TData = any>(): UseTransactionReturn<TData> {
 
       setState({ status: 'submitted', hash })
 
-      // 等待交易确认
+      // Wait for transaction confirmation
       setState({ status: 'confirming', hash })
       const receipt = await waitForTransactionReceipt(config, { hash })
 
@@ -63,19 +63,19 @@ export function useTransaction<TData = any>(): UseTransactionReturn<TData> {
         status: 'error',
         error: error instanceof Error ? error : new Error(String(error))
       })
-      throw error // 重新抛出错误，让调用者可以处理
+      throw error // Re-throw error for caller to handle
     }
   }, [config])
 
   /**
-   * 重置到 idle 状态
+   * Reset to idle state
    */
   const reset = useCallback(() => {
     setState({ status: 'idle' })
   }, [])
 
   /**
-   * 重试失败的交易
+   * Retry failed transaction
    */
   const retry = useCallback(async (fn: () => Promise<`0x${string}`>) => {
     if (state.status === 'error') {

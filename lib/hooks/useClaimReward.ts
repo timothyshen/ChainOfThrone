@@ -8,10 +8,10 @@ interface UseClaimRewardReturn {
 /**
  * Hook for claiming rewards
  *
- * 状态管理已移至 useTransaction hook
- * 此 hook 只负责执行交易逻辑
+ * State management has been moved to useTransaction hook
+ * This hook only handles transaction execution logic
  *
- * 使用方法:
+ * Usage:
  * ```tsx
  * const tx = useTransaction()
  * const { claimReward } = useClaimReward()

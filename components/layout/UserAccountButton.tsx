@@ -43,8 +43,8 @@ export default function UserAccountButton() {
     await navigator.clipboard.writeText(address)
     setCopied(true)
     toast({
-      title: "地址已复制",
-      description: "钱包地址已复制到剪贴板",
+      title: "Address Copied",
+      description: "Wallet address copied to clipboard",
     })
 
     setTimeout(() => setCopied(false), 2000)
@@ -58,8 +58,8 @@ export default function UserAccountButton() {
   const handleDisconnect = () => {
     disconnect()
     toast({
-      title: "钱包已断开",
-      description: "您已成功断开钱包连接",
+      title: "Wallet Disconnected",
+      description: "You have successfully disconnected your wallet",
     })
   }
 
@@ -67,7 +67,7 @@ export default function UserAccountButton() {
     switchChain({ chainId: monadTestnet.id })
   }
 
-  // 未连接状态
+  // Not connected state
   if (!isConnected) {
     return (
       <Button
@@ -80,7 +80,7 @@ export default function UserAccountButton() {
     )
   }
 
-  // 已连接状态 - Dropdown
+  // Connected state - Dropdown
   const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''
   const isCorrectChain = chainId === monadTestnet.id
 
@@ -105,9 +105,9 @@ export default function UserAccountButton() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-64">
-        {/* 钱包地址 */}
+        {/* Wallet Address */}
         <div className="px-3 py-2">
-          <p className="text-xs text-muted-foreground mb-1">钱包地址</p>
+          <p className="text-xs text-muted-foreground mb-1">Wallet Address</p>
           <div className="flex items-center justify-between gap-2">
             <code className="text-sm font-mono">{shortAddress}</code>
             <div className="flex gap-1">
@@ -137,10 +137,10 @@ export default function UserAccountButton() {
 
         <DropdownMenuSeparator />
 
-        {/* 余额和网络信息 */}
+        {/* Balance and Network Info */}
         <div className="px-3 py-2 space-y-2">
           <div>
-            <p className="text-xs text-muted-foreground">余额</p>
+            <p className="text-xs text-muted-foreground">Balance</p>
             <p className="text-sm font-medium">
               {balance
                 ? `${parseFloat(balance.formatted).toFixed(4)} ${balance.symbol}`
@@ -149,7 +149,7 @@ export default function UserAccountButton() {
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">网络</p>
+            <p className="text-xs text-muted-foreground">Network</p>
             <p className="text-sm font-medium flex items-center gap-1">
               {isCorrectChain ? (
                 <>
@@ -168,11 +168,11 @@ export default function UserAccountButton() {
 
         <DropdownMenuSeparator />
 
-        {/* 操作按钮 */}
+        {/* Action Buttons */}
         {!isCorrectChain && (
           <DropdownMenuItem onClick={handleSwitchChain}>
             <RefreshCw className="mr-2 h-4 w-4" />
-            <span>切换到 Monad Testnet</span>
+            <span>Switch to Monad Testnet</span>
           </DropdownMenuItem>
         )}
 
@@ -181,7 +181,7 @@ export default function UserAccountButton() {
           className="text-destructive focus:text-destructive"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>断开连接</span>
+          <span>Disconnect</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
