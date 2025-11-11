@@ -1,28 +1,35 @@
-import {
-  useWaitForTransactionReceipt,
-  useWriteContract,
-  useAccount,
-} from "wagmi";
+import { useWriteContract, useAccount } from "wagmi";
 import { gameAbi } from "@/lib/contract/gameAbi";
 import { parseEther } from "viem";
 
-type UseAddPlayerReturn = {
-  addPlayer: (address: `0x${string}`) => `0x${string}` | undefined;
-  isPending: boolean;
-  error: Error | null;
-  isConfirming: boolean;
-  isConfirmed: boolean;
-};
+interface UseAddPlayerReturn {
+  addPlayer: (address: `0x${string}`) => Promise<`0x${string}`>;
+}
 
+/**
+ * Hook for adding a player to the game
+ *
+ * 状态管理已移至 useTransaction hook
+ * 此 hook 只负责执行交易逻辑
+ *
+ * 使用方法:
+ * ```tsx
+ * const tx = useTransaction()
+ * const { addPlayer } = useAddPlayer()
+ *
+ * const handleJoin = async () => {
+ *   await tx.execute(() => addPlayer(gameAddress))
+ * }
+ * ```
+ */
 export const useAddPlayer = (): UseAddPlayerReturn => {
   const { isConnected } = useAccount();
-  const { data: hash, error, isPending, writeContract } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
 
-  const addPlayer = (address: `0x${string}`) => {
+  const addPlayer = async (address: `0x${string}`): Promise<`0x${string}`> => {
     if (!isConnected) throw new Error("Wallet not connected");
 
-    console.log("abi", gameAbi);
-    writeContract({
+    const hash = await writeContractAsync({
       address: address,
       abi: gameAbi,
       functionName: "addPlayer",
@@ -33,10 +40,5 @@ export const useAddPlayer = (): UseAddPlayerReturn => {
     return hash;
   };
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash, // Transaction hash from the writeContract call
-    });
-
-  return { addPlayer, isPending, error, isConfirming, isConfirmed };
+  return { addPlayer };
 };

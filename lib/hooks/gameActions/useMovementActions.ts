@@ -2,7 +2,8 @@ import { useCallback } from "react"
 import { useAccount } from "wagmi"
 import { Territory } from "@/lib/types/game"
 import { useMakeMove } from "@/lib/hooks/useMakeMove"
-import { useToast } from "@/lib/hooks/use-toast"
+import { useTransaction } from "@/lib/hooks/useTransaction"
+import { useTransactionToast } from "@/lib/hooks/useTransactionToast"
 import {
   useSelectionContext,
   useMovementContext,
@@ -17,7 +18,7 @@ import {
 export function useMovementActions(gameAddress: `0x${string}` | undefined) {
   const { address } = useAccount()
   const { makeMove } = useMakeMove()
-  const { toast } = useToast()
+  const tx = useTransaction()
   const { selectedTerritory, selectedArmy } = useSelectionContext()
   const {
     movementMode,
@@ -28,6 +29,12 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
     cancelMovement,
   } = useMovementContext()
 
+  // 自动显示交易状态通知
+  useTransactionToast(tx.state, {
+    success: "Army moved successfully!",
+    error: "Failed to move army"
+  })
+
   /**
    * Handle move to cell
    * Stores target territory for move confirmation
@@ -35,11 +42,6 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
   const handleMoveToCell = useCallback(
     async (targetTerritory: Territory) => {
       if (!selectedTerritory || !address || !gameAddress) {
-        toast({
-          title: "Invalid Action",
-          description: "Cannot perform this action at this time.",
-          variant: "destructive",
-        })
         return
       }
 
@@ -60,7 +62,6 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
       movementMode,
       setMoveSubmitted,
       setTargetTerritory,
-      toast,
     ]
   )
 
@@ -71,85 +72,62 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
   const handleAction = useCallback(
     async (targetTerritory: Territory, moveStrength: number) => {
       if (!selectedTerritory || !address || !gameAddress || !selectedArmy) {
-        toast({
-          title: "Invalid Action",
-          description: "Cannot perform this action at this time.",
-          variant: "destructive",
-        })
         return
       }
 
-      try {
-        // Update army position with animation flag
-        setArmyPositions((prev) => ({
-          ...prev,
-          [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
-        }))
+      // Start animation preparation
+      tx.prepare({ armyId: selectedArmy.id })
 
-        type Move = readonly [number, number, string, number, number, number]
-        const move: Move = [
-          selectedTerritory.x,
-          selectedTerritory.y,
-          address,
-          targetTerritory.x,
-          targetTerritory.y,
-          moveStrength,
-        ] as const
+      // Update army position with animation flag
+      setArmyPositions((prev) => ({
+        ...prev,
+        [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
+      }))
 
-        console.log("🐛 Move:", move)
-        await makeMove(gameAddress, move)
+      // Start animation when user decides to move
+      setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]))
 
-        // Start animation when user decides to move
-        setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]))
+      type Move = readonly [number, number, string, number, number, number]
+      const move: Move = [
+        selectedTerritory.x,
+        selectedTerritory.y,
+        address,
+        targetTerritory.x,
+        targetTerritory.y,
+        moveStrength,
+      ] as const
 
-        // Wait for animation to complete
-        setTimeout(() => {
-          // Clear animation state
-          setAnimatingArmies((prev) => {
-            const newSet = new Set(prev)
-            newSet.delete(selectedArmy.id)
-            return newSet
-          })
+      console.log("🐛 Move:", move)
 
-          // Clear the temporary animation position
-          setArmyPositions((prev) => {
-            const newPositions = { ...prev }
-            delete newPositions[selectedArmy.id]
-            return newPositions
-          })
+      // Execute transaction
+      await tx.execute(() => makeMove(gameAddress, move))
 
-          console.log(
-            `Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`
-          )
-        }, 800) // Animation duration
-
-        // Reset movement state
-        cancelMovement()
-      } catch (error) {
-        console.error("Error making move:", error)
-
-        // Clear animation on error
+      // Wait for animation to complete
+      setTimeout(() => {
+        // Clear animation state
         setAnimatingArmies((prev) => {
           const newSet = new Set(prev)
           newSet.delete(selectedArmy.id)
           return newSet
         })
 
+        // Clear the temporary animation position
         setArmyPositions((prev) => {
           const newPositions = { ...prev }
           delete newPositions[selectedArmy.id]
           return newPositions
         })
 
-        toast({
-          title: "Error",
-          description:
-            error instanceof Error
-              ? error.message
-              : "Failed to submit move to the blockchain",
-          variant: "destructive",
-        })
-      }
+        console.log(
+          `Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`
+        )
+
+        // Reset movement state
+        cancelMovement()
+
+        // Reset transaction state
+        tx.reset()
+      }, 800) // Animation duration
     },
     [
       selectedTerritory,
@@ -157,10 +135,10 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
       address,
       gameAddress,
       makeMove,
+      tx,
       setAnimatingArmies,
       setArmyPositions,
       cancelMovement,
-      toast,
     ]
   )
 
