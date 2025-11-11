@@ -1,9 +1,9 @@
 "use client"
 import Link from "next/link"
-import LoginButton from "@/components/home/LoginButton"
+import UserAccountButton from "@/components/layout/UserAccountButton"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
-import { Menu, X, User } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useFarcasterActions } from "@/lib/hooks/useFarcasterActions"
 import { useAccount } from "wagmi"
 
@@ -41,7 +41,7 @@ function Header() {
 
                 <div className="flex items-center">
                     <div className="hidden md:block">
-                        <LoginButton />
+                        <UserAccountButton />
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -76,7 +76,7 @@ function Header() {
                                 Contact
                             </button>
                             <div className="pt-2">
-                                <LoginButton />
+                                <UserAccountButton />
                             </div>
                         </nav>
                     </div>
