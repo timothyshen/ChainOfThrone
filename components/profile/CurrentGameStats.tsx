@@ -4,8 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
+import { Skeleton } from '@/components/ui/skeleton'
 import { usePlayerGameStats } from '@/lib/hooks/usePlayerGameStats'
 import { Trophy, MapPin, Sword, TrendingUp, Clock, Target, AlertCircle } from 'lucide-react'
+import { CARD_CONTENT_PADDING, BADGE_STYLES, getGameStatusBadge, PLAYER_COLORS, TRANSITIONS } from '@/lib/constants/theme'
+import { cn } from '@/lib/utils'
 
 interface CurrentGameStatsProps {
   gameAddress: `0x${string}`
@@ -35,12 +38,49 @@ export function CurrentGameStats({
   // Loading state
   if (player1Stats.isLoading || player2Stats.isLoading) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
-        <CardContent className="p-12 text-center">
-          <Spinner className="mx-auto mb-4" />
-          <p className="text-slate-400">Loading game statistics...</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        {/* Game Status Skeleton */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent className={CARD_CONTENT_PADDING.md}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Skeleton className="h-16" />
+              <Skeleton className="h-16" />
+              <Skeleton className="h-16" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Territory Control Skeleton */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent className={CARD_CONTENT_PADDING.md}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Skeleton className="h-48" />
+              <Skeleton className="h-48" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Movement Stats Skeleton */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent className={CARD_CONTENT_PADDING.md}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <Skeleton className="h-24" />
+              <Skeleton className="h-24" />
+              <Skeleton className="h-24" />
+              <Skeleton className="h-24" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
@@ -64,7 +104,7 @@ export function CurrentGameStats({
   }
 
   return (
-    <div className="space-y-6">
+    <div className={cn("space-y-6", TRANSITIONS.normal)}>
       {/* Game Status Header */}
       <Card className="bg-slate-800 border-slate-700 text-white">
         <CardHeader>
@@ -77,22 +117,14 @@ export function CurrentGameStats({
               <Badge variant="secondary" className="bg-slate-700">
                 Round {player1Stats.gameProgress.currentRound}
               </Badge>
-              <Badge
-                className={
-                  player1Stats.gameProgress.gameStatus === 'Ongoing'
-                    ? 'bg-green-500'
-                    : player1Stats.gameProgress.gameStatus === 'Finished'
-                    ? 'bg-blue-500'
-                    : 'bg-slate-500'
-                }
-              >
+              <Badge className={getGameStatusBadge(player1Stats.gameProgress.gameStatus)}>
                 {player1Stats.gameProgress.gameStatus}
               </Badge>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center text-sm">
+        <CardContent className={CARD_CONTENT_PADDING.md}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
             <div>
               <div className="text-slate-400 mb-1">Duration</div>
               <div className="text-white font-semibold">
@@ -123,8 +155,8 @@ export function CurrentGameStats({
             Territory Control
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-6">
+        <CardContent className={CARD_CONTENT_PADDING.md}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Player 1 */}
             <div className="space-y-3">
               <div className="text-center">
@@ -222,8 +254,8 @@ export function CurrentGameStats({
             Movement Statistics
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <CardContent className={CARD_CONTENT_PADDING.md}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total Moves */}
             <div className="bg-slate-900/50 rounded-lg p-4 text-center">
               <div className="text-sm text-slate-400 mb-2">Total Moves</div>

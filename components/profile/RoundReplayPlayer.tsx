@@ -15,6 +15,8 @@ import {
   Info,
 } from 'lucide-react'
 import { ReconstructedRound, MoveRecord } from '@/lib/systems/RoundHistoryReconstructor'
+import { CARD_CONTENT_PADDING } from '@/lib/constants/theme'
+import { cn } from '@/lib/utils'
 
 interface RoundReplayPlayerProps {
   round: ReconstructedRound
@@ -28,9 +30,19 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
   if (!round || round.moves.length === 0) {
     return (
       <Card className="bg-slate-800 border-slate-700">
-        <CardContent className="p-8 text-center text-slate-400">
-          <Info className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No moves to replay in this round</p>
+        <CardContent className={cn(CARD_CONTENT_PADDING.lg, "text-center")}>
+          <div className="max-w-md mx-auto">
+            <Info className="w-16 h-16 mx-auto mb-4 text-slate-600" />
+            <h3 className="text-lg font-semibold text-slate-300 mb-2">No Moves in This Round</h3>
+            <p className="text-sm text-slate-400 mb-4">
+              This round doesn't contain any recorded moves. Players may not have submitted actions during this round.
+            </p>
+            {onClose && (
+              <Button variant="outline" onClick={onClose} className="mt-4">
+                Back to Timeline
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     )

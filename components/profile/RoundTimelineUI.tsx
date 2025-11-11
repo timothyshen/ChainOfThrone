@@ -13,6 +13,8 @@ import {
   Activity,
 } from 'lucide-react'
 import { GameHistory, ReconstructedRound } from '@/lib/systems/RoundHistoryReconstructor'
+import { CARD_CONTENT_PADDING, BADGE_STYLES } from '@/lib/constants/theme'
+import { cn } from '@/lib/utils'
 
 interface RoundTimelineUIProps {
   history: GameHistory
@@ -32,10 +34,18 @@ export function RoundTimelineUI({
   if (!history || history.rounds.length === 0) {
     return (
       <Card className="bg-slate-800 border-slate-700">
-        <CardContent className="p-8 text-center text-slate-400">
-          <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No game history available yet</p>
-          <p className="text-sm mt-2">Rounds will appear here as the game progresses</p>
+        <CardContent className={cn(CARD_CONTENT_PADDING.lg, "text-center")}>
+          <div className="max-w-md mx-auto">
+            <Activity className="w-16 h-16 mx-auto mb-4 text-slate-600" />
+            <h3 className="text-lg font-semibold text-slate-300 mb-2">No Game History Yet</h3>
+            <p className="text-sm text-slate-400 mb-4">
+              Rounds will appear here as the game progresses. Make your first move to start creating history!
+            </p>
+            <div className="inline-flex items-center gap-2 text-xs text-slate-500 bg-slate-900/50 px-4 py-2 rounded-full">
+              <Clock className="w-3 h-3" />
+              Waiting for game activity...
+            </div>
+          </div>
         </CardContent>
       </Card>
     )

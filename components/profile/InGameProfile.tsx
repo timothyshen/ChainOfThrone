@@ -10,6 +10,8 @@ import { GameHistoryView } from "./GameHistoryView"
 import { CurrentGameStats } from "./CurrentGameStats"
 import { useParams } from "next/navigation"
 import { idToAddress } from "@/lib/hooks/ReadGameContract"
+import { BADGE_STYLES, CARD_CONTENT_PADDING, TRANSITIONS } from "@/lib/constants/theme"
+import { cn } from "@/lib/utils"
 
 export default function GameProfile() {
     const params = useParams()
@@ -43,30 +45,32 @@ export default function GameProfile() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl font-bold">
+                    <h1 className="text-2xl sm:text-3xl font-bold">
                         {selectedView === "overview"
                             ? "Player Comparison"
                             : selectedView === "gameStats"
                             ? "Game Statistics"
                             : "Game History"}
                     </h1>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button
                             variant={selectedView === "overview" ? "default" : "outline"}
                             className={selectedView === "overview" ? "text-white" : "text-slate-400"}
                             onClick={() => setSelectedView("overview")}
+                            size="sm"
                         >
-                            <Users className="w-4 h-4 mr-2" />
-                            Overview
+                            <Users className="w-4 h-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Overview</span>
                         </Button>
                         {gameAddress && (
                             <Button
                                 variant={selectedView === "gameStats" ? "default" : "outline"}
                                 className={selectedView === "gameStats" ? "text-white" : "text-slate-400"}
                                 onClick={() => setSelectedView("gameStats")}
+                                size="sm"
                             >
-                                <BarChart3 className="w-4 h-4 mr-2" />
-                                Game Stats
+                                <BarChart3 className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Game Stats</span>
                             </Button>
                         )}
                         {gameAddress && (
@@ -74,9 +78,10 @@ export default function GameProfile() {
                                 variant={selectedView === "history" ? "default" : "outline"}
                                 className={selectedView === "history" ? "text-white" : "text-slate-400"}
                                 onClick={() => setSelectedView("history")}
+                                size="sm"
                             >
-                                <History className="w-4 h-4 mr-2" />
-                                Round History
+                                <History className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Round History</span>
                             </Button>
                         )}
                     </div>
@@ -94,8 +99,8 @@ export default function GameProfile() {
                 ) : (
                     <>
                         {/* Coming Soon Notice */}
-                        <Card className="bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600 mb-6 text-white">
-                            <CardContent className="p-6">
+                        <Card className={cn("bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600 mb-6 text-white", TRANSITIONS.normal)}>
+                            <CardContent className={CARD_CONTENT_PADDING.md}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <Info className="w-8 h-8 text-yellow-400" />
                                     <div>
@@ -105,7 +110,7 @@ export default function GameProfile() {
                                             when the game factory is deployed.
                                         </p>
                                     </div>
-                                    <Badge variant="outline" className="text-yellow-400 border-yellow-400 whitespace-nowrap ml-auto">
+                                    <Badge variant="outline" className={cn(BADGE_STYLES.warningOutline, "whitespace-nowrap ml-auto")}>
                                         Coming Soon
                                     </Badge>
                                 </div>
@@ -113,14 +118,14 @@ export default function GameProfile() {
                         </Card>
 
                         {/* Current Players */}
-                        <Card className="bg-slate-800 border-slate-700 text-white">
+                        <Card className={cn("bg-slate-800 border-slate-700 text-white", TRANSITIONS.normal)}>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Users className="w-5 h-5" />
                                     Players in this Game
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className={CARD_CONTENT_PADDING.md}>
                                 <div className="space-y-4">
                                     {/* Player 1 */}
                                     <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-lg">
@@ -133,7 +138,7 @@ export default function GameProfile() {
                                                 {player1Address || "Loading..."}
                                             </div>
                                         </div>
-                                        <Badge className="bg-blue-500">ID: 0</Badge>
+                                        <Badge className={BADGE_STYLES.player1}>ID: 0</Badge>
                                     </div>
 
                                     {/* Player 2 */}
@@ -147,7 +152,7 @@ export default function GameProfile() {
                                                 {player2Address || "Loading..."}
                                             </div>
                                         </div>
-                                        <Badge className="bg-red-500">ID: 1</Badge>
+                                        <Badge className={BADGE_STYLES.player2}>ID: 1</Badge>
                                     </div>
                                 </div>
 
