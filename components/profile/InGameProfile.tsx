@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Trophy, Sword, Shield, Crown, Target, Zap, TrendingUp, Users, Clock, Star, Flame, Award } from "lucide-react"
+import { Trophy, Sword, Shield, Crown, Target, Zap, TrendingUp, Users, Clock, Star, Flame, Award, History } from "lucide-react"
+import { GameHistoryView } from "./GameHistoryView"
+import { useParams } from "next/navigation"
 
 interface PlayerProfile {
     id: string
@@ -34,7 +36,10 @@ interface PlayerProfile {
 }
 
 export default function GameProfile() {
-    const [selectedView, setSelectedView] = useState<"overview" | "detailed">("overview")
+    const params = useParams()
+    const gameAddress = params?.address as `0x${string}` | undefined
+
+    const [selectedView, setSelectedView] = useState<"overview" | "history">("overview")
 
     const player1: PlayerProfile = {
         id: "p1",
@@ -157,20 +162,38 @@ export default function GameProfile() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl font-bold">Player Comparison</h1>
+                    <h1 className="text-3xl font-bold">
+                        {selectedView === "overview" ? "Player Comparison" : "Game History"}
+                    </h1>
                     <div className="flex gap-2">
                         <Button
-                            variant="default"
-                            className="text-white"
-                            disabled={true}
+                            variant={selectedView === "overview" ? "default" : "outline"}
+                            className={selectedView === "overview" ? "text-white" : "text-slate-400"}
+                            onClick={() => setSelectedView("overview")}
                         >
+                            <Users className="w-4 h-4 mr-2" />
                             Overview
                         </Button>
+                        {gameAddress && (
+                            <Button
+                                variant={selectedView === "history" ? "default" : "outline"}
+                                className={selectedView === "history" ? "text-white" : "text-slate-400"}
+                                onClick={() => setSelectedView("history")}
+                            >
+                                <History className="w-4 h-4 mr-2" />
+                                Round History
+                            </Button>
+                        )}
                     </div>
                 </div>
 
-                {/* Player Headers */}
-                <div className="grid grid-cols-2 gap-6 mb-6">
+                {/* Content Area */}
+                {selectedView === "history" && gameAddress ? (
+                    <GameHistoryView gameAddress={gameAddress} />
+                ) : (
+                    <>
+                        {/* Player Headers */}
+                        <div className="grid grid-cols-2 gap-6 mb-6">
                     {/* Player 1 */}
                     <Card className="bg-slate-800 border-slate-700 text-white">
                         <CardContent className="p-6">
@@ -296,6 +319,8 @@ export default function GameProfile() {
                         showComparison={false}
                     />
                 </div>
+                    </>
+                )}
             </div>
         </div>
     )

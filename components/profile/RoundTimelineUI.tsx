@@ -1,0 +1,247 @@
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Clock,
+  Play,
+  Users,
+  Sword,
+  ChevronRight,
+  TrendingUp,
+  Activity,
+} from 'lucide-react'
+import { GameHistory, ReconstructedRound } from '@/lib/systems/RoundHistoryReconstructor'
+
+interface RoundTimelineUIProps {
+  history: GameHistory
+  currentRound?: number
+  onSelectRound: (roundNumber: number) => void
+  selectedRound: number | null
+}
+
+export function RoundTimelineUI({
+  history,
+  currentRound,
+  onSelectRound,
+  selectedRound,
+}: RoundTimelineUIProps) {
+  const [viewMode, setViewMode] = useState<'timeline' | 'list'>('timeline')
+
+  if (!history || history.rounds.length === 0) {
+    return (
+      <Card className="bg-slate-800 border-slate-700">
+        <CardContent className="p-8 text-center text-slate-400">
+          <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>No game history available yet</p>
+          <p className="text-sm mt-2">Rounds will appear here as the game progresses</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const formatTimestamp = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  const getRoundStatus = (round: ReconstructedRound) => {
+    if (round.roundNumber === currentRound) return 'current'
+    if (round.roundNumber < (currentRound || 0)) return 'completed'
+    return 'pending'
+  }
+
+  const getRoundColor = (status: string) => {
+    switch (status) {
+      case 'current':
+        return 'bg-yellow-500'
+      case 'completed':
+        return 'bg-green-500'
+      default:
+        return 'bg-slate-500'
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-white flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Round History Timeline
+            </CardTitle>
+            <div className="flex gap-2">
+              <Badge variant="secondary" className="bg-slate-700 text-white">
+                {history.totalRounds} Rounds
+              </Badge>
+              {history.endTimestamp && (
+                <Badge variant="outline" className="text-green-400 border-green-400">
+                  Completed
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Timeline View */}
+      {viewMode === 'timeline' && (
+        <ScrollArea className="h-[600px] rounded-md border border-slate-700 bg-slate-800/50 p-6">
+          <div className="relative">
+            {/* Vertical Timeline Line */}
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-700" />
+
+            {/* Timeline Items */}
+            <div className="space-y-6">
+              {history.rounds.map((round, index) => {
+                const status = getRoundStatus(round)
+                const isSelected = selectedRound === round.roundNumber
+                const isEmpty = round.moves.length === 0
+
+                return (
+                  <div
+                    key={round.roundNumber}
+                    className="relative pl-16 group"
+                  >
+                    {/* Timeline Dot */}
+                    <div
+                      className={`absolute left-6 w-5 h-5 rounded-full border-4 border-slate-800 ${getRoundColor(
+                        status
+                      )} ${isSelected ? 'ring-4 ring-yellow-400/50' : ''} transition-all`}
+                    />
+
+                    {/* Round Card */}
+                    <Card
+                      className={`bg-slate-800 border-slate-700 hover:border-slate-600 transition-all cursor-pointer ${
+                        isSelected ? 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/20' : ''
+                      }`}
+                      onClick={() => !isEmpty && onSelectRound(round.roundNumber)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-lg font-semibold text-white">
+                                Round {round.roundNumber}
+                              </h3>
+                              {status === 'current' && (
+                                <Badge className="bg-yellow-500 text-black text-xs">
+                                  Current
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-slate-400">
+                              {formatTimestamp(round.timestamp)}
+                            </p>
+                          </div>
+
+                          {!isEmpty && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-blue-400 hover:text-blue-300 hover:bg-slate-700"
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              Replay
+                            </Button>
+                          )}
+                        </div>
+
+                        {isEmpty ? (
+                          <div className="text-sm text-slate-500 italic">
+                            No moves recorded
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div className="flex items-center gap-2 text-slate-300">
+                              <Users className="w-4 h-4 text-blue-400" />
+                              <span>{round.playerActions.size} Players</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-300">
+                              <Sword className="w-4 h-4 text-red-400" />
+                              <span>{round.moves.length} Moves</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-300">
+                              <TrendingUp className="w-4 h-4 text-green-400" />
+                              <span>
+                                {round.moves.reduce((sum, m) => sum + Number(m.units), 0)}{' '}
+                                Units
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Player Actions Preview */}
+                        {!isEmpty && (
+                          <div className="mt-3 pt-3 border-t border-slate-700">
+                            <div className="text-xs text-slate-400 space-y-1">
+                              {Array.from(round.playerActions.entries()).map(
+                                ([player, move]) => (
+                                  <div
+                                    key={player}
+                                    className="flex items-center justify-between"
+                                  >
+                                    <span>
+                                      {player.slice(0, 6)}...{player.slice(-4)}
+                                    </span>
+                                    <span className="text-slate-500">
+                                      ({move.fromX},{move.fromY}) →
+                                      ({move.toX},{move.toY})
+                                    </span>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </ScrollArea>
+      )}
+
+      {/* Summary Statistics */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-blue-400">
+                {history.totalRounds}
+              </div>
+              <div className="text-sm text-slate-400">Total Rounds</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-green-400">
+                {history.rounds.reduce((sum, r) => sum + r.moves.length, 0)}
+              </div>
+              <div className="text-sm text-slate-400">Total Moves</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-purple-400">
+                {formatTimestamp(history.startTimestamp)}
+              </div>
+              <div className="text-sm text-slate-400">Game Started</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-400">
+                {currentRound || 0}
+              </div>
+              <div className="text-sm text-slate-400">Current Round</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
