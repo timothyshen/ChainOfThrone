@@ -67,25 +67,17 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
 
   /**
    * Handle action (execute move)
-   * Submits move to blockchain and handles animation
+   *
+   * 正确的执行顺序：
+   * 1. 用户选择军队数量
+   * 2. 提交交易到区块链并等待确认
+   * 3. 交易确认成功后，执行前端动画
    */
   const handleAction = useCallback(
     async (targetTerritory: Territory, moveStrength: number) => {
       if (!selectedTerritory || !address || !gameAddress || !selectedArmy) {
         return
       }
-
-      // Start animation preparation
-      tx.prepare({ armyId: selectedArmy.id })
-
-      // Update army position with animation flag
-      setArmyPositions((prev) => ({
-        ...prev,
-        [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
-      }))
-
-      // Start animation when user decides to move
-      setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]))
 
       type Move = readonly [number, number, string, number, number, number]
       const move: Move = [
@@ -99,35 +91,57 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
 
       console.log("🐛 Move:", move)
 
-      // Execute transaction
-      await tx.execute(() => makeMove(gameAddress, move))
+      try {
+        // 执行交易并等待区块链确认
+        // tx.execute() 会等待交易完全确认后才返回
+        await tx.execute(() => makeMove(gameAddress, move))
 
-      // Wait for animation to complete
-      setTimeout(() => {
-        // Clear animation state
-        setAnimatingArmies((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(selectedArmy.id)
-          return newSet
-        })
+        // ✅ 交易已确认！现在可以安全地执行动画
+        console.log(`✅ Transaction confirmed! Starting animation...`)
 
-        // Clear the temporary animation position
-        setArmyPositions((prev) => {
-          const newPositions = { ...prev }
-          delete newPositions[selectedArmy.id]
-          return newPositions
-        })
+        // Update army position with animation flag
+        setArmyPositions((prev) => ({
+          ...prev,
+          [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
+        }))
 
-        console.log(
-          `Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`
-        )
+        // Start animation
+        setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]))
+
+        // Wait for animation to complete
+        setTimeout(() => {
+          // Clear animation state
+          setAnimatingArmies((prev) => {
+            const newSet = new Set(prev)
+            newSet.delete(selectedArmy.id)
+            return newSet
+          })
+
+          // Clear the temporary animation position
+          setArmyPositions((prev) => {
+            const newPositions = { ...prev }
+            delete newPositions[selectedArmy.id]
+            return newPositions
+          })
+
+          console.log(
+            `Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`
+          )
+
+          // Reset movement state
+          cancelMovement()
+
+          // Reset transaction state
+          tx.reset()
+        }, 800) // Animation duration
+
+      } catch (error) {
+        // 交易失败，不执行动画
+        console.error("❌ Transaction failed, animation cancelled:", error)
 
         // Reset movement state
         cancelMovement()
-
-        // Reset transaction state
-        tx.reset()
-      }, 800) // Animation duration
+      }
     },
     [
       selectedTerritory,

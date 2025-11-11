@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useWaitForTransactionReceipt } from 'wagmi'
+import { useConfig } from 'wagmi'
+import { waitForTransactionReceipt } from 'wagmi/actions'
 import type { TxState, UseTransactionReturn } from '@/lib/types/transaction'
 
 /**
@@ -17,6 +18,7 @@ import type { TxState, UseTransactionReturn } from '@/lib/types/transaction'
  * const handleMove = async () => {
  *   tx.prepare({ armyId: '123' })
  *   await tx.execute(() => makeMove(gameAddress, move))
+ *   // 这里交易已经确认完成！可以安全地执行后续逻辑（如动画）
  * }
  * ```
  *
@@ -24,29 +26,22 @@ import type { TxState, UseTransactionReturn } from '@/lib/types/transaction'
  */
 export function useTransaction<TData = any>(): UseTransactionReturn<TData> {
   const [state, setState] = useState<TxState<TData>>({ status: 'idle' })
-
-  // 等待交易确认
-  const { data: receipt } = useWaitForTransactionReceipt({
-    hash: state.status === 'submitted' || state.status === 'confirming'
-      ? state.hash
-      : undefined,
-  })
-
-  // 当收到 receipt 时，更新状态为 success
-  if (receipt && (state.status === 'submitted' || state.status === 'confirming')) {
-    setState({ status: 'success', hash: state.hash, receipt })
-  }
+  const config = useConfig()
 
   /**
    * 设置 preparing 状态（可选）
-   * 用于开始动画、验证等准备工作
+   * 用于开始验证等准备工作
    */
   const prepare = useCallback((data?: TData) => {
     setState({ status: 'preparing', data })
   }, [])
 
   /**
-   * 执行交易
+   * 执行交易并等待确认
+   *
+   * 重要：此函数会等待交易完全确认后才返回
+   * 这样调用者可以在 await 之后安全地执行后续逻辑（如动画）
+   *
    * @param fn - 返回 transaction hash 的异步函数
    */
   const execute = useCallback(async (fn: () => Promise<`0x${string}`>) => {
@@ -57,16 +52,20 @@ export function useTransaction<TData = any>(): UseTransactionReturn<TData> {
 
       setState({ status: 'submitted', hash })
 
-      // 状态会在收到 receipt 时自动更新为 success
-      // 见上面的 useWaitForTransactionReceipt 逻辑
+      // 等待交易确认
+      setState({ status: 'confirming', hash })
+      const receipt = await waitForTransactionReceipt(config, { hash })
+
+      setState({ status: 'success', hash, receipt })
 
     } catch (error) {
       setState({
         status: 'error',
         error: error instanceof Error ? error : new Error(String(error))
       })
+      throw error // 重新抛出错误，让调用者可以处理
     }
-  }, [])
+  }, [config])
 
   /**
    * 重置到 idle 状态

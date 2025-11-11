@@ -24,13 +24,13 @@ import type { ButtonProps } from '@/components/ui/button'
 interface TransactionButtonProps extends Omit<ButtonProps, 'children' | 'disabled'> {
   state: TxState
   onClick: () => void
-  idleText: string
-  preparingText?: string
-  signingText?: string
-  submittedText?: string
-  confirmingText?: string
-  successText?: string
-  errorText?: string
+  idleText: React.ReactNode
+  preparingText?: React.ReactNode
+  signingText?: React.ReactNode
+  submittedText?: React.ReactNode
+  confirmingText?: React.ReactNode
+  successText?: React.ReactNode
+  errorText?: React.ReactNode
   showSpinner?: boolean
 }
 
