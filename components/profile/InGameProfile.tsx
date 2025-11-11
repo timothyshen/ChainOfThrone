@@ -1,161 +1,42 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Trophy, Sword, Shield, Crown, Target, Zap, TrendingUp, Users, Clock, Star, Flame, Award, History } from "lucide-react"
+import { Users, History, BarChart3, Info } from "lucide-react"
 import { GameHistoryView } from "./GameHistoryView"
+import { CurrentGameStats } from "./CurrentGameStats"
 import { useParams } from "next/navigation"
-
-interface PlayerProfile {
-    id: string
-    name: string
-    avatar: string
-    level: number
-    experience: number
-    maxExperience: number
-    rank: string
-    color: string
-    stats: {
-        totalGames: number
-        wins: number
-        losses: number
-        winRate: number
-        currentStreak: number
-        bestStreak: number
-        averageGameTime: string
-        favoriteStrategy: string
-        totalTroopsLost: number
-        totalTroopsKilled: number
-        castlesCaptured: number
-        siegesWon: number
-    }
-}
+import { idToAddress } from "@/lib/hooks/ReadGameContract"
 
 export default function GameProfile() {
     const params = useParams()
     const gameAddress = params?.address as `0x${string}` | undefined
 
-    const [selectedView, setSelectedView] = useState<"overview" | "history">("overview")
+    const [selectedView, setSelectedView] = useState<"overview" | "gameStats" | "history">("gameStats")
+    const [player1Address, setPlayer1Address] = useState<`0x${string}` | null>(null)
+    const [player2Address, setPlayer2Address] = useState<`0x${string}` | null>(null)
 
-    const player1: PlayerProfile = {
-        id: "p1",
-        name: "P1",
-        avatar: "/placeholder.svg?height=80&width=80&text=P1",
-        level: 15,
-        experience: 2350,
-        maxExperience: 3000,
-        rank: "Knight",
-        color: "#4A90E2",
-        stats: {
-            totalGames: 47,
-            wins: 32,
-            losses: 15,
-            winRate: 68,
-            currentStreak: 3,
-            bestStreak: 8,
-            averageGameTime: "12:34",
-            favoriteStrategy: "Aggressive Expansion",
-            totalTroopsLost: 245,
-            totalTroopsKilled: 387,
-            castlesCaptured: 12,
-            siegesWon: 8,
-        },
-    }
+    // Fetch player addresses from contract
+    useEffect(() => {
+        async function fetchPlayerAddresses() {
+            if (!gameAddress) return
 
-    const player2: PlayerProfile = {
-        id: "p2",
-        name: "P2",
-        avatar: "/placeholder.svg?height=80&width=80&text=P2",
-        level: 12,
-        experience: 1850,
-        maxExperience: 2500,
-        rank: "Squire",
-        color: "#D0021B",
-        stats: {
-            totalGames: 35,
-            wins: 18,
-            losses: 17,
-            winRate: 51,
-            currentStreak: 1,
-            bestStreak: 5,
-            averageGameTime: "15:22",
-            favoriteStrategy: "Defensive Fortification",
-            totalTroopsLost: 198,
-            totalTroopsKilled: 234,
-            castlesCaptured: 6,
-            siegesWon: 4,
-        },
-    }
+            try {
+                const p1Addr = await idToAddress(gameAddress, 0)
+                const p2Addr = await idToAddress(gameAddress, 1)
 
-    const headToHeadStats = {
-        totalMatches: 23,
-        player1Wins: 14,
-        player2Wins: 9,
-        draws: 0,
-        lastWinner: "Player 1",
-        longestGame: "18:45",
-        shortestGame: "6:23",
-        averageGameLength: "12:34",
-    }
-
-    const StatCard = ({
-        title,
-        player1Value,
-        player2Value,
-        icon: Icon,
-        format = "number",
-        showComparison = true,
-    }: {
-        title: string
-        player1Value: number | string
-        player2Value: number | string
-        icon: any
-        format?: "number" | "percentage" | "time" | "string"
-        showComparison?: boolean
-    }) => {
-        const formatValue = (value: number | string) => {
-            if (format === "percentage") return `${value}%`
-            if (format === "time") return value
-            return value
+                if (p1Addr) setPlayer1Address(p1Addr)
+                if (p2Addr) setPlayer2Address(p2Addr)
+            } catch (error) {
+                console.error('Error fetching player addresses:', error)
+            }
         }
 
-        const getWinner = () => {
-            if (!showComparison || typeof player1Value !== "number" || typeof player2Value !== "number") return null
-            if (player1Value > player2Value) return "p1"
-            if (player2Value > player1Value) return "p2"
-            return "tie"
-        }
-
-        const winner = getWinner()
-
-        return (
-            <Card className="bg-slate-800 border-slate-700 text-white">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                        <Icon className="w-4 h-4" />
-                        {title}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    <div className="flex justify-between items-center">
-                        <div className={`text-center flex-1 ${winner === "p1" ? "text-blue-400 font-bold" : ""}`}>
-                            <div className="text-lg font-semibold">{formatValue(player1Value)}</div>
-                            {winner === "p1" && <Crown className="w-4 h-4 mx-auto text-yellow-400" />}
-                        </div>
-                        <div className="text-slate-500 text-xs">VS</div>
-                        <div className={`text-center flex-1 ${winner === "p2" ? "text-red-400 font-bold" : ""}`}>
-                            <div className="text-lg font-semibold">{formatValue(player2Value)}</div>
-                            {winner === "p2" && <Crown className="w-4 h-4 mx-auto text-yellow-400" />}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        )
-    }
+        fetchPlayerAddresses()
+    }, [gameAddress])
 
     return (
         <div className="min-h-screen bg-slate-900 text-white p-4">
@@ -163,7 +44,11 @@ export default function GameProfile() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-3xl font-bold">
-                        {selectedView === "overview" ? "Player Comparison" : "Game History"}
+                        {selectedView === "overview"
+                            ? "Player Comparison"
+                            : selectedView === "gameStats"
+                            ? "Game Statistics"
+                            : "Game History"}
                     </h1>
                     <div className="flex gap-2">
                         <Button
@@ -174,6 +59,16 @@ export default function GameProfile() {
                             <Users className="w-4 h-4 mr-2" />
                             Overview
                         </Button>
+                        {gameAddress && (
+                            <Button
+                                variant={selectedView === "gameStats" ? "default" : "outline"}
+                                className={selectedView === "gameStats" ? "text-white" : "text-slate-400"}
+                                onClick={() => setSelectedView("gameStats")}
+                            >
+                                <BarChart3 className="w-4 h-4 mr-2" />
+                                Game Stats
+                            </Button>
+                        )}
                         {gameAddress && (
                             <Button
                                 variant={selectedView === "history" ? "default" : "outline"}
@@ -190,135 +85,86 @@ export default function GameProfile() {
                 {/* Content Area */}
                 {selectedView === "history" && gameAddress ? (
                     <GameHistoryView gameAddress={gameAddress} />
+                ) : selectedView === "gameStats" && gameAddress && player1Address && player2Address ? (
+                    <CurrentGameStats
+                        gameAddress={gameAddress}
+                        player1Address={player1Address}
+                        player2Address={player2Address}
+                    />
                 ) : (
                     <>
-                        {/* Player Headers */}
-                        <div className="grid grid-cols-2 gap-6 mb-6">
-                    {/* Player 1 */}
-                    <Card className="bg-slate-800 border-slate-700 text-white">
-                        <CardContent className="p-6">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="w-16 h-16">
-                                    <AvatarImage src={player1.avatar || "/placeholder.svg"} alt={player1.name} />
-                                    <AvatarFallback className="text-xl bg-blue-600">P1</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h2 className="text-xl font-bold">{player1.name}</h2>
-                                        <Badge style={{ backgroundColor: player1.color }}>
-                                            <Crown className="w-3 h-3 mr-1" />
-                                            {player1.rank}
-                                        </Badge>
+                        {/* Coming Soon Notice */}
+                        <Card className="bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600 mb-6 text-white">
+                            <CardContent className="p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Info className="w-8 h-8 text-yellow-400" />
+                                    <div>
+                                        <h3 className="text-xl font-semibold">Cross-Game Statistics Coming Soon</h3>
+                                        <p className="text-sm text-slate-300 mt-1">
+                                            Player profiles with win rates, rankings, and cross-game statistics will be available
+                                            when the game factory is deployed.
+                                        </p>
                                     </div>
-                                    <div className="text-sm text-slate-400 mb-2">Level {player1.level}</div>
-                                    <Progress value={(player1.experience / player1.maxExperience) * 100} className="h-2" />
-                                    <div className="text-xs text-slate-500 mt-1">
-                                        {player1.experience} / {player1.maxExperience} XP
+                                    <Badge variant="outline" className="text-yellow-400 border-yellow-400 whitespace-nowrap ml-auto">
+                                        Coming Soon
+                                    </Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Current Players */}
+                        <Card className="bg-slate-800 border-slate-700 text-white">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Users className="w-5 h-5" />
+                                    Players in this Game
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {/* Player 1 */}
+                                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-lg">
+                                        <Avatar className="w-12 h-12">
+                                            <AvatarFallback className="bg-blue-600 text-white">P1</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <div className="text-sm text-slate-400 mb-1">Player 1</div>
+                                            <div className="font-mono text-sm text-white">
+                                                {player1Address || "Loading..."}
+                                            </div>
+                                        </div>
+                                        <Badge className="bg-blue-500">ID: 0</Badge>
+                                    </div>
+
+                                    {/* Player 2 */}
+                                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-lg">
+                                        <Avatar className="w-12 h-12">
+                                            <AvatarFallback className="bg-red-600 text-white">P2</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <div className="text-sm text-slate-400 mb-1">Player 2</div>
+                                            <div className="font-mono text-sm text-white">
+                                                {player2Address || "Loading..."}
+                                            </div>
+                                        </div>
+                                        <Badge className="bg-red-500">ID: 1</Badge>
                                     </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
 
-                    {/* Player 2 */}
-                    <Card className="bg-slate-800 border-slate-700 text-white">
-                        <CardContent className="p-6">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="w-16 h-16">
-                                    <AvatarImage src={player2.avatar || "/placeholder.svg"} alt={player2.name} />
-                                    <AvatarFallback className="text-xl bg-red-600">P2</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h2 className="text-xl font-bold">{player2.name}</h2>
-                                        <Badge style={{ backgroundColor: player2.color }}>
-                                            <Crown className="w-3 h-3 mr-1" />
-                                            {player2.rank}
-                                        </Badge>
-                                    </div>
-                                    <div className="text-sm text-slate-400 mb-2">Level {player2.level}</div>
-                                    <Progress value={(player2.experience / player2.maxExperience) * 100} className="h-2" />
-                                    <div className="text-xs text-slate-500 mt-1">
-                                        {player2.experience} / {player2.maxExperience} XP
-                                    </div>
+                                <div className="mt-6 p-4 bg-slate-900/30 rounded-lg border border-slate-700">
+                                    <p className="text-sm text-slate-400 text-center">
+                                        For detailed statistics about this game, check the{" "}
+                                        <button
+                                            onClick={() => setSelectedView("gameStats")}
+                                            className="text-blue-400 hover:text-blue-300 underline"
+                                        >
+                                            Game Stats
+                                        </button>{" "}
+                                        tab
+                                    </p>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Head-to-Head Stats */}
-                <Card className="bg-slate-800 border-slate-700 mb-6 text-white">
-                    <CardHeader>
-                        <CardTitle className="text-center flex items-center justify-center gap-2">
-                            <Sword className="w-5 h-5" />
-                            Head-to-Head Record
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                            <div>
-                                <div className="text-2xl font-bold text-blue-400">{headToHeadStats.player1Wins}</div>
-                                <div className="text-sm text-slate-400">P1 Wins</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-red-400">{headToHeadStats.player2Wins}</div>
-                                <div className="text-sm text-slate-400">P2 Wins</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-purple-400">{headToHeadStats.totalMatches}</div>
-                                <div className="text-sm text-slate-400">Total Games</div>
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-green-400">{headToHeadStats.lastWinner}</div>
-                                <div className="text-sm text-slate-400">Last Winner</div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <StatCard
-                        title="Win Rate"
-                        player1Value={player1.stats.winRate}
-                        player2Value={player2.stats.winRate}
-                        icon={Trophy}
-                        format="percentage"
-                    />
-                    <StatCard
-                        title="Total Wins"
-                        player1Value={player1.stats.wins}
-                        player2Value={player2.stats.wins}
-                        icon={Crown}
-                    />
-                    <StatCard
-                        title="Current Streak"
-                        player1Value={player1.stats.currentStreak}
-                        player2Value={player2.stats.currentStreak}
-                        icon={Flame}
-                    />
-                    <StatCard
-                        title="Best Streak"
-                        player1Value={player1.stats.bestStreak}
-                        player2Value={player2.stats.bestStreak}
-                        icon={Star}
-                    />
-                    <StatCard
-                        title="Castles Captured"
-                        player1Value={player1.stats.castlesCaptured}
-                        player2Value={player2.stats.castlesCaptured}
-                        icon={Shield}
-                    />
-                    <StatCard
-                        title="Average Game Time"
-                        player1Value={player1.stats.averageGameTime}
-                        player2Value={player2.stats.averageGameTime}
-                        icon={Clock}
-                        format="time"
-                        showComparison={false}
-                    />
-                </div>
+                            </CardContent>
+                        </Card>
                     </>
                 )}
             </div>

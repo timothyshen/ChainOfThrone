@@ -85,7 +85,7 @@ export class AnimationExecutor {
       // Phase 3: Capture (sequential)
       if (sequence.phases.capture.length > 0) {
         console.log(`🏴 Phase 3: Territory Capture (${sequence.phases.capture.length} tasks)`)
-        await this.executePhaseSer sequential(sequence.phases.capture)
+        await this.executePhaseSequential(sequence.phases.capture)
       }
 
       console.log(`✅ Animation sequence completed for round ${sequence.roundNumber}`)
