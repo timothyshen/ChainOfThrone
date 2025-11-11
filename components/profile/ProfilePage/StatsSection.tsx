@@ -2,7 +2,7 @@ import { memo } from "react"
 import { Target, Zap } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { PlayerStats } from "./types"
+import type { PlayerStats } from "@/lib/types/profilePage"
 
 interface StatsSectionProps {
   player: PlayerStats

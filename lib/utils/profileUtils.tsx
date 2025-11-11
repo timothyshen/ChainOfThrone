@@ -1,5 +1,5 @@
 import { Trophy, Crown, Shield, Star, Award } from "lucide-react"
-import type { Achievement } from "./types"
+import type { Achievement } from "@/lib/types/profilePage"
 
 /**
  * Get badge color based on achievement rarity

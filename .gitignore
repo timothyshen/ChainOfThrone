@@ -58,5 +58,7 @@ next-env.d.ts
 /.idea/
 /.vscode/
 
+# backups
+*.backup
 
 hardhat/contrac

@@ -1,7 +1,7 @@
 import { memo } from "react"
 import { Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { MovementModeProps } from "./types"
+import type { MovementModeProps } from "@/lib/types/gameOperationPanel"
 
 /**
  * MovementMode Component

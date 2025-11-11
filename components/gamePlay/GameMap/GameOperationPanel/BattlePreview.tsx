@@ -2,7 +2,7 @@ import { memo } from "react"
 import { Sword } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import type { BattlePreviewProps } from "./types"
+import type { BattlePreviewProps } from "@/lib/types/gameOperationPanel"
 
 /**
  * BattlePreview Component

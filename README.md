@@ -11,21 +11,30 @@ Chain of Thrones is an onchain strategy pvp wargame that immerses players in a s
 ## Project Structure
 
 ```
-chain-of-throne/
-├── app/                 # Next.js app directory
-├── components/          # React components
+chain-of-thrones/
+├── app/                 # Next.js 14 App Router
+├── components/          # React components (60+ components)
+│   ├── gamePlay/        # Game play components
+│   ├── profile/         # Profile components
 │   ├── layout/          # Layout components
-│   ├── ui/              # UI components
-│   └── ...
-├── lib/                 # Utility functions and hooks
-│   ├── utils/           # General utilities
-│   ├── hooks/           # React hooks
-│   ├── providers/       # Context providers
-│   └── ...
-├── contracts/           # Smart contracts
-├── public/              # Static assets
-└── ...
+│   └── ui/              # shadcn/ui components
+├── lib/                 # Utilities, hooks, and shared logic
+│   ├── utils/           # Utility functions
+│   ├── constants/       # Game constants & animations
+│   ├── hooks/           # Custom React hooks
+│   ├── contexts/        # React contexts
+│   └── services/        # API and service layer
+├── contracts/           # Foundry smart contracts
+├── hardhat/             # Hardhat development environment
+├── backend/             # Backend services (AI agent, Lit Protocol)
+├── docs/                # Documentation
+│   ├── development/     # Development docs
+│   ├── analysis/        # Code analysis
+│   └── refactoring/     # Refactoring docs
+└── public/              # Static assets
 ```
+
+For detailed directory structure, see [docs/DIRECTORY_STRUCTURE.md](docs/DIRECTORY_STRUCTURE.md)
 
 ## How to Play
 

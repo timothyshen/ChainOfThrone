@@ -25,8 +25,8 @@ import { BattleProgress } from "./BattleProgress"
 import { MovementMode } from "./MovementMode"
 
 // Hooks and types
-import { useActionState, getActionTitle } from "./hooks/useActionState"
-import type { GameOperationPanelProps } from "./types"
+import { useActionState, getActionTitle } from "@/lib/hooks/useActionState"
+import type { GameOperationPanelProps } from "@/lib/types/gameOperationPanel"
 
 /**
  * GameOperationPanel Component

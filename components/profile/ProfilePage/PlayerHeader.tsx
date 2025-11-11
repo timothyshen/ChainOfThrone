@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
-import type { PlayerStats } from "./types"
+import type { PlayerStats } from "@/lib/types/profilePage"
 
 interface PlayerHeaderProps {
   player: PlayerStats

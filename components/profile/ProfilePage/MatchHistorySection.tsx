@@ -2,7 +2,7 @@ import { memo } from "react"
 import { MapPin } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Match } from "./types"
+import type { Match } from "@/lib/types/profilePage"
 
 interface MatchHistorySectionProps {
   matches: Match[]

@@ -16,8 +16,8 @@ import { MovementOverlay } from "./layers/MovementOverlay"
 import { AnimationLayer } from "./layers/AnimationLayer"
 
 // Hooks
-import { useMapInteractions } from "./hooks/useMapInteractions"
-import { useArmyLayer } from "./hooks/useArmyLayer"
+import { useMapInteractions } from "@/lib/hooks/useMapInteractions"
+import { useArmyLayer } from "@/lib/hooks/useArmyLayer"
 
 interface GameMapProps {
   gameAddress: `0x${string}` | undefined

@@ -2,7 +2,7 @@ import { memo } from "react"
 import { Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { MovementInputProps } from "./types"
+import type { MovementInputProps } from "@/lib/types/gameOperationPanel"
 
 /**
  * MovementInput Component

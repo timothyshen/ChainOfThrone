@@ -2,7 +2,7 @@ import { memo } from "react"
 import { Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { ArmyDetailsProps } from "./types"
+import type { ArmyDetailsProps } from "@/lib/types/gameOperationPanel"
 
 /**
  * ArmyDetails Component

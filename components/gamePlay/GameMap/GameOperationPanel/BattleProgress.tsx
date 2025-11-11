@@ -1,6 +1,6 @@
 import { memo } from "react"
 import { Sword } from "lucide-react"
-import type { BattleProgressProps } from "./types"
+import type { BattleProgressProps } from "@/lib/types/gameOperationPanel"
 
 /**
  * BattleProgress Component

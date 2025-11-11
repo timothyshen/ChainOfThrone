@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { Army } from "@/lib/types/game"
 import { BattleState, BattleTarget } from "@/lib/types/advancedGame"
-import type { ActionState } from "../types"
+import type { ActionState } from "@/lib/types/gameOperationPanel"
 
 /**
  * useActionState Hook

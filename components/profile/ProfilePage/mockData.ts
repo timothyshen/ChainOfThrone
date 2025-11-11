@@ -1,4 +1,4 @@
-import type { PlayerStats } from "./types"
+import type { PlayerStats } from "@/lib/types/profilePage"
 
 /**
  * Mock player data for ProfilePage

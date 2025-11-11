@@ -2,8 +2,8 @@ import { memo } from "react"
 import { Calendar } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Achievement } from "./types"
-import { getRarityColor, getAchievementIcon } from "./utils"
+import type { Achievement } from "@/lib/types/profilePage"
+import { getRarityColor, getAchievementIcon } from "@/lib/utils/profileUtils"
 
 interface AchievementsSectionProps {
   achievements: Achievement[]

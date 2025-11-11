@@ -1,7 +1,7 @@
 import { memo } from "react"
 import { Globe, Building, BarChart3 } from "lucide-react"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-import { useRewardData } from "./hooks/useRewardData"
+import { useRewardData } from "@/lib/hooks/useRewardData"
 
 type GameResultType = "win" | "loss"
 
