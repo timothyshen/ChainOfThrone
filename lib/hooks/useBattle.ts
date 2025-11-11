@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { Territory, Army } from '@/lib/types/game'
 import { BattleState, BattleEffect, BattleTarget } from '@/lib/types/advancedGame'
+import { ANIMATION_DURATIONS } from '@/lib/constants/animations'
 
 interface BattleSystemState {
   activeBattle: BattleState | null
@@ -84,10 +85,12 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
 
     setBattleEffects(prev => [...prev, effect])
 
-    // Remove effect after animation
+    // Remove effect after animation - using defined constants
     setTimeout(() => {
       setBattleEffects(prev => prev.filter(e => e.id !== effect.id))
-    }, type === "victory" ? 2000 : type === "explosion" ? 1200 : 800)
+    }, type === "victory" ? ANIMATION_DURATIONS.BATTLE_VICTORY
+       : type === "explosion" ? ANIMATION_DURATIONS.BATTLE_EXPLOSION
+       : ANIMATION_DURATIONS.BATTLE_CLASH)
   }, [])
 
   const completeBattle = useCallback((battle: BattleState, winner: "attacker" | "defender", getArmyDisplayPosition?: (army: Army) => { gridX: number; gridY: number }) => {
@@ -103,7 +106,7 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       } : null
     )
 
-    // Apply battle results and cleanup
+    // Apply battle results and cleanup - slower for dramatic effect
     setTimeout(() => {
       if (winner === "attacker") {
         console.log(`${battle.attackerArmy.owner} won the battle!`)
@@ -114,8 +117,8 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       setTimeout(() => {
         setActiveBattle(null)
         setBattleEffects([])
-      }, 1000)
-    }, 2000)
+      }, 1500)
+    }, ANIMATION_DURATIONS.BATTLE_COMPLETE)
   }, [addBattleEffect])
 
   const animateBattle = useCallback((
@@ -123,13 +126,13 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
     getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }
   ) => {
     const startTime = Date.now()
-    const battleDuration = 3000 // 3 seconds
+    const battleDuration = ANIMATION_DURATIONS.BATTLE_PROGRESS // 5 seconds for more dramatic battle
 
     const battleInterval = setInterval(() => {
       const elapsed = Date.now() - startTime
       const progress = Math.min(elapsed / battleDuration, 1)
 
-      // Calculate casualties
+      // Calculate casualties with smoother progression
       const { attackerOdds } = calculateBattleOdds(
         battle.attackerArmy,
         battle.defenderArmy || battle.defenderTerritory!
@@ -137,10 +140,11 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       const attackerDamage = Math.floor(progress * (1 - attackerOdds) * 100)
       const defenderDamage = Math.floor(progress * attackerOdds * 80)
 
-      // Add battle effects
-      if (Math.random() < 0.2) {
+      // Add battle effects with adjusted frequency for slower battle
+      // Lower probability since we have more frames over 5s vs 3s
+      if (Math.random() < 0.15) {
         addBattleEffect(battle, "clash", getArmyDisplayPosition)
-      } else if (Math.random() < 0.05) {
+      } else if (Math.random() < 0.04) {
         addBattleEffect(battle, "explosion", getArmyDisplayPosition)
       }
 
@@ -158,7 +162,7 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
         const winner = Math.random() < attackerOdds ? "attacker" : "defender"
         completeBattle(battle, winner, getArmyDisplayPosition)
       }
-    }, 100)
+    }, 150) // Slightly slower update interval for smoother animation
   }, [calculateBattleOdds, addBattleEffect, completeBattle])
 
   const startBattle = useCallback((

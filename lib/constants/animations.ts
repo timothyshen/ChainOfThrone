@@ -9,11 +9,17 @@
  * Animation durations in milliseconds
  */
 export const ANIMATION_DURATIONS = {
-  /** Army movement animation */
-  ARMY_MOVE: 800,
+  /** Army movement animation - slower for better visibility */
+  ARMY_MOVE: 1500,
 
-  /** Battle progress animation */
-  BATTLE_PROGRESS: 2000,
+  /** Battle progress animation - more dramatic timing */
+  BATTLE_PROGRESS: 5000,
+
+  /** Battle effect durations */
+  BATTLE_CLASH: 1200,
+  BATTLE_EXPLOSION: 1800,
+  BATTLE_VICTORY: 3000,
+  BATTLE_COMPLETE: 2000,
 
   /** Modal fade in/out */
   MODAL_FADE: 300,

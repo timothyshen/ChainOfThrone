@@ -8,6 +8,7 @@ import {
   useSelectionContext,
   useMovementContext,
 } from "@/lib/contexts/GameContext"
+import { ANIMATION_DURATIONS } from "@/lib/constants/animations"
 
 /**
  * useMovementActions Hook
@@ -133,7 +134,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
 
           // Reset transaction state
           tx.reset()
-        }, 800) // Animation duration
+        }, ANIMATION_DURATIONS.ARMY_MOVE) // Animation duration from constants
 
       } catch (error) {
         // Transaction failed, do not execute animation

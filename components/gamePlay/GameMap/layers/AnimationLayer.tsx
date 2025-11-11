@@ -2,6 +2,7 @@ import { memo, useMemo } from "react"
 import { Users } from "lucide-react"
 import { Army } from "@/lib/types/game"
 import { getGridCellPosition } from "@/lib/constants/grid"
+import { ANIMATION_DURATIONS } from "@/lib/constants/animations"
 
 interface AnimationLayerProps {
   armies: Army[]
@@ -35,18 +36,29 @@ export const AnimationLayer = memo(
               0% {
                 left: ${startPosition.left};
                 top: ${startPosition.top};
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+                filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+              }
+              15% {
+                transform: translate(-50%, -50%) scale(1.15) rotate(-3deg);
                 opacity: 1;
               }
               50% {
-                transform: translate(-50%, -50%) scale(1.2);
-                opacity: 0.9;
+                transform: translate(-50%, -50%) scale(1.3) rotate(2deg);
+                opacity: 0.95;
+                filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.8));
+              }
+              85% {
+                transform: translate(-50%, -50%) scale(1.15) rotate(-2deg);
+                opacity: 1;
               }
               100% {
                 left: ${endPosition.left};
                 top: ${endPosition.top};
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
                 opacity: 1;
+                filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
               }
             }
           `
@@ -76,35 +88,40 @@ export const AnimationLayer = memo(
                   left: startPosition.left,
                   top: startPosition.top,
                   transform: "translate(-50%, -50%)",
-                  animation: `moveArmy-${army.id} 0.8s ease-in-out forwards`,
+                  animation: `moveArmy-${army.id} ${ANIMATION_DURATIONS.ARMY_MOVE}ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards`,
                 }}
               >
                 <Users className="w-4 h-4 md:w-5 md:h-5 text-white" />
 
-                {/* Trail Effect */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                {/* Trail Effect - Enhanced with motion blur */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-b from-yellow-400/20 via-transparent to-yellow-400/20" />
 
-                {/* Movement Particles */}
-                <div className="absolute -inset-2">
+                {/* Movement Particles - More dramatic */}
+                <div className="absolute -inset-4">
                   <div
-                    className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping"
-                    style={{ top: "10%", left: "20%", animationDelay: "0ms" }}
+                    className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping"
+                    style={{ top: "10%", left: "20%", animationDelay: "0ms", animationDuration: "1.5s" }}
                   />
                   <div
-                    className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping"
-                    style={{
-                      top: "80%",
-                      right: "15%",
-                      animationDelay: "200ms",
-                    }}
+                    className="absolute w-1 h-1 bg-yellow-300 rounded-full animate-ping"
+                    style={{ top: "30%", left: "80%", animationDelay: "150ms", animationDuration: "1.8s" }}
                   />
                   <div
-                    className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping"
-                    style={{
-                      bottom: "20%",
-                      left: "70%",
-                      animationDelay: "400ms",
-                    }}
+                    className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping"
+                    style={{ top: "80%", right: "15%", animationDelay: "300ms", animationDuration: "1.5s" }}
+                  />
+                  <div
+                    className="absolute w-1 h-1 bg-amber-400 rounded-full animate-ping"
+                    style={{ top: "60%", left: "10%", animationDelay: "450ms", animationDuration: "1.6s" }}
+                  />
+                  <div
+                    className="absolute w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping"
+                    style={{ bottom: "20%", left: "70%", animationDelay: "600ms", animationDuration: "1.5s" }}
+                  />
+                  <div
+                    className="absolute w-1 h-1 bg-yellow-300 rounded-full animate-ping"
+                    style={{ bottom: "40%", right: "25%", animationDelay: "750ms", animationDuration: "1.7s" }}
                   />
                 </div>
               </div>
