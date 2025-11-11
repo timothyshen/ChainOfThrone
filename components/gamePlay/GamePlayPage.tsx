@@ -19,6 +19,10 @@ import GameOperationPanel from '@/components/gamePlay/GameMap/GameOperationPanel
 import GameMap from '@/components/gamePlay/GameMap'
 import BattleEffectOverlay from '@/components/gamePlay/GameMap/BattleEffectOverlay'
 import { GameContextProvider, useGameStateContext, useBattleContext } from '@/lib/contexts/GameContext'
+import { useRoundAnimation } from '@/lib/hooks/useRoundAnimation'
+import { MissedRoundsNotification } from './MissedRoundsNotification'
+import { MissedRoundsInfo } from '@/lib/systems/RoundHistoryManager'
+import { getRoundNumber } from '@/lib/hooks/ReadGameContract'
 
 interface GamePlayPageRefactoredProps {
   gameAddressParam: `0x${string}`
@@ -44,13 +48,39 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
   // UI state
   const [isMobile, setIsMobile] = useState(false)
   const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false)
-  
-  // Rate limiting for event-triggered refreshes
+  const [missedRoundsInfo, setMissedRoundsInfo] = useState<MissedRoundsInfo | null>(null)
+
+  // Round animation system
+  const {
+    isAnimating,
+    playRoundTransition,
+    checkForMissedRounds,
+    playMissedRounds,
+  } = useRoundAnimation({
+    gameAddress: gameAddressParam,
+    onMissedRounds: (info) => {
+      setMissedRoundsInfo(info)
+      toast({
+        title: "Missed Rounds",
+        description: `You missed ${info.missedRounds.length} rounds. Check notification for replay.`,
+        variant: "default",
+      })
+    },
+    autoPlayMissedRounds: false, // Manual control
+  })
+
+  // Rate limiting for event-triggered refreshes (but now without animation blocking)
   const lastRefreshRef = useRef<number>(0)
   const handleEventRefresh = useCallback(() => {
     const now = Date.now()
     const minInterval = 2000 // 2 seconds minimum between refreshes
-    
+
+    // Don't refresh if animation is playing
+    if (isAnimating) {
+      console.log('🐛 Skipping refresh - animation in progress')
+      return
+    }
+
     if (now - lastRefreshRef.current > minInterval) {
       console.log('🐛 Event-triggered refresh allowed')
       lastRefreshRef.current = now
@@ -58,19 +88,32 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
     } else {
       console.log('🐛 Event-triggered refresh rate limited')
     }
-  }, [refreshAllData])
+  }, [refreshAllData, isAnimating])
 
-  // Contract event listeners - now rate limited
+  // Contract event listeners - now with animation integration
   useWatchContractEvent({
     address: gameAddressParam,
     abi: gameAbi,
     eventName: 'RoundCompleted',
-    onLogs: () => {
-      handleEventRefresh()
-      toast({
-        title: "Round Completed",
-        description: `Round has been completed`,
-      })
+    onLogs: async (logs) => {
+      try {
+        // Get the new round number from contract
+        const newRoundNumber = await getRoundNumber(gameAddressParam)
+
+        console.log(`🎯 RoundCompleted event - transitioning to round ${newRoundNumber}`)
+
+        // Play round transition with animations
+        await playRoundTransition(newRoundNumber as number)
+
+        toast({
+          title: "Round Completed",
+          description: `Round ${newRoundNumber} has been completed`,
+        })
+      } catch (error) {
+        console.error('Error handling RoundCompleted event:', error)
+        // Fallback to regular refresh if animation fails
+        handleEventRefresh()
+      }
     },
   })
 
@@ -119,6 +162,33 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
+  // Check for missed rounds on mount
+  useEffect(() => {
+    const checkMissedOnMount = async () => {
+      if (!gameAddressParam) return
+
+      try {
+        const currentRound = await getRoundNumber(gameAddressParam)
+
+        if (currentRound && currentRound > 0) {
+          // Check for missed rounds
+          const info = checkForMissedRounds()
+
+          if (info && info.hasMissedRounds) {
+            console.log(
+              `⚠️ Found ${info.missedRounds.length} missed rounds on mount:`,
+              info.missedRounds
+            )
+          }
+        }
+      } catch (error) {
+        console.error('Error checking missed rounds on mount:', error)
+      }
+    }
+
+    checkMissedOnMount()
+  }, [gameAddressParam, checkForMissedRounds])
+
   // Game status and player information panel
   const GameStatusPanel = () => (
     <div className="w-full space-y-6 p-4">
@@ -137,8 +207,41 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
     </div>
   )
 
+  // Handle missed rounds replay
+  const handleViewReplay = useCallback(async () => {
+    if (!missedRoundsInfo) return
+
+    console.log(`⏩ Playing replay for ${missedRoundsInfo.missedRounds.length} rounds`)
+
+    try {
+      await playMissedRounds(missedRoundsInfo.missedRounds)
+
+      toast({
+        title: "Replay Complete",
+        description: "You're now up to date!",
+      })
+
+      // Clear notification
+      setMissedRoundsInfo(null)
+    } catch (error) {
+      console.error('Error playing missed rounds replay:', error)
+      toast({
+        title: "Replay Failed",
+        description: "Could not play missed rounds. Try refreshing the page.",
+        variant: "destructive",
+      })
+    }
+  }, [missedRoundsInfo, playMissedRounds, toast])
+
   return (
     <div className="flex flex-col h-screen md:mt-12 bg-slate-900">
+      {/* Missed Rounds Notification */}
+      <MissedRoundsNotification
+        missedRoundsInfo={missedRoundsInfo}
+        onViewReplay={handleViewReplay}
+        onDismiss={() => setMissedRoundsInfo(null)}
+      />
+
       {/* Mobile status drawer */}
       <div className="md:hidden py-2 px-4 flex-shrink-0">
         <Drawer>
