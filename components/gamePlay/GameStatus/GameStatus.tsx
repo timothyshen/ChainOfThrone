@@ -9,6 +9,7 @@ import { toast } from "@/lib/hooks/use-toast";
 import { truncateAddress } from "@/lib/utils";
 import { GameStatusEnum, PlayerState, GameStatusProps } from "@/lib/types/gameStatus";
 import { getGameStatus, totalPlayers, getWinner } from "@/lib/hooks/ReadGameContract";
+import { getGameStatusText, getStatusColor } from "@/lib/utils/gameStatus";
 import { useAddPlayer } from "@/lib/hooks/useAddPlayer";
 import { useTransaction } from "@/lib/hooks/useTransaction";
 import { useTransactionToast } from "@/lib/hooks/useTransactionToast";
@@ -17,19 +18,6 @@ import { DiplomacyResultModal } from "../GameCompleteModal";
 import { TransactionButton } from "@/components/shared/TransactionButton";
 import { useWatchContractEvent } from "wagmi"
 import { gameAbi } from '@/lib/contract/gameAbi'
-
-const getGameStatusText = (status: number): GameStatusEnum => {
-    switch (status) {
-        case 0:
-            return GameStatusEnum.NOT_STARTED;
-        case 1:
-            return GameStatusEnum.ONGOING;
-        case 2:
-            return GameStatusEnum.COMPLETED;
-        default:
-            return GameStatusEnum.NOT_STARTED;
-    }
-}
 
 const winStats = {
     supplyCenters: 18,
@@ -57,7 +45,7 @@ const PlayerList = ({ players, currentPlayer }: { players: PlayerState[], curren
         <div className="grid gap-2">
             {players.map((player, index) => (
                 <div
-                    key={index}
+                    key={player.address}
                     className={`flex items-center justify-between p-2 rounded-md ${player.address.toLowerCase() === currentPlayer.toLowerCase()
                         ? 'bg-primary/20 border border-primary'
                         : 'bg-muted'
@@ -95,8 +83,8 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
     const { gameAddress } = useGameAddress();
     const { addPlayer } = useAddPlayer();
     const tx = useTransaction();
-    const [showCompleteModal, setShowCompleteModal] = useState(true);
-    const [winer, setWinner] = useState(String)
+    const [showCompleteModal, setShowCompleteModal] = useState(false);
+    const [winner, setWinner] = useState<string | null>(null)
 
     // Automatically display transaction status notifications
     useTransactionToast(tx.state, {
@@ -107,12 +95,10 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
     useEffect(() => {
         async function checkWinner() {
             if (gameStatus === GameStatusEnum.COMPLETED) {
-                setShowCompleteModal(true);
-                if (!gameAddress) return null;
+                if (!gameAddress) return;
                 const winnerAddress = await getWinner(gameAddress);
-                if (winnerAddress === currentPlayer) {
-                    setWinner(currentPlayer);
-                }
+                setWinner(winnerAddress as string);
+                setShowCompleteModal(true);
             }
         }
         checkWinner();
@@ -184,19 +170,6 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                 </CardContent>
             </Card>
         );
-    }
-
-    const getStatusColor = (status: GameStatusEnum) => {
-        switch (status) {
-            case GameStatusEnum.NOT_STARTED:
-                return "bg-yellow-500";
-            case GameStatusEnum.ONGOING:
-                return "bg-green-500";
-            case GameStatusEnum.COMPLETED:
-                return "bg-blue-500";
-            default:
-                return "bg-gray-500";
-        }
     }
 
     // TODO: need two progress bars, one for player progress and one for round progress
@@ -292,7 +265,7 @@ export default function GameStatus({ isLoading, currentPlayer, gameStatus, total
                     <DiplomacyResultModal
                         gameAddress={gameAddress}
                         type="win"
-                        open={false}
+                        open={showCompleteModal && gameStatus === GameStatusEnum.COMPLETED}
                         onOpenChange={setShowCompleteModal}
                         year="Fall, 1908"
                         stats={winStats}

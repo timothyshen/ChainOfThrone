@@ -5,6 +5,7 @@ import { AnimationExecutor, AnimationCallbacks } from '@/lib/systems/AnimationEx
 import { RoundHistoryManager, MissedRoundsInfo } from '@/lib/systems/RoundHistoryManager'
 import { useGameStateContext, useMovementContext, useBattleContext } from '@/lib/contexts/GameContext'
 import { Army } from '@/lib/types/game'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * useRoundAnimation Hook
@@ -60,7 +61,7 @@ export function useRoundAnimation({
     const callbacks: AnimationCallbacks = {
       // Movement animations
       onMoveStart: (armyId, from, to) => {
-        console.log(`🚶 Move start: ${armyId} from (${from.x},${from.y}) to (${to.x},${to.y})`)
+        logger.debug(`Move start: ${armyId} from (${from.x},${from.y}) to (${to.x},${to.y})`)
 
         // Set army as animating
         setAnimatingArmies((prev) => new Set([...prev, armyId]))
@@ -73,7 +74,7 @@ export function useRoundAnimation({
       },
 
       onMoveComplete: (armyId) => {
-        console.log(`✅ Move complete: ${armyId}`)
+        logger.debug(`Move complete: ${armyId}`)
 
         // Clear animating state
         setAnimatingArmies((prev) => {
@@ -92,7 +93,7 @@ export function useRoundAnimation({
 
       // Battle animations
       onBattleStart: (location, intensity) => {
-        console.log(`⚔️ Battle start at (${location.x},${location.y}) - intensity: ${intensity}`)
+        logger.debug(`Battle start at (${location.x},${location.y}) - intensity: ${intensity}`)
 
         // Find armies at this location for battle animation
         const armiesAtLocation = armies.filter(
@@ -133,29 +134,29 @@ export function useRoundAnimation({
       },
 
       onBattleComplete: (location) => {
-        console.log(`✅ Battle complete at (${location.x},${location.y})`)
+        logger.debug(`Battle complete at (${location.x},${location.y})`)
         // Battle effects auto-cleanup via timeouts
       },
 
       // Territory capture animations
       onCaptureStart: (territory, newOwner) => {
-        console.log(`🏴 Capture start: (${territory.x},${territory.y}) by ${newOwner.slice(0, 6)}...`)
+        logger.debug(`Capture start: (${territory.x},${territory.y}) by ${newOwner.slice(0, 6)}...`)
         // Territory color will update via state refresh
         // Could add particle effects here
       },
 
       onCaptureComplete: (territory) => {
-        console.log(`✅ Capture complete: (${territory.x},${territory.y})`)
+        logger.debug(`Capture complete: (${territory.x},${territory.y})`)
       },
 
       // Army spawn/destroy
       onArmySpawn: (army) => {
-        console.log(`✨ Army spawned: ${army.id} at (${army.x},${army.y})`)
+        logger.debug(`Army spawned: ${army.id} at (${army.x},${army.y})`)
         // Add spawn animation effect
       },
 
       onArmyDestroy: (army) => {
-        console.log(`💀 Army destroyed: ${army.id}`)
+        logger.debug(`Army destroyed: ${army.id}`)
         // Add destruction animation effect
       },
     }
@@ -170,7 +171,7 @@ export function useRoundAnimation({
     async (newRoundNumber: number) => {
       if (!gameAddress) return
 
-      console.log(`🎬 Playing round transition: ${currentRoundRef.current} → ${newRoundNumber}`)
+      logger.log(`Playing round transition: ${currentRoundRef.current} → ${newRoundNumber}`)
 
       try {
         // 1. Capture current state before fetching new data
@@ -193,7 +194,7 @@ export function useRoundAnimation({
           // 6. Play animations
           await executor.playSequence(sequence)
         } else {
-          console.log('⚠️ No diff calculated, skipping animations')
+          logger.debug('No diff calculated, skipping animations')
         }
 
         // 7. Mark round as viewed
@@ -202,9 +203,9 @@ export function useRoundAnimation({
         // 8. Clear any movement state
         cancelMovement()
 
-        console.log(`✅ Round transition complete: round ${newRoundNumber}`)
+        logger.log(`Round transition complete: round ${newRoundNumber}`)
       } catch (error) {
-        console.error('❌ Error during round transition:', error)
+        logger.error('Error during round transition:', error)
       }
     },
     [gameAddress, territories, armies, refreshAllData, cancelMovement, stateManager, sequencer, executor, historyManager]
@@ -230,13 +231,13 @@ export function useRoundAnimation({
    */
   const playMissedRounds = useCallback(
     async (rounds: number[]) => {
-      console.log(`⏩ Playing ${rounds.length} missed rounds...`)
+      logger.log(`Playing ${rounds.length} missed rounds...`)
 
       for (const round of rounds) {
         // Play each missed round
         // Note: We don't have historical state, so this is a placeholder
         // In a full implementation, you'd fetch getRoundMoves(round) and reconstruct state
-        console.log(`⏩ Fast-forwarding round ${round}`)
+        logger.debug(`Fast-forwarding round ${round}`)
 
         // Mark as viewed
         if (gameAddress) {
@@ -244,7 +245,7 @@ export function useRoundAnimation({
         }
       }
 
-      console.log(`✅ Finished playing missed rounds`)
+      logger.log(`Finished playing missed rounds`)
     },
     [gameAddress, historyManager]
   )

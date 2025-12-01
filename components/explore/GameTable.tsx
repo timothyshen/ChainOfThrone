@@ -16,8 +16,8 @@ import { Info, Users, ArrowRight } from 'lucide-react'
 // Types
 import { Game } from "@/lib/types/setup"
 import { cn } from '@/lib/utils'
+import { getStatusDisplayText, getStatusBadgeStyles, GameStatusNumber } from '@/lib/utils/gameStatus'
 
-export type GameStatus = 0 | 1 | 2
 export type StatusFilter = 'all' | 'open' | 'in progress' | 'full'
 
 interface GameTableProps {
@@ -25,25 +25,6 @@ interface GameTableProps {
     searchTerm: string
     statusFilter: StatusFilter
     onSelectGame: (game: Game) => void
-}
-
-// Utils
-const STATUS_MAP: Record<GameStatus, string> = {
-    0: "Open",
-    1: "Progressing",
-    2: "Completed"
-}
-
-const getStatusText = (status: number): string => STATUS_MAP[status as GameStatus] ?? "Unknown"
-
-const getStatusStyles = (status: number): string => {
-    const baseStyles = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium w-full justify-center"
-    const statusStyles = {
-        0: 'bg-white text-green-400 border border-green-400',
-        1: 'bg-white text-yellow-400 border border-yellow-400',
-        2: 'bg-white text-red-400 border border-red-400'
-    }
-    return `${baseStyles} ${statusStyles[status as GameStatus] ?? ''}`
 }
 
 export default function GameTable({ games, searchTerm, statusFilter, onSelectGame }: GameTableProps) {
@@ -69,7 +50,7 @@ export default function GameTable({ games, searchTerm, statusFilter, onSelectGam
 
     const filteredGames = games.filter(game =>
         game.gameAddress.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (statusFilter === 'all' || getStatusText(game.status).toLowerCase() === statusFilter)
+        (statusFilter === 'all' || getStatusDisplayText(game.status).toLowerCase() === statusFilter)
     )
 
     // Desktop Table View
@@ -95,8 +76,8 @@ export default function GameTable({ games, searchTerm, statusFilter, onSelectGam
                                 </div>
                             </TableCell>
                             <TableCell className="text-center">
-                                <span className={getStatusStyles(game.status)}>
-                                    {getStatusText(game.status)}
+                                <span className={getStatusBadgeStyles(game.status)}>
+                                    {getStatusDisplayText(game.status)}
                                 </span>
                             </TableCell>
                             <TableCell className="text-right">
@@ -137,8 +118,8 @@ export default function GameTable({ games, searchTerm, statusFilter, onSelectGam
                                 <div className="font-mono text-sm w-[70%] mr-2">
                                     {game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}
                                 </div>
-                                <span className={cn(getStatusStyles(game.status), "w-fit")}>
-                                    {getStatusText(game.status)}
+                                <span className={cn(getStatusBadgeStyles(game.status), "w-fit")}>
+                                    {getStatusDisplayText(game.status)}
                                 </span>
                             </div>
                             <div className="flex items-center gap-1">

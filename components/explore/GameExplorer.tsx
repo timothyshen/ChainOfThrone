@@ -16,9 +16,14 @@ import { Sword, Loader2 } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { useToast } from "@/lib/hooks/use-toast"
 import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
+import { debounce } from "@/lib/utils/debounce"
+import { logger } from "@/lib/utils/logger"
 
 // Types
 import { Game } from "@/lib/types/setup"
+
+// Components
+import { NoGamesEmptyState } from "@/components/common/EmptyState"
   
   
 export default function GameExplorer() {
@@ -35,7 +40,7 @@ export default function GameExplorer() {
         abi: gameFactoryAbi,
         eventName: "GameCreated",
         onLogs: () => {
-            fetchGames()
+            debouncedFetchGames()
         }
     })
 
@@ -49,11 +54,17 @@ export default function GameExplorer() {
                 description: "Failed to fetch games",
                 variant: "destructive",
             })
-            console.error(error)
+            logger.error("Failed to fetch games:", error)
         } finally {
             setIsLoading(false)
         }
     }, [toast])
+
+    // Debounced fetch for event-triggered updates
+    const debouncedFetchGames = useCallback(
+        debounce(() => fetchGames(), 500),
+        [fetchGames]
+    )
 
     useEffect(() => {
         fetchGames()
@@ -86,14 +97,17 @@ export default function GameExplorer() {
                     setStatusFilter={setStatusFilter}
                 />
 
-                {/* Games Table */}
-
-                <GameTable
-                    games={games}
-                    searchTerm={searchTerm}
-                    statusFilter={statusFilter}
-                    onSelectGame={setSelectedGame}
-                />
+                {/* Games Table or Empty State */}
+                {games.length === 0 ? (
+                    <NoGamesEmptyState />
+                ) : (
+                    <GameTable
+                        games={games}
+                        searchTerm={searchTerm}
+                        statusFilter={statusFilter}
+                        onSelectGame={setSelectedGame}
+                    />
+                )}
             </CardContent>
         </Card>
     )

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Territory, Army } from "@/lib/types/game";
 import { GameStatusEnum, PlayerState } from "@/lib/types/gameStatus";
+import { getGameStatusText } from "@/lib/utils/gameStatus";
 import {
   get2DGrid,
   addressToId,
@@ -63,18 +64,6 @@ export function useGameState(
   const [isGridLoading, setIsGridLoading] = useState(true);
   const [isStatusLoading, setIsStatusLoading] = useState(true);
 
-  const getGameStatusText = (status: number): GameStatusEnum => {
-    switch (status) {
-      case 0:
-        return GameStatusEnum.NOT_STARTED;
-      case 1:
-        return GameStatusEnum.ONGOING;
-      case 2:
-        return GameStatusEnum.COMPLETED;
-      default:
-        return GameStatusEnum.NOT_STARTED;
-    }
-  };
 
   /**
    * Type guard to validate grid data structure

@@ -9,6 +9,7 @@ interface TerritoryGridProps {
   currentPlayerAddress?: `0x${string}`
   onTerritoryClick: (e: React.MouseEvent, territory: Territory) => void
   onArmyClick: (territory: Territory, army: Army) => void
+  isLoading?: boolean
 }
 
 /**
@@ -18,7 +19,22 @@ interface TerritoryGridProps {
  * Each cell shows territory name, icon, and unit counts
  */
 export const TerritoryGrid = memo(
-  ({ flatTerritories, isMobile, armies, currentPlayerAddress, onTerritoryClick, onArmyClick }: TerritoryGridProps) => {
+  ({ flatTerritories, isMobile, armies, currentPlayerAddress, onTerritoryClick, onArmyClick, isLoading }: TerritoryGridProps) => {
+    // Loading skeleton
+    if (isLoading) {
+      return (
+        <div className="absolute inset-0 p-2 rounded-lg">
+          <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div
+                key={i}
+                className="relative border-2 border-slate-600 rounded-lg bg-slate-700/50 animate-pulse min-h-[80px] md:min-h-[120px]"
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
     // Memoize icon function
     const getTerritoryIcon = useCallback((isCastle: boolean) => {
       return isCastle ? (
@@ -60,15 +76,22 @@ export const TerritoryGrid = memo(
             return (
             <div
               key={territory.id}
-              className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50
+              role="button"
+              tabIndex={0}
+              aria-label={`${territory.name}${territory.isCastle ? ' (Castle)' : ''}${hasFriendly ? `, ${armyGroups.friendly.reduce((sum, army) => sum + Number(army.size), 0)} friendly units` : ''}${hasEnemy ? `, ${armyGroups.enemy.reduce((sum, army) => sum + Number(army.size), 0)} enemy units` : ''}`}
+              aria-pressed={territory.isSelected}
+              className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-slate-700/50 min-h-[80px] md:min-h-[120px] min-w-[60px] md:min-w-0 focus:outline-none focus:ring-2 focus:ring-yellow-400
                 ${territory.isSelected
                   ? 'border-yellow-400 shadow-lg shadow-yellow-400/50 scale-105'
                   : 'border-slate-600'
                 }`}
-              style={{
-                minHeight: isMobile ? "80px" : "120px",
-              }}
               onClick={(e) => onTerritoryClick(e, territory)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onTerritoryClick(e as unknown as React.MouseEvent, territory)
+                }
+              }}
             >
               {/* Territory Content */}
               <div className="p-2 md:p-3 h-full flex flex-col justify-between">

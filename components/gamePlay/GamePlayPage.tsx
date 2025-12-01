@@ -6,6 +6,7 @@ import { useAccount, useWatchContractEvent } from 'wagmi'
 import { useGameAddress } from '@/lib/hooks/useGameAddress'
 import { gameAbi } from '@/lib/contract/gameAbi'
 import { useToast } from "@/lib/hooks/use-toast"
+import { logger } from "@/lib/utils/logger"
 import { Spinner } from '../ui/spinner'
 import GameStatus from '@/components/gamePlay/GameStatus/GameStatus'
 import { GameOverview } from './GameStatus/GameOverview'
@@ -77,16 +78,16 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
 
     // Don't refresh if animation is playing
     if (isAnimating) {
-      console.log('🐛 Skipping refresh - animation in progress')
+      logger.debug('Skipping refresh - animation in progress')
       return
     }
 
     if (now - lastRefreshRef.current > minInterval) {
-      console.log('🐛 Event-triggered refresh allowed')
+      logger.debug('Event-triggered refresh allowed')
       lastRefreshRef.current = now
       refreshAllData()
     } else {
-      console.log('🐛 Event-triggered refresh rate limited')
+      logger.debug('Event-triggered refresh rate limited')
     }
   }, [refreshAllData, isAnimating])
 
@@ -100,7 +101,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
         // Get the new round number from contract
         const newRoundNumber = await getRoundNumber(gameAddressParam)
 
-        console.log(`🎯 RoundCompleted event - transitioning to round ${newRoundNumber}`)
+        logger.log(`RoundCompleted event - transitioning to round ${newRoundNumber}`)
 
         // Play round transition with animations
         await playRoundTransition(newRoundNumber as number)
@@ -110,7 +111,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
           description: `Round ${newRoundNumber} has been completed`,
         })
       } catch (error) {
-        console.error('Error handling RoundCompleted event:', error)
+        logger.error('Error handling RoundCompleted event:', error)
         // Fallback to regular refresh if animation fails
         handleEventRefresh()
       }
@@ -175,14 +176,14 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
           const info = checkForMissedRounds()
 
           if (info && info.hasMissedRounds) {
-            console.log(
-              `⚠️ Found ${info.missedRounds.length} missed rounds on mount:`,
+            logger.log(
+              `Found ${info.missedRounds.length} missed rounds on mount:`,
               info.missedRounds
             )
           }
         }
       } catch (error) {
-        console.error('Error checking missed rounds on mount:', error)
+        logger.error('Error checking missed rounds on mount:', error)
       }
     }
 
@@ -211,7 +212,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
   const handleViewReplay = useCallback(async () => {
     if (!missedRoundsInfo) return
 
-    console.log(`⏩ Playing replay for ${missedRoundsInfo.missedRounds.length} rounds`)
+    logger.log(`Playing replay for ${missedRoundsInfo.missedRounds.length} rounds`)
 
     try {
       await playMissedRounds(missedRoundsInfo.missedRounds)
@@ -224,7 +225,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
       // Clear notification
       setMissedRoundsInfo(null)
     } catch (error) {
-      console.error('Error playing missed rounds replay:', error)
+      logger.error('Error playing missed rounds replay:', error)
       toast({
         title: "Replay Failed",
         description: "Could not play missed rounds. Try refreshing the page.",

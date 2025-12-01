@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { Territory, Army } from '@/lib/types/game'
 import { BattleState, BattleEffect, BattleTarget } from '@/lib/types/advancedGame'
 import { ANIMATION_DURATIONS } from '@/lib/constants/animations'
+import { logger } from '@/lib/utils/logger'
 
 interface BattleSystemState {
   activeBattle: BattleState | null
@@ -58,7 +59,7 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
       territory: "units" in target ? (target as Territory) : undefined,
     })
     setShowBattlePreview(true)
-    console.log('Battle preview initialized for', attacker.owner, 'vs', "size" in target ? target.owner : 'territory')
+    logger.debug('Battle preview initialized for', attacker.owner, 'vs', "size" in target ? target.owner : 'territory')
   }, [])
 
   const addBattleEffect = useCallback((
@@ -109,9 +110,9 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
     // Apply battle results and cleanup - slower for dramatic effect
     setTimeout(() => {
       if (winner === "attacker") {
-        console.log(`${battle.attackerArmy.owner} won the battle!`)
+        logger.debug(`${battle.attackerArmy.owner} won the battle!`)
       } else {
-        console.log(`${battle.attackerArmy.owner} was defeated!`)
+        logger.debug(`${battle.attackerArmy.owner} was defeated!`)
       }
 
       setTimeout(() => {
@@ -166,12 +167,12 @@ export function useBattle(): BattleSystemState & BattleSystemActions {
   }, [calculateBattleOdds, addBattleEffect, completeBattle])
 
   const startBattle = useCallback((
-    attacker: Army, 
+    attacker: Army,
     target: Army | Territory,
     getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }
   ) => {
     const battleId = `battle_${Date.now()}`
-    console.log('Starting battle:', attacker.owner, 'vs', "size" in target ? target.owner : 'territory')
+    logger.debug('Starting battle:', attacker.owner, 'vs', "size" in target ? target.owner : 'territory')
 
     const battle: BattleState = {
       id: battleId,

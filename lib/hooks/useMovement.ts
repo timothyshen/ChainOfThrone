@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { Territory, Army } from '@/lib/types/game'
 import { ArmyPosition } from '@/lib/types/advancedGame'
+import { logger } from '@/lib/utils/logger'
 
 interface MovementState {
   // Movement mode
@@ -18,6 +19,11 @@ interface MovementState {
   armyPositions: Record<string, ArmyPosition>
 }
 
+interface MoveValidationResult {
+  isValid: boolean
+  reason?: string
+}
+
 interface MovementActions {
   // Mode controls
   setMovementMode: (mode: boolean) => void
@@ -26,17 +32,22 @@ interface MovementActions {
   setMoveStrength: (strength: number) => void
   setMoveSubmitted: (submitted: boolean) => void
   setTargetTerritory: (territory: Territory | null) => void
-  
+
   // Animation controls
   setAnimatingArmies: (armies: Set<string> | ((prev: Set<string>) => Set<string>)) => void
   setArmyPositions: (positions: Record<string, ArmyPosition> | ((prev: Record<string, ArmyPosition>) => Record<string, ArmyPosition>)) => void
-  
+
   // Movement logic
   getAdjacentTerritories: (territory: Territory, territories: Territory[][]) => Territory[]
   getValidMovementCells: (army: Army, territories: Territory[][]) => { x: number; y: number }[]
   getArmyDisplayPosition: (army: Army) => { gridX: number; gridY: number }
   cancelMovement: () => void
   initializeMovement: (army: Army, territories: Territory[][]) => void
+
+  // Validation
+  validateMove: (army: Army, destination: Territory, currentPlayerAddress: string, territories: Territory[][]) => MoveValidationResult
+  isHostileTerritory: (territory: Territory, currentPlayerAddress: string) => boolean
+  canArmyMove: (army: Army, currentPlayerAddress: string) => boolean
 }
 
 export function useMovement(): MovementState & MovementActions {
@@ -121,7 +132,7 @@ export function useMovement(): MovementState & MovementActions {
         const validCells = getAdjacentTerritories(armyTerritory, territories)
         setValidMovementCells(validCells.map(t => ({ x: t.x, y: t.y })))
       } else {
-        console.error('❌ Coordinate mismatch:', {
+        logger.error('Coordinate mismatch:', {
           army: { x: army.x, y: army.y },
           territory: { x: armyTerritory.x, y: armyTerritory.y }
         })
@@ -130,6 +141,63 @@ export function useMovement(): MovementState & MovementActions {
     setShowMovementPaths(true)
     setMovementMode(true)
   }, [getAdjacentTerritories])
+
+  // Zero address constant
+  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+
+  /**
+   * Check if a territory is hostile (owned by enemy)
+   */
+  const isHostileTerritory = useCallback((territory: Territory, currentPlayerAddress: string): boolean => {
+    if (!territory.player || territory.player.toLowerCase() === ZERO_ADDRESS.toLowerCase()) {
+      return false // Unowned territory is not hostile
+    }
+    return territory.player.toLowerCase() !== currentPlayerAddress.toLowerCase()
+  }, [])
+
+  /**
+   * Check if current player can move the army (ownership validation)
+   */
+  const canArmyMove = useCallback((army: Army, currentPlayerAddress: string): boolean => {
+    return army.owner.toLowerCase() === currentPlayerAddress.toLowerCase()
+  }, [])
+
+  /**
+   * Comprehensive move validation
+   */
+  const validateMove = useCallback((
+    army: Army,
+    destination: Territory,
+    currentPlayerAddress: string,
+    territories: Territory[][]
+  ): MoveValidationResult => {
+    // 1. Check army ownership
+    if (!canArmyMove(army, currentPlayerAddress)) {
+      return { isValid: false, reason: "You don't own this army" }
+    }
+
+    // 2. Get army's current territory
+    const armyTerritory = territories[army.x]?.[army.y]
+    if (!armyTerritory) {
+      return { isValid: false, reason: "Army position not found" }
+    }
+
+    // 3. Check if destination is adjacent
+    const adjacentTerritories = getAdjacentTerritories(armyTerritory, territories)
+    const isAdjacent = adjacentTerritories.some(t => t.x === destination.x && t.y === destination.y)
+    if (!isAdjacent) {
+      return { isValid: false, reason: "Destination is not adjacent" }
+    }
+
+    // 4. Check if destination is hostile (valid for battle)
+    const hostile = isHostileTerritory(destination, currentPlayerAddress)
+
+    // Return valid - caller can decide how to handle hostile vs friendly
+    return {
+      isValid: true,
+      reason: hostile ? "hostile" : "friendly"
+    }
+  }, [canArmyMove, getAdjacentTerritories, isHostileTerritory])
 
   return {
     // State
@@ -156,5 +224,10 @@ export function useMovement(): MovementState & MovementActions {
     getArmyDisplayPosition,
     cancelMovement,
     initializeMovement,
+
+    // Validation
+    validateMove,
+    isHostileTerritory,
+    canArmyMove,
   }
 }

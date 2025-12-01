@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
+import { useToast } from "@/lib/hooks/use-toast"
+import { logger } from "@/lib/utils/logger"
 
 
 type Player = {
@@ -23,11 +25,19 @@ type ChatMessage = {
     responded?: boolean
 }
 
-function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Player[], currentPlayerId: `0x${string}` | '', onSendMessage: (recipientId: string, content: string, type?: string) => void }) {
+interface ChatSystemProps {
+    players: Player[]
+    currentPlayerId: `0x${string}` | ''
+    onSendMessage: (recipientId: string, content: string, type?: string) => void
+}
+
+function ChatSystem({ players, currentPlayerId, onSendMessage }: ChatSystemProps) {
     const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null)
     const [messageContent, setMessageContent] = useState('')
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+    const [isSending, setIsSending] = useState(false)
     const chatContainerRef = useRef<HTMLDivElement>(null)
+    const { toast } = useToast()
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -35,40 +45,54 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
         }
     }, [chatMessages])
 
-    const handleSendMessage = async () => {
-        if (!currentPlayerId) return;
-        if (selectedRecipient && messageContent.trim()) {
-            const content = messageContent.trim()
-            const isNegotiation = content.startsWith('/nego ')
-
-            const newMessage: ChatMessage = {
-                senderId: currentPlayerId,
-                recipientId: selectedRecipient,
-                content: isNegotiation ? content.substring(6) : content,
-                timestamp: Date.now(),
-                ...(isNegotiation && { type: 'negotiation' })
-            }
-
-            try {
-                // const userAlice = await PushAPI.initialize(process.env.NEXT_PUBLIC_PUSH_API_KEY as string);
-
-                // const recipientWallet = players.find(p => p.id === selectedRecipient)?.wallet
-                // if (recipientWallet) {
-                // await userAlice.chat.send(recipientWallet, {
-                //     content: newMessage.content,
-                //     type: 'Text'
-                // });
-                // }
-
-                setChatMessages(prev => [...prev, newMessage])
-                onSendMessage(selectedRecipient, newMessage.content, isNegotiation ? 'negotiation' : undefined)
-                setMessageContent('')
-
-            } catch (error) {
-                console.error('Error sending message:', error)
-            }
+    const handleSendMessage = useCallback(async () => {
+        if (!currentPlayerId) {
+            toast({
+                title: "Error",
+                description: "You must be logged in to send messages",
+                variant: "destructive",
+            })
+            return
         }
-    }
+
+        if (!selectedRecipient) {
+            toast({
+                title: "Select Recipient",
+                description: "Please select a player to message",
+                variant: "destructive",
+            })
+            return
+        }
+
+        if (!messageContent.trim()) return
+
+        const content = messageContent.trim()
+        const isNegotiation = content.startsWith('/nego ')
+
+        const newMessage: ChatMessage = {
+            senderId: currentPlayerId,
+            recipientId: selectedRecipient,
+            content: isNegotiation ? content.substring(6) : content,
+            timestamp: Date.now(),
+            ...(isNegotiation && { type: 'negotiation' })
+        }
+
+        setIsSending(true)
+        try {
+            setChatMessages(prev => [...prev, newMessage])
+            onSendMessage(selectedRecipient, newMessage.content, isNegotiation ? 'negotiation' : undefined)
+            setMessageContent('')
+        } catch (error) {
+            logger.error('Error sending message:', error)
+            toast({
+                title: "Error",
+                description: "Failed to send message. Please try again.",
+                variant: "destructive",
+            })
+        } finally {
+            setIsSending(false)
+        }
+    }, [currentPlayerId, selectedRecipient, messageContent, onSendMessage, toast])
 
     const renderMessage = (msg: ChatMessage, index: number) => {
         const isCurrentUser = msg.senderId === currentPlayerId
@@ -86,13 +110,11 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
                                     variant="default"
                                     onClick={() => {
                                         onSendMessage(msg.senderId, `Accepted: ${msg.content}`)
-                                        const updatedMessages = [...chatMessages]
-                                        if (updatedMessages[index] == null) return ""
-                                        updatedMessages[index] = {
-                                            ...updatedMessages[index],
-                                            responded: true
-                                        }
-                                        setChatMessages(updatedMessages)
+                                        setChatMessages(prev =>
+                                            prev.map((m, i) =>
+                                                i === index ? { ...m, responded: true } : m
+                                            )
+                                        )
                                     }}
                                 >
                                     Yes
@@ -102,10 +124,11 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
                                     variant="destructive"
                                     onClick={() => {
                                         onSendMessage(msg.senderId, `Declined: ${msg.content}`)
-                                        const updatedMessages = [...chatMessages]
-                                        if (updatedMessages[index] == null) return ""
-                                        updatedMessages[index].responded = true
-                                        setChatMessages(updatedMessages)
+                                        setChatMessages(prev =>
+                                            prev.map((m, i) =>
+                                                i === index ? { ...m, responded: true } : m
+                                            )
+                                        )
                                     }}
                                 >
                                     No
@@ -154,7 +177,9 @@ function ChatSystem({ players, currentPlayerId, onSendMessage }: { players: Play
                         onChange={(e) => setMessageContent(e.target.value)}
                         className="flex-grow mr-2"
                     />
-                    <Button onClick={handleSendMessage}>Send</Button>
+                    <Button onClick={handleSendMessage} disabled={isSending || !messageContent.trim()}>
+                        {isSending ? 'Sending...' : 'Send'}
+                    </Button>
                 </div>
             </CardContent>
         </Card>
