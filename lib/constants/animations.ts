@@ -21,6 +21,9 @@ export const ANIMATION_DURATIONS = {
   BATTLE_VICTORY: 3000,
   BATTLE_COMPLETE: 2000,
 
+  /** Territory conquest animation */
+  TERRITORY_CONQUEST: 2000,
+
   /** Modal fade in/out */
   MODAL_FADE: 300,
 

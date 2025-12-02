@@ -10,6 +10,7 @@ import {
 } from '@/lib/hooks/ReadGameContract'
 import { contractClient } from '@/lib/contract/client'
 import { gameAbi } from '@/lib/contract/gameAbi'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * Player Game Statistics
@@ -108,7 +109,7 @@ export function usePlayerGameStats({
 
     const fetchStats = async () => {
       try {
-        console.log(`📊 Fetching stats for player ${playerAddress.slice(0, 6)}...`)
+        logger.debug(`Fetching stats for player ${playerAddress.slice(0, 6)}...`)
 
         // Fetch all required data in parallel
         const [grid, currentRound, gameStatus, playerId, totalPlayersCount, playerMoves] =
@@ -153,9 +154,9 @@ export function usePlayerGameStats({
           error: null,
         })
 
-        console.log('✅ Stats calculated successfully')
+        logger.debug('Stats calculated successfully')
       } catch (error) {
-        console.error('❌ Error fetching player stats:', error)
+        logger.error('Error fetching player stats:', error)
         if (isMounted) {
           setStats((prev) => ({
             ...prev,
@@ -209,7 +210,7 @@ async function fetchPlayerMoves(
       roundNumber: BigInt(move.roundNumber),
     }))
   } catch (error) {
-    console.error('Error fetching player moves:', error)
+    logger.error('Error fetching player moves:', error)
     return []
   }
 }

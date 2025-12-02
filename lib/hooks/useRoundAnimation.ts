@@ -1,11 +1,11 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { StateManager } from '@/lib/systems/StateManager'
 import { AnimationSequencer } from '@/lib/systems/AnimationSequencer'
 import { AnimationExecutor, AnimationCallbacks } from '@/lib/systems/AnimationExecutor'
 import { RoundHistoryManager, MissedRoundsInfo } from '@/lib/systems/RoundHistoryManager'
 import { useGameStateContext, useMovementContext, useBattleContext } from '@/lib/contexts/GameContext'
-import { Army } from '@/lib/types/game'
 import { logger } from '@/lib/utils/logger'
+import { setAdd, setDelete } from '@/lib/utils/setHelpers'
 
 /**
  * useRoundAnimation Hook
@@ -63,8 +63,8 @@ export function useRoundAnimation({
       onMoveStart: (armyId, from, to) => {
         logger.debug(`Move start: ${armyId} from (${from.x},${from.y}) to (${to.x},${to.y})`)
 
-        // Set army as animating
-        setAnimatingArmies((prev) => new Set([...prev, armyId]))
+        // Set army as animating (using optimized helper)
+        setAnimatingArmies((prev) => setAdd(prev, armyId))
 
         // Set target position
         setArmyPositions((prev) => ({
@@ -76,12 +76,8 @@ export function useRoundAnimation({
       onMoveComplete: (armyId) => {
         logger.debug(`Move complete: ${armyId}`)
 
-        // Clear animating state
-        setAnimatingArmies((prev) => {
-          const newSet = new Set(prev)
-          newSet.delete(armyId)
-          return newSet
-        })
+        // Clear animating state (using optimized helper)
+        setAnimatingArmies((prev) => setDelete(prev, armyId))
 
         // Clear position override
         setArmyPositions((prev) => {

@@ -9,6 +9,8 @@ import {
   useMovementContext,
 } from "@/lib/contexts/GameContext"
 import { ANIMATION_DURATIONS } from "@/lib/constants/animations"
+import { logger } from "@/lib/utils/logger"
+import { setAdd, setDelete } from "@/lib/utils/setHelpers"
 
 /**
  * useMovementActions Hook
@@ -50,7 +52,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
         // Store the target territory and show the move strength input
         setTargetTerritory(targetTerritory)
         setMoveSubmitted(true)
-        console.log(
+        logger.debug(
           `Move target selected: (${targetTerritory.x}, ${targetTerritory.y})`
         )
       }
@@ -90,15 +92,15 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
         moveStrength,
       ] as const
 
-      console.log("🐛 Move:", move)
+      logger.debug("Move:", move)
 
       try {
         // Execute transaction and wait for blockchain confirmation
         // tx.execute() waits for transaction to be fully confirmed before returning
         await tx.execute(() => makeMove(gameAddress, move))
 
-        // ✅ Transaction confirmed! Now safe to execute animation
-        console.log(`✅ Transaction confirmed! Starting animation...`)
+        // Transaction confirmed! Now safe to execute animation
+        logger.debug("Transaction confirmed! Starting animation...")
 
         // Update army position with animation flag
         setArmyPositions((prev) => ({
@@ -106,17 +108,13 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
           [selectedArmy.id]: { ...targetTerritory, isAnimating: true },
         }))
 
-        // Start animation
-        setAnimatingArmies((prev) => new Set([...prev, selectedArmy.id]))
+        // Start animation (using optimized helper)
+        setAnimatingArmies((prev) => setAdd(prev, selectedArmy.id))
 
         // Wait for animation to complete
         setTimeout(() => {
-          // Clear animation state
-          setAnimatingArmies((prev) => {
-            const newSet = new Set(prev)
-            newSet.delete(selectedArmy.id)
-            return newSet
-          })
+          // Clear animation state (using optimized helper)
+          setAnimatingArmies((prev) => setDelete(prev, selectedArmy.id))
 
           // Clear the temporary animation position
           setArmyPositions((prev) => {
@@ -125,7 +123,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
             return newPositions
           })
 
-          console.log(
+          logger.debug(
             `Army ${selectedArmy.id} moved to (${targetTerritory.x}, ${targetTerritory.y})`
           )
 
@@ -138,7 +136,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
 
       } catch (error) {
         // Transaction failed, do not execute animation
-        console.error("❌ Transaction failed, animation cancelled:", error)
+        logger.error("Transaction failed, animation cancelled:", error)
 
         // Reset movement state
         cancelMovement()

@@ -1,238 +1,135 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Button } from "@/components/ui/button"
-import { useAccount, useWatchContractEvent } from 'wagmi'
-import { useGameAddress } from '@/lib/hooks/useGameAddress'
-import { gameAbi } from '@/lib/contract/gameAbi'
-import { useToast } from "@/lib/hooks/use-toast"
-import { logger } from "@/lib/utils/logger"
-import { Spinner } from '../ui/spinner'
-import GameStatus from '@/components/gamePlay/GameStatus/GameStatus'
-import { GameOverview } from './GameStatus/GameOverview'
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/lib/hooks/use-toast";
+import { logger } from "@/lib/utils/logger";
+import { Spinner } from "../ui/spinner";
 import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
-} from "@/components/ui/drawer"
-import { ChevronDown } from 'lucide-react'
-import GameOperationPanel from '@/components/gamePlay/GameMap/GameOperationPanel'
-import GameMap from '@/components/gamePlay/GameMap'
-import BattleEffectOverlay from '@/components/gamePlay/GameMap/BattleEffectOverlay'
-import { GameContextProvider, useGameStateContext, useBattleContext } from '@/lib/contexts/GameContext'
-import { useRoundAnimation } from '@/lib/hooks/useRoundAnimation'
-import { MissedRoundsNotification } from './MissedRoundsNotification'
-import { MissedRoundsInfo } from '@/lib/systems/RoundHistoryManager'
-import { getRoundNumber } from '@/lib/hooks/ReadGameContract'
+} from "@/components/ui/drawer";
+import { ChevronDown } from "lucide-react";
 
-interface GamePlayPageRefactoredProps {
-  gameAddressParam: `0x${string}`
+// Components
+import GameOperationPanel from "@/components/gamePlay/GameMap/GameOperationPanel";
+import GameMap from "@/components/gamePlay/GameMap";
+import BattleEffectOverlay from "@/components/gamePlay/GameMap/BattleEffectOverlay";
+import { MissedRoundsNotification } from "./MissedRoundsNotification";
+import { GameStatusPanel } from "./GameStatusPanel";
+
+// Context
+import {
+  GameContextProvider,
+  useGameStateContext,
+  useBattleContext,
+} from "@/lib/contexts/GameContext";
+
+// Hooks
+import { useRoundAnimation } from "@/lib/hooks/useRoundAnimation";
+import { useGamePlayEvents } from "@/lib/hooks/useGamePlayEvents";
+import { useMobileDetection } from "@/lib/hooks/useMobileDetection";
+import { getRoundNumber } from "@/lib/hooks/ReadGameContract";
+
+// Types
+import { MissedRoundsInfo } from "@/lib/systems/RoundHistoryManager";
+
+interface GamePlayPageProps {
+  gameAddressParam: `0x${string}`;
 }
 
-// Inner component that has access to context
-function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
-  const { address } = useAccount()
-  const { toast } = useToast()
+/**
+ * Inner component that has access to GameContext
+ */
+function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
+  const { toast } = useToast();
+  const { isMobile } = useMobileDetection();
 
   // Context hooks
-  const {
-    gameStatus,
-    totalPlayer,
-    maxPlayer,
-    playerAddresses,
-    isGridLoading,
-    isStatusLoading,
-    refreshAllData
-  } = useGameStateContext()
-  const { battleEffects } = useBattleContext()
+  const { isGridLoading, refreshAllData } = useGameStateContext();
+  const { battleEffects } = useBattleContext();
 
   // UI state
-  const [isMobile, setIsMobile] = useState(false)
-  const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false)
-  const [missedRoundsInfo, setMissedRoundsInfo] = useState<MissedRoundsInfo | null>(null)
+  const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false);
+  const [missedRoundsInfo, setMissedRoundsInfo] =
+    useState<MissedRoundsInfo | null>(null);
 
   // Round animation system
-  const {
-    isAnimating,
-    playRoundTransition,
-    checkForMissedRounds,
-    playMissedRounds,
-  } = useRoundAnimation({
-    gameAddress: gameAddressParam,
-    onMissedRounds: (info) => {
-      setMissedRoundsInfo(info)
-      toast({
-        title: "Missed Rounds",
-        description: `You missed ${info.missedRounds.length} rounds. Check notification for replay.`,
-        variant: "default",
-      })
-    },
-    autoPlayMissedRounds: false, // Manual control
-  })
-
-  // Rate limiting for event-triggered refreshes (but now without animation blocking)
-  const lastRefreshRef = useRef<number>(0)
-  const handleEventRefresh = useCallback(() => {
-    const now = Date.now()
-    const minInterval = 2000 // 2 seconds minimum between refreshes
-
-    // Don't refresh if animation is playing
-    if (isAnimating) {
-      logger.debug('Skipping refresh - animation in progress')
-      return
-    }
-
-    if (now - lastRefreshRef.current > minInterval) {
-      logger.debug('Event-triggered refresh allowed')
-      lastRefreshRef.current = now
-      refreshAllData()
-    } else {
-      logger.debug('Event-triggered refresh rate limited')
-    }
-  }, [refreshAllData, isAnimating])
-
-  // Contract event listeners - now with animation integration
-  useWatchContractEvent({
-    address: gameAddressParam,
-    abi: gameAbi,
-    eventName: 'RoundCompleted',
-    onLogs: async (logs) => {
-      try {
-        // Get the new round number from contract
-        const newRoundNumber = await getRoundNumber(gameAddressParam)
-
-        logger.log(`RoundCompleted event - transitioning to round ${newRoundNumber}`)
-
-        // Play round transition with animations
-        await playRoundTransition(newRoundNumber as number)
-
+  const { isAnimating, playRoundTransition, checkForMissedRounds, playMissedRounds } =
+    useRoundAnimation({
+      gameAddress: gameAddressParam,
+      onMissedRounds: (info) => {
+        setMissedRoundsInfo(info);
         toast({
-          title: "Round Completed",
-          description: `Round ${newRoundNumber} has been completed`,
-        })
-      } catch (error) {
-        logger.error('Error handling RoundCompleted event:', error)
-        // Fallback to regular refresh if animation fails
-        handleEventRefresh()
-      }
-    },
-  })
+          title: "Missed Rounds",
+          description: `You missed ${info.missedRounds.length} rounds. Check notification for replay.`,
+          variant: "default",
+        });
+      },
+      autoPlayMissedRounds: false,
+    });
 
-  useWatchContractEvent({
-    address: gameAddressParam,
-    abi: gameAbi,
-    eventName: "MoveSubmitted",
-    onLogs() {
-      handleEventRefresh()
-      toast({
-        title: "Move Submitted",
-        description: "A move has been submitted",
-      })
-    },
-  })
-
-  useWatchContractEvent({
-    address: gameAddressParam,
-    abi: gameAbi,
-    eventName: "PlayerAdded",
-    onLogs() {
-      handleEventRefresh()
-    },
-  })
-
-  useWatchContractEvent({
-    address: gameAddressParam,
-    abi: gameAbi,
-    eventName: "GameStarted",
-    onLogs() {
-      handleEventRefresh()
-      toast({
-        title: "Game Started",
-        description: "The game has begun!",
-      })
-    },
-  })
-
-  // Handle mobile/desktop responsive behavior
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+  // Contract event listeners
+  useGamePlayEvents({
+    gameAddress: gameAddressParam,
+    isAnimating,
+    refreshAllData,
+    playRoundTransition,
+  });
 
   // Check for missed rounds on mount
   useEffect(() => {
     const checkMissedOnMount = async () => {
-      if (!gameAddressParam) return
+      if (!gameAddressParam) return;
 
       try {
-        const currentRound = await getRoundNumber(gameAddressParam)
+        const currentRound = await getRoundNumber(gameAddressParam);
 
         if (currentRound && currentRound > 0) {
-          // Check for missed rounds
-          const info = checkForMissedRounds()
+          const info = checkForMissedRounds();
 
           if (info && info.hasMissedRounds) {
             logger.log(
               `Found ${info.missedRounds.length} missed rounds on mount:`,
               info.missedRounds
-            )
+            );
           }
         }
       } catch (error) {
-        logger.error('Error checking missed rounds on mount:', error)
+        logger.error("Error checking missed rounds on mount:", error);
       }
-    }
+    };
 
-    checkMissedOnMount()
-  }, [gameAddressParam, checkForMissedRounds])
-
-  // Game status and player information panel
-  const GameStatusPanel = () => (
-    <div className="w-full space-y-6 p-4">
-      <GameStatus
-        isLoading={isStatusLoading}
-        currentPlayer={address ?? ''}
-        gameStatus={gameStatus}
-        totalPlayer={totalPlayer}
-        maxPlayer={maxPlayer}
-        playerAddresses={playerAddresses}
-        setGameStatus={() => { }} // Context will handle this
-        setTotalPlayer={() => { }} // Context will handle this
-        fetchGameData={refreshAllData}
-      />
-      <GameOverview playerAddress={address} />
-    </div>
-  )
+    checkMissedOnMount();
+  }, [gameAddressParam, checkForMissedRounds]);
 
   // Handle missed rounds replay
   const handleViewReplay = useCallback(async () => {
-    if (!missedRoundsInfo) return
+    if (!missedRoundsInfo) return;
 
-    logger.log(`Playing replay for ${missedRoundsInfo.missedRounds.length} rounds`)
+    logger.log(
+      `Playing replay for ${missedRoundsInfo.missedRounds.length} rounds`
+    );
 
     try {
-      await playMissedRounds(missedRoundsInfo.missedRounds)
+      await playMissedRounds(missedRoundsInfo.missedRounds);
 
       toast({
         title: "Replay Complete",
         description: "You're now up to date!",
-      })
+      });
 
-      // Clear notification
-      setMissedRoundsInfo(null)
+      setMissedRoundsInfo(null);
     } catch (error) {
-      logger.error('Error playing missed rounds replay:', error)
+      logger.error("Error playing missed rounds replay:", error);
       toast({
         title: "Replay Failed",
         description: "Could not play missed rounds. Try refreshing the page.",
         variant: "destructive",
-      })
+      });
     }
-  }, [missedRoundsInfo, playMissedRounds, toast])
+  }, [missedRoundsInfo, playMissedRounds, toast]);
 
   return (
     <div className="flex flex-col h-screen md:mt-12 bg-slate-900">
@@ -275,7 +172,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
           )}
         </div>
 
-        {/* Mobile operation panel - always rendered to track state changes */}
+        {/* Mobile operation panel */}
         <GameOperationPanel
           gameAddress={gameAddressParam}
           isMobile={isMobile}
@@ -295,19 +192,23 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageRefactoredProps) {
             gameAddress={gameAddressParam}
             isMobile={false}
             mobileBottomPanelOpen={false}
-            setMobileBottomPanelOpen={() => { }}
+            setMobileBottomPanelOpen={() => {}}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-// Main component with context provider
-export default function GamePlayPage({ gameAddressParam }: GamePlayPageRefactoredProps) {
+/**
+ * GamePlayPage Component
+ *
+ * Main game play page with context provider wrapper
+ */
+export default function GamePlayPage({ gameAddressParam }: GamePlayPageProps) {
   return (
     <GameContextProvider gameAddress={gameAddressParam}>
       <GamePlayContent gameAddressParam={gameAddressParam} />
     </GameContextProvider>
-  )
+  );
 }
