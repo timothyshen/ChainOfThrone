@@ -15,6 +15,8 @@ import { GRID_CONFIG } from "@/lib/constants/grid"
 import { TerritoryGrid } from "./layers/TerritoryGrid"
 import { MovementOverlay } from "./layers/MovementOverlay"
 import { AnimationLayer } from "./layers/AnimationLayer"
+import { GameStatusBar } from "./GameStatusBar"
+import { ContextualActionBar } from "./ContextualActionBar"
 
 // Hooks
 import { useMapInteractions } from "@/lib/hooks/useMapInteractions"
@@ -114,9 +116,12 @@ export default function GameMap({
 
   return (
     <div
-      className="h-full bg-slate-900 text-white flex flex-col md:flex-row"
+      className="h-full bg-slate-900 text-white flex flex-col"
       onClick={handleMapClick}
     >
+      {/* Game Status Bar - Castle Count & Win Condition */}
+      <GameStatusBar isMobile={isMobile} />
+
       {/* Main Map Area */}
       <div className="flex-1 relative overflow-hidden">
         {/* Map Canvas */}
@@ -202,6 +207,9 @@ export default function GameMap({
           )}
         </div>
       </div>
+
+      {/* Contextual Action Bar - Bottom guidance */}
+      <ContextualActionBar isMobile={isMobile} />
     </div>
   )
 }
