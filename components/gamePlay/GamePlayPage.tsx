@@ -18,6 +18,7 @@ import GameMap from "@/components/gamePlay/GameMap";
 import BattleEffectOverlay from "@/components/gamePlay/GameMap/BattleEffectOverlay";
 import { MissedRoundsNotification } from "./MissedRoundsNotification";
 import { GameStatusPanel } from "./GameStatusPanel";
+import { TurnHistoryPanel } from "./GameMap/panels/TurnHistoryPanel";
 
 // Context
 import {
@@ -193,6 +194,10 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
             isMobile={false}
             mobileBottomPanelOpen={false}
             setMobileBottomPanelOpen={() => {}}
+          />
+          <TurnHistoryPanel
+            isCollapsible={true}
+            defaultExpanded={false}
           />
         </div>
       </div>

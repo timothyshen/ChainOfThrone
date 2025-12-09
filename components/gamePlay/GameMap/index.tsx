@@ -17,6 +17,7 @@ import { MovementOverlay } from "./layers/MovementOverlay"
 import { AnimationLayer } from "./layers/AnimationLayer"
 import { GameStatusBar } from "./GameStatusBar"
 import { ContextualActionBar } from "./ContextualActionBar"
+import { MiniMapPanel } from "./panels/MiniMapPanel"
 
 // Hooks
 import { useMapInteractions } from "@/lib/hooks/useMapInteractions"
@@ -203,6 +204,13 @@ export default function GameMap({
                 <span className="text-lg">✕</span>
                 Cancel (ESC)
               </button>
+            </div>
+          )}
+
+          {/* Mini Map Panel - Corner overlay */}
+          {!isMobile && (
+            <div className="absolute top-4 left-4 z-20 w-48">
+              <MiniMapPanel isCollapsible={true} defaultExpanded={false} />
             </div>
           )}
         </div>
