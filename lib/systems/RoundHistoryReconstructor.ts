@@ -64,19 +64,20 @@ export class RoundHistoryReconstructor {
       const rounds = this.groupMovesByRound(allMoves, currentRound)
 
       // Calculate timestamps
+      const firstRound = rounds[0]
+      const lastRound = rounds[rounds.length - 1]
+      const firstMove = firstRound?.moves[0]
+      const lastRoundMoves = lastRound?.moves
+      const lastMove = lastRoundMoves?.[lastRoundMoves.length - 1]
+
       const startTimestamp =
-        rounds.length > 0 && rounds[0].moves.length > 0
-          ? Number(rounds[0].moves[0].timestamp) * 1000
+        firstMove
+          ? Number(firstMove.timestamp) * 1000
           : Date.now()
 
       const endTimestamp =
-        rounds.length > 0 &&
-        rounds[rounds.length - 1].moves.length > 0
-          ? Number(
-              rounds[rounds.length - 1].moves[
-                rounds[rounds.length - 1].moves.length - 1
-              ].timestamp
-            ) * 1000
+        lastMove
+          ? Number(lastMove.timestamp) * 1000
           : undefined
 
       const history: GameHistory = {
@@ -203,7 +204,7 @@ export class RoundHistoryReconstructor {
         roundNumber: i,
         moves: roundMoves,
         timestamp:
-          roundMoves.length > 0
+          roundMoves.length > 0 && roundMoves[0]
             ? Number(roundMoves[0].timestamp) * 1000
             : Date.now(),
         playerActions,

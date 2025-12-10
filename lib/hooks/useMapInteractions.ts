@@ -71,9 +71,6 @@ export function useMapInteractions({
       movementMode,
       validMovementCells,
       flatTerritories,
-      armies,
-      selectedArmy,
-      handleInitializeBattle,
       handleMoveToCell,
     ]
   )

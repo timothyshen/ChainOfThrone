@@ -1,29 +1,26 @@
 'use client'
 
 import { useWatchContractEvent } from "wagmi"
-import { useRouter } from "next/navigation"
 import { gameFactoryAbi } from "@/lib/contract/gameFactoryAbi"
-import { GAME_FACTORY_ADDRESS, MONAD_GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts"
+import { MONAD_GAME_FACTORY_ADDRESS } from "@/lib/constants/contracts"
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog"
 import GameTable, { StatusFilter } from "./GameTable"
 import GameFilters from "./GameFilters"
 
 // Icons
-import { Sword, Loader2, Copy, ExternalLink, Users, Clock, ArrowRight } from 'lucide-react'
+import { Sword, Loader2, Users, Clock } from 'lucide-react'
 
 // Hooks and Utils
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useToast } from "@/lib/hooks/use-toast"
 import { getGamesInfo } from "@/lib/hooks/ReadGameFactoryContract"
 import { debounce } from "@/lib/utils/debounce"
@@ -35,10 +32,9 @@ import { Game } from "@/lib/types/setup"
 
 // Components
 import { NoGamesEmptyState } from "@/components/common/EmptyState"
-  
-  
+
+
 export default function GameExplorer() {
-    const router = useRouter()
     const [selectedGame, setSelectedGame] = useState<Game | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -46,23 +42,6 @@ export default function GameExplorer() {
     const [isLoading, setIsLoading] = useState(true)
 
     const { toast } = useToast()
-
-    const handleJoinGame = (gameAddress: string) => {
-        localStorage.setItem("gameAddress", gameAddress)
-        router.push(`/game/${gameAddress}`)
-        toast({
-            title: "Joining game",
-            description: "Redirecting to game room...",
-        })
-    }
-
-    const handleCopyAddress = (address: string) => {
-        navigator.clipboard.writeText(address)
-        toast({
-            title: "Copied",
-            description: "Game address copied to clipboard",
-        })
-    }
 
     useWatchContractEvent({
         address: MONAD_GAME_FACTORY_ADDRESS as `0x${string}`,
@@ -90,8 +69,8 @@ export default function GameExplorer() {
     }, [toast])
 
     // Debounced fetch for event-triggered updates
-    const debouncedFetchGames = useCallback(
-        debounce(() => fetchGames(), 500),
+    const debouncedFetchGames = useMemo(
+        () => debounce(() => fetchGames(), 500),
         [fetchGames]
     )
 

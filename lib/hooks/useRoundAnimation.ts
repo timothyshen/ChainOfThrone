@@ -6,6 +6,8 @@ import { RoundHistoryManager, MissedRoundsInfo } from '@/lib/systems/RoundHistor
 import { useGameStateContext, useMovementContext, useBattleContext } from '@/lib/contexts/GameContext'
 import { logger } from '@/lib/utils/logger'
 import { setAdd, setDelete } from '@/lib/utils/setHelpers'
+import { Army } from '@/lib/types/game'
+import { BattleState } from '@/lib/types/advancedGame'
 
 /**
  * useRoundAnimation Hook
@@ -38,11 +40,11 @@ export function useRoundAnimation({
     setAnimatingArmies,
     setArmyPositions,
     cancelMovement,
+    getArmyDisplayPosition,
   } = useMovementContext()
   const {
     startBattle,
     addBattleEffect,
-    getArmyDisplayPosition,
   } = useBattleContext()
 
   // Initialize systems (singleton instances)
@@ -102,9 +104,12 @@ export function useRoundAnimation({
           const attacker = armiesAtLocation[0]
           const defender = armiesAtLocation[1]
 
+          // Guard against undefined (TypeScript safety)
+          if (!attacker || !defender) return
+
           // Add battle effects
-          const fakeAttacker = { ...attacker, x: location.x, y: location.y }
-          const fakeBattle = {
+          const fakeAttacker: Army = { ...attacker, x: location.x, y: location.y }
+          const fakeBattle: BattleState = {
             id: `battle_${Date.now()}`,
             attackerArmy: fakeAttacker,
             defenderArmy: defender,
@@ -158,7 +163,7 @@ export function useRoundAnimation({
     }
 
     executor.setCallbacks(callbacks)
-  }, [armies, setAnimatingArmies, setArmyPositions, addBattleEffect, getArmyDisplayPosition])
+  }, [armies, setAnimatingArmies, setArmyPositions, addBattleEffect, getArmyDisplayPosition, executor])
 
   /**
    * Play round transition animation
@@ -257,7 +262,9 @@ export function useRoundAnimation({
     if (info && info.hasMissedRounds && autoPlayMissedRounds) {
       playMissedRounds(info.missedRounds)
     }
-  }, [currentRoundRef.current, gameAddress, autoPlayMissedRounds])
+    // Note: currentRoundRef.current is excluded as refs don't trigger re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameAddress, autoPlayMissedRounds, checkForMissedRounds, playMissedRounds])
 
   return {
     isAnimating: executor.isAnimating(),

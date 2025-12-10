@@ -39,7 +39,7 @@ export default function GameStatus({
 
   // Use the player join hook
   const { handleJoin, txState } = usePlayerJoinGame({
-    gameAddress,
+    gameAddress: gameAddress ?? undefined,
     onStatusUpdate: setGameStatus,
     onTotalPlayerUpdate: setTotalPlayer,
     onSuccess: fetchGameData,
@@ -103,7 +103,7 @@ export default function GameStatus({
       {gameAddress && (
         <DiplomacyResultModal
           gameAddress={gameAddress}
-          type={winner === currentPlayer ? "win" : "lose"}
+          type={winner === currentPlayer ? "win" : "loss"}
           open={showCompleteModal && gameStatus === GameStatusEnum.COMPLETED}
           onOpenChange={setShowCompleteModal}
           year="Fall, 1908"

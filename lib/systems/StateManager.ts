@@ -185,8 +185,10 @@ export class StateManager {
 
     for (let x = 0; x < 3; x++) {
       for (let y = 0; y < 3; y++) {
-        const oldTerritory = this.previousState.territories[x][y]
-        const newTerritory = this.currentState.territories[x][y]
+        const oldTerritory = this.previousState.territories[x]?.[y]
+        const newTerritory = this.currentState.territories[x]?.[y]
+
+        if (!oldTerritory || !newTerritory) continue
 
         if (
           oldTerritory.player.toLowerCase() !== newTerritory.player.toLowerCase()

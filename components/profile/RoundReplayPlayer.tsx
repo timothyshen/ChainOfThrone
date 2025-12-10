@@ -35,7 +35,7 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
             <Info className="w-16 h-16 mx-auto mb-4 text-text-muted" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No Moves in This Round</h3>
             <p className="text-sm text-text-secondary mb-4">
-              This round doesn't contain any recorded moves. Players may not have submitted actions during this round.
+              This round doesn&apos;t contain any recorded moves. Players may not have submitted actions during this round.
             </p>
             {onClose && (
               <Button variant="outline" onClick={onClose} className="mt-4">
@@ -50,6 +50,11 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
 
   const currentMove = round.moves[currentMoveIndex]
   const progress = ((currentMoveIndex + 1) / round.moves.length) * 100
+
+  // Guard against undefined currentMove (should not happen due to earlier check)
+  if (!currentMove) {
+    return null
+  }
 
   const handlePrevious = () => {
     if (currentMoveIndex > 0) {

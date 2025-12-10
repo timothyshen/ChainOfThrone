@@ -67,8 +67,10 @@ export type Battle = BattleState;
 // Panel types
 export type ActivePanel = "territory" | "army" | "overview" | null;
 
-// Army position tracking
-export interface ArmyPosition extends Territory {
+// Army position tracking for animations
+export interface ArmyPosition {
+  x: number;
+  y: number;
   isAnimating: boolean;
 }
 

@@ -68,9 +68,8 @@ export function useGameContractEvents({
 
         if (onRoundCompleted) {
           // Extract round number from event if available
-          const roundNumber = logs[0]?.args
-            ? (logs[0].args as { roundNumber?: bigint }).roundNumber
-            : undefined;
+          const log = logs[0] as { args?: { roundNumber?: bigint } } | undefined;
+          const roundNumber = log?.args?.roundNumber;
           await onRoundCompleted(roundNumber ? Number(roundNumber) : 0);
         } else {
           handleRefresh();

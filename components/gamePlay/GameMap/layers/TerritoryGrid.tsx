@@ -23,28 +23,11 @@ const zeroAddress = "0x0000000000000000000000000000000000000000"
  */
 export const TerritoryGrid = memo(
   ({ flatTerritories, isMobile, armies, currentPlayerAddress, onTerritoryClick, onArmyClick, isLoading }: TerritoryGridProps) => {
-    // Loading skeleton
-    if (isLoading) {
-      return (
-        <div className="absolute inset-0 p-2 rounded-lg">
-          <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div
-                key={i}
-                className="relative border-2 border-border rounded-lg bg-surface-3/50 animate-pulse aspect-square"
-              />
-            ))}
-          </div>
-        </div>
-      )
-    }
-    // Memoize icon function
-    const getTerritoryIcon = useCallback((isCastle: boolean) => {
-      return isCastle ? (
-        <Crown className="w-3 h-3 md:w-4 md:h-4" />
-      ) : (
-        <Flag className="w-3 h-3 md:w-4 md:h-4" />
-      )
+    // All hooks must be called before any early returns
+
+    // Check if territory has an owner
+    const hasOwner = useCallback((player: `0x${string}`) => {
+      return player && player.toLowerCase() !== zeroAddress.toLowerCase()
     }, [])
 
     // Get armies at a specific territory, separated by ownership
@@ -61,11 +44,6 @@ export const TerritoryGrid = memo(
       if (!currentPlayerAddress) return "bg-gray-500"
       return player === currentPlayerAddress ? "bg-blue-500" : "bg-red-500"
     }, [currentPlayerAddress])
-
-    // Check if territory has an owner
-    const hasOwner = useCallback((player: `0x${string}`) => {
-      return player && player.toLowerCase() !== zeroAddress.toLowerCase()
-    }, [])
 
     // Get castle-specific styling
     const getCastleStyles = useCallback((territory: Territory & { isSelected: boolean }) => {
@@ -113,6 +91,22 @@ export const TerritoryGrid = memo(
 
       return "border-border"
     }, [currentPlayerAddress, hasOwner])
+
+    // Loading skeleton - after all hooks
+    if (isLoading) {
+      return (
+        <div className="absolute inset-0 p-2 rounded-lg">
+          <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div
+                key={i}
+                className="relative border-2 border-border rounded-lg bg-surface-3/50 animate-pulse aspect-square"
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div className="absolute inset-0 p-2 rounded-lg">

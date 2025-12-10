@@ -6,7 +6,7 @@ import {
   QueuedBattle,
 } from "@/lib/systems/BattleAnimationQueue";
 import { Army, Territory } from "@/lib/types/game";
-import { useBattleContext } from "@/lib/contexts/GameContext";
+import { useBattleContext, useMovementContext } from "@/lib/contexts/GameContext";
 import { logger } from "@/lib/utils/logger";
 
 /**
@@ -47,7 +47,8 @@ export interface UseBattleQueueReturn {
 
 export function useBattleQueue(): UseBattleQueueReturn {
   const queue = useRef(new BattleAnimationQueue()).current;
-  const { startBattle, getArmyDisplayPosition, activeBattle } = useBattleContext();
+  const { startBattle, activeBattle } = useBattleContext();
+  const { getArmyDisplayPosition } = useMovementContext();
 
   // Track queue state for React
   const [queueLength, setQueueLength] = useState(0);
@@ -82,6 +83,8 @@ export function useBattleQueue(): UseBattleQueueReturn {
         setQueueLength(0);
       },
     });
+    // Note: queue is a stable ref, updateQueueLength is defined later but stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startBattle, getArmyDisplayPosition]);
 
   // Watch for battle completion to advance queue

@@ -3,13 +3,14 @@
 import {
     createConfig,
     WagmiProvider,
+    type Config,
 } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
 import { monadTestnet } from 'viem/chains';
-import { injected, metaMask, walletConnect } from 'wagmi/connectors'
+import { injected, metaMask } from 'wagmi/connectors'
 
-const config = createConfig({
+export const wagmiConfig: Config = createConfig({
     chains: [monadTestnet],
     connectors: [
         injected(),
@@ -28,7 +29,7 @@ interface WalletsProviderWrapperProps {
 
 export default function DynamicProvider({ children }: WalletsProviderWrapperProps): JSX.Element {
     return (
-        <WagmiProvider config={config}>
+        <WagmiProvider config={wagmiConfig}>
             <QueryClientProvider client={queryClient}>
                 {children}
             </QueryClientProvider>

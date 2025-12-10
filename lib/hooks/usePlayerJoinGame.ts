@@ -49,7 +49,7 @@ export function usePlayerJoinGame({
 
     try {
       // Execute transaction and wait for confirmation
-      await tx.execute(() => addPlayer(gameAddress));
+      await tx.execute(() => addPlayer(gameAddress as `0x${string}`));
 
       // After transaction is confirmed, update game state
       const [status, total] = await Promise.all([
@@ -68,6 +68,6 @@ export function usePlayerJoinGame({
   return {
     handleJoin,
     txState: tx.state,
-    isJoining: tx.isPending,
+    isJoining: tx.isLoading,
   };
 }

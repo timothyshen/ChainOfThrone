@@ -55,12 +55,17 @@ function calculateFavoriteStrategy(wins: number, totalGames: number): string {
 /**
  * Generate achievements based on player stats
  */
+function getDateString(date: Date = new Date()): string {
+  return date.toISOString().split("T")[0] ?? date.toISOString().slice(0, 10);
+}
+
 function generateAchievements(
   totalGames: number,
   wins: number,
   _gameHistory: GameHistory[]
 ): Achievement[] {
   const achievements: Achievement[] = [];
+  const today = getDateString();
 
   if (wins >= 1) {
     achievements.push({
@@ -68,7 +73,7 @@ function generateAchievements(
       name: "First Victory",
       description: "Win your first battle",
       icon: "trophy",
-      unlockedAt: new Date().toISOString().split("T")[0],
+      unlockedAt: today,
       rarity: "common",
     });
   }
@@ -79,7 +84,7 @@ function generateAchievements(
       name: "Rising Star",
       description: "Win 5 games",
       icon: "star",
-      unlockedAt: new Date().toISOString().split("T")[0],
+      unlockedAt: today,
       rarity: "common",
     });
   }
@@ -90,7 +95,7 @@ function generateAchievements(
       name: "Veteran",
       description: "Win 10 games",
       icon: "medal",
-      unlockedAt: new Date().toISOString().split("T")[0],
+      unlockedAt: today,
       rarity: "rare",
     });
   }
@@ -101,7 +106,7 @@ function generateAchievements(
       name: "Dedicated Player",
       description: "Play 25 games",
       icon: "crown",
-      unlockedAt: new Date().toISOString().split("T")[0],
+      unlockedAt: today,
       rarity: "rare",
     });
   }
@@ -112,7 +117,7 @@ function generateAchievements(
       name: "Master Strategist",
       description: "Win 25 games",
       icon: "shield",
-      unlockedAt: new Date().toISOString().split("T")[0],
+      unlockedAt: today,
       rarity: "epic",
     });
   }
@@ -146,7 +151,7 @@ function convertToMatches(
       opponent: `${opponent.slice(0, 6)}...${opponent.slice(-4)}`,
       result: isWinner ? "win" : "loss",
       duration,
-      date: new Date(game.timestamp).toISOString().split("T")[0],
+      date: getDateString(new Date(game.timestamp)),
       mapName: "Westeros",
     };
   });

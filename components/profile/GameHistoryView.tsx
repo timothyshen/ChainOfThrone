@@ -24,8 +24,6 @@ export function GameHistoryView({ gameAddress }: GameHistoryViewProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const reconstructor = new RoundHistoryReconstructor()
-
   // Load game history on mount
   useEffect(() => {
     async function loadHistory() {
@@ -41,7 +39,8 @@ export function GameHistoryView({ gameAddress }: GameHistoryViewProps) {
         const round = (await getRoundNumber(gameAddress)) as number
         setCurrentRound(round)
 
-        // Fetch complete history
+        // Fetch complete history using fresh reconstructor instance
+        const reconstructor = new RoundHistoryReconstructor()
         const gameHistory = await reconstructor.getGameHistory(gameAddress)
         setHistory(gameHistory)
 

@@ -46,11 +46,12 @@ export function useTransactionToast(
     }
 
     if (state.status === 'error') {
+      const errorMessage = 'error' in state ? state.error.message : 'Transaction failed'
       toast({
         title: 'Failed',
-        description: messages?.error || state.error.message || 'Transaction failed',
+        description: messages?.error || errorMessage,
         variant: 'destructive',
       })
     }
-  }, [state.status, toast, messages])
+  }, [state, toast, messages])
 }

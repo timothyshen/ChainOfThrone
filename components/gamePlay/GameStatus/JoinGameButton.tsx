@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Loader2, UserPlus } from "lucide-react";
 import { TransactionButton } from "@/components/shared/TransactionButton";
-import { TransactionState } from "@/lib/hooks/useTransaction";
+import type { TxState } from "@/lib/types/transaction";
 
 interface JoinGameButtonProps {
   isFull: boolean;
-  txState: TransactionState;
+  txState: TxState;
   onJoin: () => void;
 }
 
