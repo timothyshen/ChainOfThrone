@@ -79,8 +79,8 @@ export const TerritoryGrid = memo(
       let styles = "ring-2 ring-amber-500/50 "
 
       if (!isOwned) {
-        // Uncontrolled castle - pulse animation to attract attention
-        styles += "animate-pulse shadow-lg shadow-amber-500/30 "
+        // Uncontrolled castle
+        styles += "shadow-lg shadow-amber-500/30 "
       } else if (isPlayerOwned) {
         // Player's castle - blue with gold
         styles += "shadow-lg shadow-blue-500/30 "

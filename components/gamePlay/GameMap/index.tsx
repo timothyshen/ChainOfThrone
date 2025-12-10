@@ -109,15 +109,22 @@ export default function GameMap({
     return () => window.removeEventListener('keydown', handleEscKey)
   }, [movementMode, selectedArmy, selectedTerritory, clearSelection, cancelMovement])
 
+  // Calculate size based on container
+  const containerSize = isMobile ? "min(calc(100vw - 16px), calc(100vh - 240px))" : "min(100%, 600px)"
+
   return (
     <div
       className="w-full h-full flex items-center justify-center"
       onClick={handleMapClick}
     >
-      {/* Map Canvas - Square aspect ratio, fits container */}
+      {/* Map Canvas - Square aspect ratio */}
       <div
         ref={mapRef}
-        className="relative bg-gradient-to-br from-surface-1 to-surface-2 aspect-square w-full h-full max-w-[600px] max-h-[600px] rounded-lg overflow-hidden"
+        className="relative bg-gradient-to-br from-surface-1 to-surface-2 rounded-lg overflow-hidden"
+        style={{
+          width: containerSize,
+          height: containerSize,
+        }}
       >
           {/* Grid Background - Click to cancel */}
           <div

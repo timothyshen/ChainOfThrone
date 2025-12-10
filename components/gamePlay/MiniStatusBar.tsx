@@ -59,28 +59,28 @@ export const MiniStatusBar = memo(function MiniStatusBar() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <button className="w-full h-12 mt-2 px-4 flex items-center justify-between bg-surface-1 border-b border-border active:bg-surface-2 transition-colors">
+        <button className="w-full h-12 px-4 flex items-center justify-between bg-surface-1 border-b border-border active:bg-surface-2 transition-colors">
           {/* Castle Progress - Primary Info */}
-          <div className="flex items-center gap-3">
-            <Crown className="w-5 h-5 text-game-castle" />
+          <div className="flex items-center gap-2">
+            <Crown className="w-4 h-4 text-game-castle" />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 text-sm">
               {/* Player Progress */}
-              <span className="text-lg font-bold text-game-player">
+              <span className="font-bold text-game-player">
                 {castleStats.player}
               </span>
-              <span className="text-sm text-text-muted">/3</span>
+              <span className="text-text-muted">/3</span>
 
               {/* Progress Bars */}
-              <div className="flex items-center gap-1">
-                <div className="w-10 h-1.5 bg-surface-3 rounded-full overflow-hidden">
+              <div className="flex items-center gap-1 mx-1">
+                <div className="w-8 h-1.5 bg-surface-3 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-game-player transition-all duration-300"
                     style={{ width: `${(castleStats.player / CASTLES_TO_WIN) * 100}%` }}
                   />
                 </div>
-                <span className="text-xs text-text-muted">vs</span>
-                <div className="w-10 h-1.5 bg-surface-3 rounded-full overflow-hidden">
+                <span className="text-text-muted">vs</span>
+                <div className="w-8 h-1.5 bg-surface-3 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-game-enemy transition-all duration-300"
                     style={{ width: `${(castleStats.enemy / CASTLES_TO_WIN) * 100}%` }}
@@ -89,17 +89,17 @@ export const MiniStatusBar = memo(function MiniStatusBar() {
               </div>
 
               {/* Enemy Progress */}
-              <span className="text-lg font-bold text-game-enemy">
+              <span className="font-bold text-game-enemy">
                 {castleStats.enemy}
               </span>
-              <span className="text-sm text-text-muted">/3</span>
+              <span className="text-text-muted">/3</span>
             </div>
           </div>
 
           {/* Right Side: Turn Status + Expand Icon */}
           <div className="flex items-center gap-2">
             <div
-              className={`px-2 py-0.5 rounded text-xs font-medium ${
+              className={`px-2 py-0.5 rounded text-sm font-medium ${
                 hasSubmittedRound
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
                   : "bg-amber-50 text-amber-700 border border-amber-300"
