@@ -117,7 +117,7 @@ export default function GameMap({
 
   return (
     <div
-      className="h-full bg-slate-900 text-white flex flex-col"
+      className="h-full bg-background text-foreground flex flex-col"
       onClick={handleMapClick}
     >
       {/* Game Status Bar - Castle Count & Win Condition */}
@@ -128,7 +128,7 @@ export default function GameMap({
         {/* Map Canvas */}
         <div
           ref={mapRef}
-          className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900"
+          className="w-full h-full bg-gradient-to-br from-surface-1 to-surface-2"
           style={{
             transform: `scale(1)`,
             transformOrigin: "center center",
@@ -151,7 +151,7 @@ export default function GameMap({
             {Array.from({ length: GRID_CONFIG.totalCells }).map((_, index) => (
               <div
                 key={index}
-                className="border border-slate-600/30 rounded-lg bg-slate-800/20"
+                className="border border-border/50 rounded-lg bg-surface-2/30"
                 onClick={(e) => {
                   // Click on grid cell = cancel operation
                   e.stopPropagation()
@@ -199,7 +199,7 @@ export default function GameMap({
                   clearSelection()
                   cancelMovement()
                 }}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-200 flex items-center gap-2 font-bold"
+                className="px-4 py-2 bg-game-enemy hover:bg-game-enemy/90 text-white rounded-lg shadow-soft transition-all duration-200 flex items-center gap-2 font-bold"
               >
                 <span className="text-lg">✕</span>
                 Cancel (ESC)

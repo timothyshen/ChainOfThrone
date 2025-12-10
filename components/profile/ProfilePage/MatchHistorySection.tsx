@@ -16,7 +16,7 @@ interface MatchHistorySectionProps {
 export const MatchHistorySection = memo(
   ({ matches }: MatchHistorySectionProps) => {
     return (
-      <Card className="bg-slate-800 border-slate-700 text-white">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle>Recent Match History</CardTitle>
         </CardHeader>
@@ -25,7 +25,7 @@ export const MatchHistorySection = memo(
             {matches.map((match) => (
               <div
                 key={match.id}
-                className="flex items-center justify-between p-3 bg-slate-700 rounded-lg"
+                className="flex items-center justify-between p-3 bg-surface-2 rounded-lg"
               >
                 {/* Match Info */}
                 <div className="flex items-center gap-3">
@@ -41,7 +41,7 @@ export const MatchHistorySection = memo(
                   </Badge>
                   <div>
                     <div className="font-semibold">vs {match.opponent}</div>
-                    <div className="text-sm text-slate-400 flex items-center gap-2">
+                    <div className="text-sm text-text-secondary flex items-center gap-2">
                       <MapPin className="w-3 h-3" />
                       {match.mapName}
                     </div>
@@ -49,7 +49,7 @@ export const MatchHistorySection = memo(
                 </div>
 
                 {/* Match Metadata */}
-                <div className="text-right text-sm text-slate-400">
+                <div className="text-right text-sm text-text-secondary">
                   <div>{match.duration}</div>
                   <div>{match.date}</div>
                 </div>

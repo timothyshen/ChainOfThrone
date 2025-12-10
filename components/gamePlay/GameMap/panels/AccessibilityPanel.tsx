@@ -51,18 +51,18 @@ export const AccessibilityPanel = memo(({
 
   const header = (
     <div
-      className={`flex items-center justify-between p-2 ${isCollapsible ? 'cursor-pointer hover:bg-slate-700/50' : ''}`}
+      className={`flex items-center justify-between p-2 ${isCollapsible ? 'cursor-pointer hover:bg-surface-3/50' : ''}`}
       onClick={() => isCollapsible && setIsExpanded(!isExpanded)}
     >
       <div className="flex items-center gap-2">
-        <Accessibility className="w-4 h-4 text-slate-400" />
+        <Accessibility className="w-4 h-4 text-text-secondary" />
         <span className="text-sm font-medium">Accessibility</span>
       </div>
       {isCollapsible && (
         isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-slate-400" />
+          <ChevronUp className="w-4 h-4 text-text-secondary" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <ChevronDown className="w-4 h-4 text-text-secondary" />
         )
       )}
     </div>
@@ -70,24 +70,24 @@ export const AccessibilityPanel = memo(({
 
   if (!isExpanded && isCollapsible) {
     return (
-      <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+      <div className="bg-surface-1/95 backdrop-blur-sm border border-border rounded-lg overflow-hidden shadow-soft">
         {header}
       </div>
     )
   }
 
   return (
-    <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+    <div className="bg-surface-1/95 backdrop-blur-sm border border-border rounded-lg overflow-hidden shadow-soft">
       {header}
 
       <div className="p-3 pt-0 space-y-3">
         {/* Color-blind Mode */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-slate-400" />
+            <Eye className="w-4 h-4 text-text-secondary" />
             <div>
               <p className="text-sm font-medium">Color-blind Mode</p>
-              <p className="text-[10px] text-slate-500">Use patterns + shapes</p>
+              <p className="text-[10px] text-text-muted">Use patterns + shapes</p>
             </div>
           </div>
           <Switch
@@ -100,10 +100,10 @@ export const AccessibilityPanel = memo(({
         {/* High Contrast */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-slate-400" />
+            <Eye className="w-4 h-4 text-text-secondary" />
             <div>
               <p className="text-sm font-medium">High Contrast</p>
-              <p className="text-[10px] text-slate-500">Increase visibility</p>
+              <p className="text-[10px] text-text-muted">Increase visibility</p>
             </div>
           </div>
           <Switch
@@ -116,10 +116,10 @@ export const AccessibilityPanel = memo(({
         {/* Reduced Motion */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-slate-400" />
+            <Zap className="w-4 h-4 text-text-secondary" />
             <div>
               <p className="text-sm font-medium">Reduced Motion</p>
-              <p className="text-[10px] text-slate-500">Disable animations</p>
+              <p className="text-[10px] text-text-muted">Disable animations</p>
             </div>
           </div>
           <Switch
@@ -132,10 +132,10 @@ export const AccessibilityPanel = memo(({
         {/* Screen Reader Announcements */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Volume2 className="w-4 h-4 text-slate-400" />
+            <Volume2 className="w-4 h-4 text-text-secondary" />
             <div>
               <p className="text-sm font-medium">Announcements</p>
-              <p className="text-[10px] text-slate-500">Screen reader alerts</p>
+              <p className="text-[10px] text-text-muted">Screen reader alerts</p>
             </div>
           </div>
           <Switch
@@ -148,10 +148,10 @@ export const AccessibilityPanel = memo(({
         {/* Large Text */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Type className="w-4 h-4 text-slate-400" />
+            <Type className="w-4 h-4 text-text-secondary" />
             <div>
               <p className="text-sm font-medium">Large Text</p>
-              <p className="text-[10px] text-slate-500">Increase font size</p>
+              <p className="text-[10px] text-text-muted">Increase font size</p>
             </div>
           </div>
           <Switch
@@ -162,7 +162,7 @@ export const AccessibilityPanel = memo(({
         </div>
 
         {/* Reset Button */}
-        <div className="pt-2 border-t border-slate-700">
+        <div className="pt-2 border-t border-border">
           <Button
             variant="outline"
             size="sm"
@@ -175,13 +175,13 @@ export const AccessibilityPanel = memo(({
         </div>
 
         {/* Keyboard Shortcuts Info */}
-        <div className="pt-2 border-t border-slate-700">
-          <p className="text-[10px] text-slate-500 font-medium mb-1">Keyboard Shortcuts:</p>
-          <div className="grid grid-cols-2 gap-1 text-[9px] text-slate-500">
-            <div><kbd className="bg-slate-700 px-1 rounded">ESC</kbd> Cancel action</div>
-            <div><kbd className="bg-slate-700 px-1 rounded">Tab</kbd> Navigate cells</div>
-            <div><kbd className="bg-slate-700 px-1 rounded">Enter</kbd> Select/Confirm</div>
-            <div><kbd className="bg-slate-700 px-1 rounded">Space</kbd> Toggle selection</div>
+        <div className="pt-2 border-t border-border">
+          <p className="text-[10px] text-text-muted font-medium mb-1">Keyboard Shortcuts:</p>
+          <div className="grid grid-cols-2 gap-1 text-[9px] text-text-muted">
+            <div><kbd className="bg-surface-3 px-1 rounded">ESC</kbd> Cancel action</div>
+            <div><kbd className="bg-surface-3 px-1 rounded">Tab</kbd> Navigate cells</div>
+            <div><kbd className="bg-surface-3 px-1 rounded">Enter</kbd> Select/Confirm</div>
+            <div><kbd className="bg-surface-3 px-1 rounded">Space</kbd> Toggle selection</div>
           </div>
         </div>
       </div>

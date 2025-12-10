@@ -21,7 +21,7 @@ export const AchievementsSection = memo(
         {achievements.map((achievement) => (
           <Card
             key={achievement.id}
-            className="bg-slate-800 border-slate-700 text-white"
+            className="bg-card border-border"
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
@@ -37,7 +37,7 @@ export const AchievementsSection = memo(
                 {/* Achievement Details */}
                 <div className="flex-1">
                   <h3 className="font-bold mb-1">{achievement.name}</h3>
-                  <p className="text-sm text-slate-400 mb-2">
+                  <p className="text-sm text-text-secondary mb-2">
                     {achievement.description}
                   </p>
 
@@ -46,7 +46,7 @@ export const AchievementsSection = memo(
                     <Badge variant="outline" className="text-xs">
                       {achievement.rarity}
                     </Badge>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-text-muted">
                       <Calendar className="w-3 h-3 inline mr-1" />
                       {achievement.unlockedAt}
                     </span>

@@ -17,7 +17,7 @@ export const StatsSection = memo(({ player }: StatsSectionProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Combat Statistics */}
-      <Card className="bg-slate-800 border-slate-700 text-white">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="w-5 h-5" />
@@ -47,7 +47,7 @@ export const StatsSection = memo(({ player }: StatsSectionProps) => {
       </Card>
 
       {/* Strategy Profile */}
-      <Card className="bg-slate-800 border-slate-700 text-white">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5" />

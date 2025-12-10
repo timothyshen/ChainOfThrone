@@ -133,7 +133,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
   }, [missedRoundsInfo, playMissedRounds, toast]);
 
   return (
-    <div className="flex flex-col h-screen md:mt-12 bg-slate-900">
+    <div className="flex flex-col h-screen md:mt-12 bg-background">
       {/* Missed Rounds Notification */}
       <MissedRoundsNotification
         missedRoundsInfo={missedRoundsInfo}

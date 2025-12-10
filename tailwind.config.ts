@@ -65,11 +65,61 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Game-specific semantic colors
+        game: {
+          player: {
+            DEFAULT: "hsl(var(--game-player))",
+            light: "hsl(var(--game-player-light))",
+          },
+          enemy: {
+            DEFAULT: "hsl(var(--game-enemy))",
+            light: "hsl(var(--game-enemy-light))",
+          },
+          castle: {
+            DEFAULT: "hsl(var(--game-castle))",
+            light: "hsl(var(--game-castle-light))",
+          },
+          neutral: {
+            DEFAULT: "hsl(var(--game-neutral))",
+            light: "hsl(var(--game-neutral-light))",
+          },
+        },
+        // Surface layers for depth
+        surface: {
+          1: "hsl(var(--surface-1))",
+          2: "hsl(var(--surface-2))",
+          3: "hsl(var(--surface-3))",
+        },
+        // Text hierarchy
+        text: {
+          primary: "hsl(var(--text-primary))",
+          secondary: "hsl(var(--text-secondary))",
+          muted: "hsl(var(--text-muted))",
+        },
+        // Warm stone palette for manual use
+        stone: {
+          50: "#faf9f7",
+          100: "#f5f3f0",
+          200: "#e8e4de",
+          300: "#d6d0c7",
+          400: "#b8b0a3",
+          500: "#9a9183",
+          600: "#7d7568",
+          700: "#655e53",
+          800: "#544e45",
+          900: "#47423b",
+          950: "#272420",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        'soft': '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.05)',
+        'soft-lg': '0 4px 16px -4px rgba(0, 0, 0, 0.1), 0 8px 24px -8px rgba(0, 0, 0, 0.06)',
+        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
       },
       keyframes: {
         "accordion-down": {

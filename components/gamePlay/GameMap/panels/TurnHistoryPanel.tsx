@@ -124,7 +124,7 @@ export const TurnHistoryPanel = memo(({
         case "capture":
           return "text-amber-400 bg-amber-900/30"
         default:
-          return "text-slate-400 bg-slate-800/30"
+          return "text-text-secondary bg-surface-2/50"
       }
     } else {
       switch (event.type) {
@@ -135,30 +135,30 @@ export const TurnHistoryPanel = memo(({
         case "capture":
           return "text-red-400 bg-red-900/30"
         default:
-          return "text-slate-400 bg-slate-800/30"
+          return "text-text-secondary bg-surface-2/50"
       }
     }
   }
 
   const header = (
     <div
-      className={`flex items-center justify-between p-2 ${isCollapsible ? 'cursor-pointer hover:bg-slate-700/50' : ''}`}
+      className={`flex items-center justify-between p-2 ${isCollapsible ? 'cursor-pointer hover:bg-surface-3/50' : ''}`}
       onClick={() => isCollapsible && setIsExpanded(!isExpanded)}
     >
       <div className="flex items-center gap-2">
-        <History className="w-4 h-4 text-slate-400" />
+        <History className="w-4 h-4 text-text-secondary" />
         <span className="text-sm font-medium">Turn History</span>
         {historyEvents.length > 0 && (
-          <span className="text-[10px] bg-slate-600 px-1.5 py-0.5 rounded-full">
+          <span className="text-[10px] bg-surface-3 px-1.5 py-0.5 rounded-full">
             {historyEvents.length}
           </span>
         )}
       </div>
       {isCollapsible && (
         isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-slate-400" />
+          <ChevronUp className="w-4 h-4 text-text-secondary" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <ChevronDown className="w-4 h-4 text-text-secondary" />
         )
       )}
     </div>
@@ -166,19 +166,19 @@ export const TurnHistoryPanel = memo(({
 
   if (!isExpanded && isCollapsible) {
     return (
-      <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+      <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden">
         {header}
       </div>
     )
   }
 
   return (
-    <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+    <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden">
       {header}
 
       <div className="p-2 pt-0 space-y-1 max-h-60 overflow-y-auto">
         {historyEvents.length === 0 ? (
-          <div className="text-center py-4 text-xs text-slate-500">
+          <div className="text-center py-4 text-xs text-text-muted">
             No events yet. Make a move!
           </div>
         ) : (
@@ -208,7 +208,7 @@ export const TurnHistoryPanel = memo(({
 
       {/* Replay Button - Placeholder */}
       {historyEvents.length > 0 && (
-        <div className="p-2 border-t border-slate-700">
+        <div className="p-2 border-t border-border">
           <Button
             variant="outline"
             size="sm"

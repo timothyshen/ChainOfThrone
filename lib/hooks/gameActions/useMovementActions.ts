@@ -7,6 +7,7 @@ import { useTransactionToast } from "@/lib/hooks/useTransactionToast"
 import {
   useSelectionContext,
   useMovementContext,
+  useGameStateContext,
 } from "@/lib/contexts/GameContext"
 import { ANIMATION_DURATIONS } from "@/lib/constants/animations"
 import { logger } from "@/lib/utils/logger"
@@ -31,6 +32,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
     setTargetTerritory,
     cancelMovement,
   } = useMovementContext()
+  const { refreshAllData } = useGameStateContext()
 
   // Automatically display transaction status notifications
   useTransactionToast(tx.state, {
@@ -112,7 +114,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
         setAnimatingArmies((prev) => setAdd(prev, selectedArmy.id))
 
         // Wait for animation to complete
-        setTimeout(() => {
+        setTimeout(async () => {
           // Clear animation state (using optimized helper)
           setAnimatingArmies((prev) => setDelete(prev, selectedArmy.id))
 
@@ -132,6 +134,9 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
 
           // Reset transaction state
           tx.reset()
+
+          // Refresh game state to update roundSubmitted status
+          await refreshAllData()
         }, ANIMATION_DURATIONS.ARMY_MOVE) // Animation duration from constants
 
       } catch (error) {
@@ -152,6 +157,7 @@ export function useMovementActions(gameAddress: `0x${string}` | undefined) {
       setAnimatingArmies,
       setArmyPositions,
       cancelMovement,
+      refreshAllData,
     ]
   )
 

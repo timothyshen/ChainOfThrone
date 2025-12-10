@@ -122,27 +122,27 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
         return (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-game-player flex items-center justify-center">
                 <Users className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white">
+                <p className="text-sm font-medium text-foreground">
                   {actionHint.armySize} units selected
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-text-secondary">
                   Tap a destination on the map
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
               {actionHint.moveOptions > 0 && (
-                <div className="flex items-center gap-1 text-green-400 text-xs">
+                <div className="flex items-center gap-1 text-emerald-600 text-xs">
                   <Navigation className="w-3 h-3" />
                   <span>{actionHint.moveOptions} move</span>
                 </div>
               )}
               {actionHint.attackOptions > 0 && (
-                <div className="flex items-center gap-1 text-red-400 text-xs">
+                <div className="flex items-center gap-1 text-game-enemy text-xs">
                   <Sword className="w-3 h-3" />
                   <span>{actionHint.attackOptions} attack</span>
                 </div>
@@ -156,10 +156,10 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                actionHint.isCastle ? "bg-amber-500" :
-                actionHint.isEnemyOwned ? "bg-red-500" :
-                actionHint.isPlayerOwned ? "bg-blue-500" :
-                "bg-slate-500"
+                actionHint.isCastle ? "bg-game-castle" :
+                actionHint.isEnemyOwned ? "bg-game-enemy" :
+                actionHint.isPlayerOwned ? "bg-game-player" :
+                "bg-game-neutral"
               }`}>
                 {actionHint.isCastle ? (
                   <Crown className="w-4 h-4 text-white" />
@@ -168,13 +168,13 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-white flex items-center gap-1">
+                <p className="text-sm font-medium text-foreground flex items-center gap-1">
                   {actionHint.name}
                   {actionHint.isCastle && (
-                    <span className="text-[10px] text-amber-400">(Castle)</span>
+                    <span className="text-[10px] text-game-castle">(Castle)</span>
                   )}
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-text-secondary">
                   {actionHint.isPlayerOwned ? "Your territory" :
                    actionHint.isEnemyOwned ? `Enemy territory (${actionHint.enemyUnits} units)` :
                    "Neutral territory"}
@@ -182,7 +182,7 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
               </div>
             </div>
             {actionHint.isEnemyOwned && actionHint.isCastle && (
-              <div className="flex items-center gap-1 text-amber-400 text-xs bg-amber-900/50 px-2 py-1 rounded">
+              <div className="flex items-center gap-1 text-game-castle text-xs bg-game-castle-light px-2 py-1 rounded">
                 <Target className="w-3 h-3" />
                 <span>Capture to win!</span>
               </div>
@@ -195,23 +195,23 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
         return (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center">
-                <Users className="w-4 h-4 text-slate-300" />
+              <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center">
+                <Users className="w-4 h-4 text-text-secondary" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white">
+                <p className="text-sm font-medium text-foreground">
                   {actionHint.hasArmies ? (
                     <>Tap your army ({actionHint.totalUnits} units) to move</>
                   ) : (
                     <>No armies available</>
                   )}
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-text-secondary">
                   Select an army on the map to begin
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-amber-400 text-xs bg-amber-900/50 px-2 py-1 rounded">
+            <div className="flex items-center gap-1 text-game-castle text-xs bg-game-castle-light px-2 py-1 rounded">
               <Crown className="w-3 h-3" />
               <span>
                 {actionHint.castlesNeeded > 0
@@ -226,7 +226,7 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
 
   return (
     <div className={`
-      bg-slate-800/95 backdrop-blur-sm border-t border-slate-700
+      bg-surface-1/95 backdrop-blur-sm border-t border-border shadow-soft
       px-3 py-2 md:px-4 md:py-3
       ${isMobile ? "fixed bottom-0 left-0 right-0 z-20" : ""}
     `}>

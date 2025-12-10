@@ -54,16 +54,16 @@ export const MovementInput = memo(({
     <div className="space-y-4">
       {/* Header */}
       <div className="text-center">
-        <Navigation className="w-6 h-6 mx-auto text-blue-400 mb-1" />
+        <Navigation className="w-6 h-6 mx-auto text-game-player mb-1" />
         <h3 className="font-bold text-lg">Move Army</h3>
       </div>
 
       {/* Target Territory */}
       {targetTerritory && (
-        <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-3">
+        <div className="bg-game-player-light border border-game-player/50 rounded-lg p-3">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-400" />
-            <span className="text-sm text-blue-300">
+            <MapPin className="w-4 h-4 text-game-player" />
+            <span className="text-sm text-game-player">
               Moving to <span className="font-bold">{targetTerritory.name}</span>
             </span>
           </div>
@@ -73,8 +73,8 @@ export const MovementInput = memo(({
       {/* Unit Selection */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-400">Units to send:</span>
-          <span className="font-bold text-xl text-blue-400">{currentValue}</span>
+          <span className="text-text-secondary">Units to send:</span>
+          <span className="font-bold text-xl text-game-player">{currentValue}</span>
         </div>
 
         {/* Slider */}
@@ -87,7 +87,7 @@ export const MovementInput = memo(({
             onValueChange={(value) => onMoveStrengthChange(value[0] ?? 1)}
             className="w-full"
           />
-          <div className="flex justify-between text-xs text-slate-500 mt-1">
+          <div className="flex justify-between text-xs text-text-muted mt-1">
             <span>1</span>
             <span>{maxUnits}</span>
           </div>
@@ -123,16 +123,16 @@ export const MovementInput = memo(({
       </div>
 
       {/* Preview */}
-      <div className="bg-slate-800/50 rounded-lg p-3 space-y-2">
-        <p className="text-xs text-slate-400 font-medium">After move:</p>
+      <div className="bg-surface-2 rounded-lg p-3 space-y-2">
+        <p className="text-xs text-text-secondary font-medium">After move:</p>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-xs text-slate-300">Source</span>
+            <span className="text-xs text-foreground">Source</span>
           </div>
           <div className="flex items-center gap-1">
-            <Users className="w-3 h-3 text-slate-400" />
+            <Users className="w-3 h-3 text-text-secondary" />
             <span className={`text-sm font-bold ${preview.sourceRemaining === 0 ? 'text-yellow-400' : 'text-green-400'}`}>
               {preview.sourceRemaining} units
             </span>
@@ -140,17 +140,17 @@ export const MovementInput = memo(({
         </div>
 
         <div className="flex justify-center">
-          <ArrowRight className="w-4 h-4 text-blue-400" />
+          <ArrowRight className="w-4 h-4 text-game-player" />
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-xs text-slate-300">Destination</span>
+            <span className="text-xs text-foreground">Destination</span>
           </div>
           <div className="flex items-center gap-1">
-            <Users className="w-3 h-3 text-slate-400" />
-            <span className="text-sm font-bold text-blue-400">
+            <Users className="w-3 h-3 text-text-secondary" />
+            <span className="text-sm font-bold text-game-player">
               {preview.destinationUnits} units
             </span>
           </div>
@@ -172,7 +172,7 @@ export const MovementInput = memo(({
 
       {/* Move Button */}
       <Button
-        className={`w-full ${isMobile ? 'h-12 text-base' : ''} bg-blue-600 hover:bg-blue-700 text-white`}
+        className={`w-full ${isMobile ? 'h-12 text-base' : ''} bg-primary hover:bg-primary/90 text-white`}
         disabled={!canMove}
         onClick={onMoveArmy}
       >

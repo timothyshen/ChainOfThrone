@@ -109,18 +109,18 @@ export const MiniMapPanel = memo(({
 
   const header = (
     <div
-      className={`flex items-center justify-between p-2 ${isCollapsible ? 'cursor-pointer hover:bg-slate-700/50' : ''}`}
+      className={`flex items-center justify-between p-2 ${isCollapsible ? 'cursor-pointer hover:bg-surface-3/50' : ''}`}
       onClick={() => isCollapsible && setIsExpanded(!isExpanded)}
     >
       <div className="flex items-center gap-2">
-        <Map className="w-4 h-4 text-slate-400" />
+        <Map className="w-4 h-4 text-text-secondary" />
         <span className="text-sm font-medium">Overview</span>
       </div>
       {isCollapsible && (
         isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-slate-400" />
+          <ChevronUp className="w-4 h-4 text-text-secondary" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <ChevronDown className="w-4 h-4 text-text-secondary" />
         )
       )}
     </div>
@@ -128,20 +128,20 @@ export const MiniMapPanel = memo(({
 
   if (!isExpanded && isCollapsible) {
     return (
-      <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+      <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden">
         {header}
       </div>
     )
   }
 
   return (
-    <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+    <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden">
       {header}
 
       <div className="p-3 pt-0 space-y-3">
         {/* Castle Status */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+          <div className="flex items-center gap-1 text-xs text-game-castle font-medium">
             <Crown className="w-3 h-3" />
             CASTLE STATUS
           </div>
@@ -149,10 +149,10 @@ export const MiniMapPanel = memo(({
           {/* Player Castles */}
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-blue-400">You</span>
-              <span className="font-bold text-blue-400">{stats.playerCastles}/{CASTLES_TO_WIN}</span>
+              <span className="text-game-player">You</span>
+              <span className="font-bold text-game-player">{stats.playerCastles}/{CASTLES_TO_WIN}</span>
             </div>
-            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-surface-3 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 transition-all duration-300"
                 style={{ width: `${(stats.playerCastles / CASTLES_TO_WIN) * 100}%` }}
@@ -163,10 +163,10 @@ export const MiniMapPanel = memo(({
           {/* Enemy Castles */}
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-red-400">Enemy</span>
-              <span className="font-bold text-red-400">{stats.enemyCastles}/{CASTLES_TO_WIN}</span>
+              <span className="text-game-enemy">Enemy</span>
+              <span className="font-bold text-game-enemy">{stats.enemyCastles}/{CASTLES_TO_WIN}</span>
             </div>
-            <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-surface-3 rounded-full overflow-hidden">
               <div
                 className="h-full bg-red-500 transition-all duration-300"
                 style={{ width: `${(stats.enemyCastles / CASTLES_TO_WIN) * 100}%` }}
@@ -175,7 +175,7 @@ export const MiniMapPanel = memo(({
           </div>
 
           {stats.neutralCastles > 0 && (
-            <div className="text-[10px] text-slate-500 text-center">
+            <div className="text-[10px] text-text-muted text-center">
               {stats.neutralCastles} unclaimed castle{stats.neutralCastles > 1 ? 's' : ''}
             </div>
           )}
@@ -183,7 +183,7 @@ export const MiniMapPanel = memo(({
 
         {/* Army Strength */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+          <div className="flex items-center gap-1 text-xs text-text-secondary font-medium">
             <Users className="w-3 h-3" />
             ARMY STRENGTH
           </div>
@@ -191,16 +191,16 @@ export const MiniMapPanel = memo(({
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-blue-400">You: {stats.playerUnits}</span>
+              <span className="text-game-player">You: {stats.playerUnits}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-red-400">Enemy: {stats.enemyUnits}</span>
+              <span className="text-game-enemy">Enemy: {stats.enemyUnits}</span>
               <div className="w-2 h-2 rounded-full bg-red-500" />
             </div>
           </div>
 
           {/* Strength bar */}
-          <div className="h-2 bg-slate-700 rounded-full overflow-hidden flex">
+          <div className="h-2 bg-surface-3 rounded-full overflow-hidden flex">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
               style={{
@@ -222,12 +222,12 @@ export const MiniMapPanel = memo(({
 
         {/* Mini Map Grid */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+          <div className="flex items-center gap-1 text-xs text-text-secondary font-medium">
             <Map className="w-3 h-3" />
             MAP OVERVIEW
           </div>
 
-          <div className="grid grid-cols-3 gap-1 p-2 bg-slate-900/50 rounded-lg">
+          <div className="grid grid-cols-3 gap-1 p-2 bg-surface-2/50 rounded-lg">
             {miniMapGrid.flat().map((cell) => (
               <div
                 key={cell.id}
@@ -237,7 +237,7 @@ export const MiniMapPanel = memo(({
                     ? 'bg-blue-500/60 border border-blue-400'
                     : cell.isEnemyOwned
                     ? 'bg-red-500/60 border border-red-400'
-                    : 'bg-slate-600/60 border border-slate-500'
+                    : 'bg-game-neutral/40 border border-game-neutral/60'
                   }
                   ${cell.isCastle ? 'ring-1 ring-amber-400' : ''}
                 `}
@@ -246,7 +246,7 @@ export const MiniMapPanel = memo(({
                   <Crown className={`w-2.5 h-2.5 ${
                     cell.isPlayerOwned ? 'text-blue-200' :
                     cell.isEnemyOwned ? 'text-red-200' :
-                    'text-amber-400'
+                    'text-game-castle'
                   }`} />
                 )}
                 {!cell.isCastle && (cell.hasPlayerArmy || cell.hasEnemyArmy) && (
@@ -259,7 +259,7 @@ export const MiniMapPanel = memo(({
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-center gap-3 text-[9px] text-slate-500">
+          <div className="flex items-center justify-center gap-3 text-[9px] text-text-muted">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-blue-500/60 border border-blue-400 rounded-sm" />
               <span>You</span>
@@ -269,7 +269,7 @@ export const MiniMapPanel = memo(({
               <span>Enemy</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-slate-600/60 border border-slate-500 rounded-sm ring-1 ring-amber-400" />
+              <div className="w-2 h-2 bg-game-neutral/40 border border-game-neutral/60 rounded-sm ring-1 ring-amber-400" />
               <span>Castle</span>
             </div>
           </div>

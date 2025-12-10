@@ -17,7 +17,7 @@ import {
 export function useTerritoryActions() {
   const { address } = useAccount()
   const { toast } = useToast()
-  const { armies, territories } = useGameStateContext()
+  const { armies, territories, playerAddresses, playerId } = useGameStateContext()
   const {
     selectedArmy,
     selectedTerritory,
@@ -86,6 +86,19 @@ export function useTerritoryActions() {
         return
       }
 
+      // Check if player has already submitted their move this round
+      const playerIndex = playerId ? parseInt(playerId) : -1
+      const hasSubmittedMove = playerIndex >= 0 && playerAddresses[playerIndex]?.roundSubmitted
+
+      if (hasSubmittedMove) {
+        toast({
+          title: "Move Already Submitted",
+          description: "You have already submitted your move for this round. Wait for the next round.",
+          variant: "default",
+        })
+        return
+      }
+
       setSelectedTerritory(territory)
       selectArmy(army)
 
@@ -107,6 +120,8 @@ export function useTerritoryActions() {
       cancelMovement,
       address,
       toast,
+      playerId,
+      playerAddresses,
     ]
   )
 

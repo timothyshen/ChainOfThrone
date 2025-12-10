@@ -122,14 +122,14 @@ export const GameStatusBar = memo(({ isMobile }: { isMobile?: boolean }) => {
   }, [address, playerAddresses])
 
   return (
-    <div className="w-full bg-slate-800/90 backdrop-blur-sm border-b border-slate-700 px-3 py-2 md:px-4 md:py-3">
+    <div className="w-full bg-surface-1/95 backdrop-blur-sm border-b border-border px-3 py-2 md:px-4 md:py-3 shadow-soft">
       {/* Warning Banner */}
       {warningState && (
         <div
           className={`mb-2 px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-bold animate-pulse ${
             warningState.type === "playerCloseToWin"
-              ? "bg-green-600/30 border border-green-500 text-green-300"
-              : "bg-red-600/30 border border-red-500 text-red-300"
+              ? "bg-emerald-50 border border-emerald-300 text-emerald-700"
+              : "bg-game-enemy-light border border-game-enemy/50 text-game-enemy"
           }`}
         >
           {warningState.type === "playerCloseToWin" ? (
@@ -146,43 +146,43 @@ export const GameStatusBar = memo(({ isMobile }: { isMobile?: boolean }) => {
         {/* Castle Count - PRIMARY (Win Condition!) */}
         <div className="flex items-center gap-3 md:gap-4">
           <div className="flex items-center gap-2">
-            <Crown className="w-5 h-5 md:w-6 md:h-6 text-yellow-400" />
-            <span className="text-xs md:text-sm font-medium text-slate-400">CASTLES:</span>
+            <Crown className="w-5 h-5 md:w-6 md:h-6 text-game-castle" />
+            <span className="text-xs md:text-sm font-medium text-text-secondary">CASTLES:</span>
           </div>
 
           {/* Player Castles */}
           <div className="flex items-center gap-2">
             <div className="flex flex-col items-center">
-              <span className="text-lg md:text-xl font-bold text-blue-400">
+              <span className="text-lg md:text-xl font-bold text-game-player">
                 {castleStats.player}/{CASTLES_TO_WIN}
               </span>
-              <span className="text-[10px] md:text-xs text-slate-500">You</span>
+              <span className="text-[10px] md:text-xs text-text-muted">You</span>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-16 md:w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="w-16 md:w-24 h-2 bg-surface-3 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 transition-all duration-300"
+                className="h-full bg-game-player transition-all duration-300"
                 style={{ width: `${(castleStats.player / CASTLES_TO_WIN) * 100}%` }}
               />
             </div>
           </div>
 
-          <span className="text-slate-500 font-medium">vs</span>
+          <span className="text-text-muted font-medium">vs</span>
 
           {/* Enemy Castles */}
           <div className="flex items-center gap-2">
-            <div className="w-16 md:w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="w-16 md:w-24 h-2 bg-surface-3 rounded-full overflow-hidden">
               <div
-                className="h-full bg-red-500 transition-all duration-300"
+                className="h-full bg-game-enemy transition-all duration-300"
                 style={{ width: `${(castleStats.enemy / CASTLES_TO_WIN) * 100}%` }}
               />
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-lg md:text-xl font-bold text-red-400">
+              <span className="text-lg md:text-xl font-bold text-game-enemy">
                 {castleStats.enemy}/{CASTLES_TO_WIN}
               </span>
-              <span className="text-[10px] md:text-xs text-slate-500">Enemy</span>
+              <span className="text-[10px] md:text-xs text-text-muted">Enemy</span>
             </div>
           </div>
         </div>
@@ -191,26 +191,26 @@ export const GameStatusBar = memo(({ isMobile }: { isMobile?: boolean }) => {
         <div className={`flex items-center gap-4 md:gap-6 ${isMobile ? "w-full justify-center" : ""}`}>
           {/* Unit Count */}
           <div className="flex items-center gap-2 text-xs md:text-sm">
-            <Users className="w-4 h-4 text-slate-400" />
-            <span className="text-green-400 font-medium">{unitStats.player}</span>
-            <span className="text-slate-500">vs</span>
-            <span className="text-red-400 font-medium">{unitStats.enemy}</span>
+            <Users className="w-4 h-4 text-text-secondary" />
+            <span className="text-game-player font-medium">{unitStats.player}</span>
+            <span className="text-text-muted">vs</span>
+            <span className="text-game-enemy font-medium">{unitStats.enemy}</span>
           </div>
 
           {/* Territory Count */}
           <div className="flex items-center gap-2 text-xs md:text-sm">
-            <Flag className="w-4 h-4 text-slate-400" />
-            <span className="text-blue-400 font-medium">{territoryStats.player}</span>
-            <span className="text-slate-500">vs</span>
-            <span className="text-red-400 font-medium">{territoryStats.enemy}</span>
+            <Flag className="w-4 h-4 text-text-secondary" />
+            <span className="text-game-player font-medium">{territoryStats.player}</span>
+            <span className="text-text-muted">vs</span>
+            <span className="text-game-enemy font-medium">{territoryStats.enemy}</span>
           </div>
 
           {/* Turn Status */}
           <div
             className={`px-2 py-1 rounded text-xs font-medium ${
               hasSubmittedRound
-                ? "bg-green-600/30 text-green-300 border border-green-600"
-                : "bg-yellow-600/30 text-yellow-300 border border-yellow-600"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
+                : "bg-amber-50 text-amber-700 border border-amber-300"
             }`}
           >
             {hasSubmittedRound ? "Move Submitted" : "Your Turn"}

@@ -87,7 +87,7 @@ export const RoundTransitionOverlay = memo(({
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-slate-900"
+          className="absolute inset-0 bg-stone-900"
         />
 
         {/* Content */}
@@ -153,7 +153,7 @@ export const RoundTransitionOverlay = memo(({
                     <p className="text-xl text-green-400">
                       You have {playerCastles}/{castlesToWin} castles
                     </p>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-stone-400">
                       Capture 1 more to win the game!
                     </p>
                   </div>
@@ -167,7 +167,7 @@ export const RoundTransitionOverlay = memo(({
                     <p className="text-xl text-red-300">
                       Enemy has {enemyCastles}/{castlesToWin} castles
                     </p>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-stone-400">
                       Stop them before they win!
                     </p>
                   </div>
@@ -192,7 +192,7 @@ export const RoundTransitionOverlay = memo(({
                 {/* Castle Status */}
                 <div className="flex items-center justify-center gap-8 mt-6">
                   <div className="text-center">
-                    <p className="text-sm text-slate-400">You</p>
+                    <p className="text-sm text-stone-400">You</p>
                     <div className="flex items-center gap-2">
                       <Crown className="w-5 h-5 text-blue-400" />
                       <span className="text-2xl font-bold text-blue-400">
@@ -200,9 +200,9 @@ export const RoundTransitionOverlay = memo(({
                       </span>
                     </div>
                   </div>
-                  <div className="text-slate-600">vs</div>
+                  <div className="text-stone-500">vs</div>
                   <div className="text-center">
-                    <p className="text-sm text-slate-400">Enemy</p>
+                    <p className="text-sm text-stone-400">Enemy</p>
                     <div className="flex items-center gap-2">
                       <Crown className="w-5 h-5 text-red-400" />
                       <span className="text-2xl font-bold text-red-400">

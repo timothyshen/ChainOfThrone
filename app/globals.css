@@ -4,58 +4,130 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* New Lighter Color Palette - Parchment & Stone Theme */
+
+    /* Background tones - warm off-white */
+    --background: 40 30% 97%;
+    --foreground: 30 10% 20%;
+
+    /* Cards & Surfaces - clean with subtle warmth */
+    --card: 40 25% 99%;
+    --card-foreground: 30 10% 20%;
+
+    /* Popover */
+    --popover: 40 25% 99%;
+    --popover-foreground: 30 10% 20%;
+
+    /* Primary - Deep Navy Blue (player color base) */
+    --primary: 213 50% 25%;
+    --primary-foreground: 40 30% 97%;
+
+    /* Secondary - Warm Stone */
+    --secondary: 30 15% 92%;
+    --secondary-foreground: 30 10% 25%;
+
+    /* Muted - Soft warm gray */
+    --muted: 30 12% 94%;
+    --muted-foreground: 25 8% 45%;
+
+    /* Accent - Warm amber/gold */
+    --accent: 42 70% 50%;
+    --accent-foreground: 30 10% 15%;
+
+    /* Destructive - Terracotta red */
+    --destructive: 8 55% 48%;
+    --destructive-foreground: 40 30% 97%;
+
+    /* Borders & Inputs */
+    --border: 30 15% 85%;
+    --input: 30 15% 88%;
+    --ring: 213 50% 35%;
+
+    --radius: 0.625rem;
+
+    /* Chart Colors */
+    --chart-1: 213 50% 45%;
+    --chart-2: 150 40% 45%;
+    --chart-3: 42 65% 50%;
+    --chart-4: 8 50% 50%;
+    --chart-5: 280 45% 55%;
+
+    /* Game-specific semantic colors */
+    --game-player: 213 55% 40%;
+    --game-player-light: 213 45% 92%;
+    --game-enemy: 8 55% 48%;
+    --game-enemy-light: 8 45% 94%;
+    --game-castle: 42 70% 50%;
+    --game-castle-light: 42 60% 92%;
+    --game-neutral: 30 8% 55%;
+    --game-neutral-light: 30 12% 94%;
+
+    /* Surface layers */
+    --surface-1: 40 25% 98%;
+    --surface-2: 35 20% 95%;
+    --surface-3: 30 15% 90%;
+
+    /* Text hierarchy */
+    --text-primary: 30 10% 18%;
+    --text-secondary: 25 8% 40%;
+    --text-muted: 25 6% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Dark mode - warmer dark tones, not pure black */
+    --background: 30 15% 10%;
+    --foreground: 35 15% 92%;
+
+    --card: 30 12% 14%;
+    --card-foreground: 35 15% 92%;
+
+    --popover: 30 12% 14%;
+    --popover-foreground: 35 15% 92%;
+
+    --primary: 213 45% 65%;
+    --primary-foreground: 30 15% 10%;
+
+    --secondary: 30 10% 22%;
+    --secondary-foreground: 35 15% 90%;
+
+    --muted: 30 10% 20%;
+    --muted-foreground: 30 10% 60%;
+
+    --accent: 42 65% 55%;
+    --accent-foreground: 30 15% 10%;
+
+    --destructive: 8 50% 55%;
+    --destructive-foreground: 35 15% 95%;
+
+    --border: 30 10% 22%;
+    --input: 30 10% 22%;
+    --ring: 213 45% 60%;
+
+    --chart-1: 213 50% 55%;
+    --chart-2: 150 45% 50%;
+    --chart-3: 42 60% 55%;
+    --chart-4: 8 55% 55%;
+    --chart-5: 280 50% 60%;
+
+    /* Game colors - dark mode */
+    --game-player: 213 50% 60%;
+    --game-player-light: 213 30% 20%;
+    --game-enemy: 8 50% 55%;
+    --game-enemy-light: 8 30% 18%;
+    --game-castle: 42 65% 55%;
+    --game-castle-light: 42 40% 18%;
+    --game-neutral: 30 8% 50%;
+    --game-neutral-light: 30 10% 18%;
+
+    /* Surface layers - dark */
+    --surface-1: 30 12% 12%;
+    --surface-2: 30 10% 16%;
+    --surface-3: 30 10% 22%;
+
+    /* Text hierarchy - dark */
+    --text-primary: 35 15% 92%;
+    --text-secondary: 30 10% 70%;
+    --text-muted: 30 8% 50%;
   }
 }
 
@@ -65,6 +137,7 @@
   }
   body {
     @apply bg-background text-foreground min-h-screen flex flex-col;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
   html {
     @apply h-full;
@@ -86,6 +159,19 @@
 
   .desktop-only {
     @apply hidden md:block;
+  }
+
+  /* Game-specific component styles */
+  .game-surface {
+    @apply bg-surface-1 border border-border rounded-xl;
+  }
+
+  .game-card {
+    @apply bg-card border border-border rounded-xl shadow-sm;
+  }
+
+  .game-panel {
+    @apply bg-surface-2 border border-border rounded-lg;
   }
 }
 
