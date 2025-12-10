@@ -1,16 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/lib/hooks/use-toast";
 import { logger } from "@/lib/utils/logger";
 import { Spinner } from "../ui/spinner";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { ChevronDown } from "lucide-react";
 
 // Components
 import GameOperationPanel from "@/components/gamePlay/GameMap/GameOperationPanel";
@@ -19,6 +12,8 @@ import BattleEffectOverlay from "@/components/gamePlay/GameMap/BattleEffectOverl
 import { MissedRoundsNotification } from "./MissedRoundsNotification";
 import { GameStatusPanel } from "./GameStatusPanel";
 import { TurnHistoryPanel } from "./GameMap/panels/TurnHistoryPanel";
+import { MiniStatusBar } from "./MiniStatusBar";
+import { ContextualActionBar } from "./GameMap/ContextualActionBar";
 
 // Context
 import {
@@ -132,8 +127,66 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
     }
   }, [missedRoundsInfo, playMissedRounds, toast]);
 
+  // Mobile layout
+  // Header: 56px, MiniStatusBar: 48px, ActionBar: ~56px, BottomNav: 64px
+  if (isMobile) {
+    return (
+      <div className="h-[100dvh] bg-background overflow-hidden">
+        {/* Missed Rounds Notification - Floating */}
+        <MissedRoundsNotification
+          missedRoundsInfo={missedRoundsInfo}
+          onViewReplay={handleViewReplay}
+          onDismiss={() => setMissedRoundsInfo(null)}
+        />
+
+        {/* Top: Mini Status Bar - Fixed below header (56px) */}
+        <div className="fixed left-0 right-0 z-40" style={{ top: "56px" }}>
+          <MiniStatusBar />
+        </div>
+
+        {/* Middle: Game Map - Between status bar and action bar */}
+        <div
+          className="absolute left-0 right-0 flex items-center justify-center"
+          style={{
+            top: "104px", /* header (56px) + status bar (48px) */
+            bottom: "120px" /* action bar (~56px) + bottom nav (64px) */
+          }}
+        >
+          {isGridLoading ? (
+            <Spinner />
+          ) : (
+            <GameMap
+              gameAddress={gameAddressParam}
+              isMobile={true}
+              setMobileBottomPanelOpen={setMobileBottomPanelOpen}
+            />
+          )}
+        </div>
+
+        {/* Bottom: Contextual Action Bar - Fixed above bottom nav (64px) */}
+        <div className="fixed left-0 right-0 z-40" style={{ bottom: "64px" }}>
+          <ContextualActionBar />
+        </div>
+
+        {/* Mobile Operation Drawer - on demand */}
+        <GameOperationPanel
+          gameAddress={gameAddressParam}
+          isMobile={true}
+          mobileBottomPanelOpen={mobileBottomPanelOpen}
+          setMobileBottomPanelOpen={setMobileBottomPanelOpen}
+        />
+
+        {/* Battle Effects Overlay */}
+        {battleEffects.length > 0 && (
+          <BattleEffectOverlay battleEffects={battleEffects} />
+        )}
+      </div>
+    );
+  }
+
+  // Desktop layout
   return (
-    <div className="flex flex-col h-[calc(100dvh-60px)] md:h-[calc(100vh-3rem)] md:mt-12 bg-background overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-3rem)] mt-12 bg-background overflow-hidden">
       {/* Missed Rounds Notification */}
       <MissedRoundsNotification
         missedRoundsInfo={missedRoundsInfo}
@@ -141,23 +194,8 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
         onDismiss={() => setMissedRoundsInfo(null)}
       />
 
-      {/* Mobile status drawer */}
-      <div className="md:hidden py-2 px-4 flex-shrink-0">
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button variant="outline" className="w-full">
-              <span className="text-sm">Status</span>
-              <ChevronDown className="w-4 h-4" />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <GameStatusPanel />
-          </DrawerContent>
-        </Drawer>
-      </div>
-
       {/* Main game layout */}
-      <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
         {/* Game map section */}
         <div className="flex-1 min-h-0 overflow-hidden">
           {isGridLoading ? (
@@ -167,21 +205,11 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
           ) : (
             <GameMap
               gameAddress={gameAddressParam}
-              isMobile={isMobile}
-              setMobileBottomPanelOpen={setMobileBottomPanelOpen}
+              isMobile={false}
+              setMobileBottomPanelOpen={() => {}}
             />
           )}
         </div>
-
-        {/* Mobile operation panel - only on mobile */}
-        {isMobile && (
-          <GameOperationPanel
-            gameAddress={gameAddressParam}
-            isMobile={true}
-            mobileBottomPanelOpen={mobileBottomPanelOpen}
-            setMobileBottomPanelOpen={setMobileBottomPanelOpen}
-          />
-        )}
 
         {/* Battle Effects Overlay */}
         {battleEffects.length > 0 && (
@@ -189,7 +217,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
         )}
 
         {/* Desktop side panel */}
-        <div className="hidden md:flex md:flex-col md:w-1/3 p-4 space-y-4 overflow-hidden flex-shrink-0">
+        <div className="flex flex-col w-1/3 max-w-md p-4 space-y-4 overflow-hidden flex-shrink-0">
           <GameStatusPanel />
           <GameOperationPanel
             gameAddress={gameAddressParam}

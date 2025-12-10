@@ -6,7 +6,6 @@ import {
   useGameStateContext,
   useSelectionContext,
   useMovementContext,
-  useBattleContext,
 } from "@/lib/contexts/GameContext"
 import { useGameActions } from "@/lib/hooks/gameActions"
 import { GRID_CONFIG } from "@/lib/constants/grid"
@@ -15,13 +14,10 @@ import { GRID_CONFIG } from "@/lib/constants/grid"
 import { TerritoryGrid } from "./layers/TerritoryGrid"
 import { MovementOverlay } from "./layers/MovementOverlay"
 import { AnimationLayer } from "./layers/AnimationLayer"
-import { GameStatusBar } from "./GameStatusBar"
-import { ContextualActionBar } from "./ContextualActionBar"
 import { MiniMapPanel } from "./panels/MiniMapPanel"
 
 // Hooks
 import { useMapInteractions } from "@/lib/hooks/useMapInteractions"
-import { useArmyLayer } from "@/lib/hooks/useArmyLayer"
 
 interface GameMapProps {
   gameAddress: `0x${string}` | undefined
@@ -53,10 +49,8 @@ export default function GameMap({
     validMovementCells,
     animatingArmies,
     armyPositions,
-    getArmyDisplayPosition,
     cancelMovement,
   } = useMovementContext()
-  const { battleEffects } = useBattleContext()
 
   // Actions
   const {
@@ -117,20 +111,14 @@ export default function GameMap({
 
   return (
     <div
-      className="h-full bg-background text-foreground flex flex-col"
+      className="w-full h-full flex items-center justify-center"
       onClick={handleMapClick}
     >
-      {/* Game Status Bar - Castle Count & Win Condition */}
-      <GameStatusBar isMobile={isMobile} />
-
-      {/* Main Map Area */}
-      <div className="flex-1 relative overflow-hidden flex items-center justify-center p-2 min-h-0">
-        {/* Map Canvas - Square aspect ratio, fits viewport */}
-        <div
-          ref={mapRef}
-          className="relative bg-gradient-to-br from-surface-1 to-surface-2 aspect-square h-full max-w-full rounded-lg overflow-hidden"
-          style={{ maxHeight: "600px", maxWidth: "600px" }}
-        >
+      {/* Map Canvas - Square aspect ratio, fits container */}
+      <div
+        ref={mapRef}
+        className="relative bg-gradient-to-br from-surface-1 to-surface-2 aspect-square w-full h-full max-w-[600px] max-h-[600px] rounded-lg overflow-hidden"
+      >
           {/* Grid Background - Click to cancel */}
           <div
             className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1"
@@ -201,17 +189,13 @@ export default function GameMap({
             </div>
           )}
 
-          {/* Mini Map Panel - Corner overlay */}
+          {/* Mini Map Panel - Corner overlay (desktop only) */}
           {!isMobile && (
             <div className="absolute top-4 left-4 z-20 w-48">
               <MiniMapPanel isCollapsible={true} defaultExpanded={false} />
             </div>
           )}
-        </div>
       </div>
-
-      {/* Contextual Action Bar - Bottom guidance */}
-      <ContextualActionBar isMobile={isMobile} />
     </div>
   )
 }

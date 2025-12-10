@@ -13,7 +13,7 @@ function Header() {
     const { isConnected } = useAccount()
 
     return (
-        <header className={cn("bg-primary text-primary-foreground py-4")}>
+        <header className={cn("fixed top-0 left-0 right-0 z-50 bg-primary text-primary-foreground py-4")}>
             <div className={cn("container mx-auto px-4 flex justify-between items-center")}>
                 <div className={cn("flex items-center")}>
                     <Link href="/" className={cn("text-2xl font-bold")}>

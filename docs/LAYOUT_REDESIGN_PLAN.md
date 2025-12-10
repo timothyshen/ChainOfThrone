@@ -189,10 +189,28 @@ export const ContextualActionBar = memo(() => {
 export default function GameMap({ gameAddress, isMobile }: GameMapProps) {
   return (
     <div className="aspect-square w-full max-w-[600px] relative">
-      {/* 只保留地图核心内容 */}
+      {/* 地图核心内容 */}
       <TerritoryGrid ... />
-      <AnimationLayer ... />
-      <MovementOverlay ... />
+
+      {/* ✅ 动画层 - 保留 */}
+      <AnimationLayer
+        armies={armies}
+        animatingArmies={animatingArmies}
+        armyPositions={armyPositions}
+      />
+
+      {/* ✅ 移动路径高亮 - 保留 */}
+      <MovementOverlay
+        showMovementPaths={showMovementPaths}
+        movementMode={movementMode}
+        validMovementCells={validMovementCells}
+        ...
+      />
+
+      {/* ✅ 战斗特效覆盖层 - 保留 */}
+      {battleEffects.length > 0 && (
+        <BattleEffectOverlay battleEffects={battleEffects} />
+      )}
 
       {/* 取消按钮 (浮动) */}
       {movementMode && <CancelButton />}
@@ -202,6 +220,31 @@ export default function GameMap({ gameAddress, isMobile }: GameMapProps) {
     </div>
   )
 }
+```
+
+### 关于动画和特效的说明
+
+**保留的动画组件**:
+
+| 组件 | 用途 | 位置 |
+|------|------|------|
+| `AnimationLayer` | 军队移动动画 | GameMap 内部 (absolute) |
+| `MovementOverlay` | 可移动格子高亮 | GameMap 内部 (absolute) |
+| `BattleEffectOverlay` | 战斗爆炸/伤害特效 | GameMap 内部 (absolute) |
+
+**动画层级 (z-index)**:
+```
+z-10: TerritoryGrid (基础格子)
+z-20: MovementOverlay (移动高亮)
+z-25: AnimationLayer (移动动画)
+z-30: BattleEffectOverlay (战斗特效)
+z-40: CancelButton / MiniMap (UI控件)
+```
+
+**注意**: BattleEffectOverlay 之前在 GamePlayPage 层级，建议移到 GameMap 内部，这样:
+1. 特效位置与地图坐标一致
+2. 不会被固定的 ActionBar 遮挡
+3. 动画层级更清晰
 ```
 
 ---

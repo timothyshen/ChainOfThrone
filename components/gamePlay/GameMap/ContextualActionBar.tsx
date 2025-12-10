@@ -225,7 +225,10 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
   }
 
   return (
-    <div className="bg-surface-1/95 backdrop-blur-sm border-t border-border shadow-soft px-3 py-2 md:px-4 md:py-3 flex-shrink-0">
+    <div
+      className="bg-surface-1 border-t border-border shadow-soft px-4 py-3"
+      style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom, 0px))" }}
+    >
       {renderContent()}
     </div>
   )
