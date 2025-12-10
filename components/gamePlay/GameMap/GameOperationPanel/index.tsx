@@ -212,7 +212,7 @@ const GameOperationPanel = ({
                 </div>
               </>
             ) : (
-              <div className="text-center py-4 text-slate-400">
+              <div className="text-center py-4 text-text-secondary">
                 Select an army to view details
               </div>
             )}
@@ -232,10 +232,10 @@ const GameOperationPanel = ({
   // Desktop rendering
   if (!selectedArmy) {
     return (
-      <div className="space-y-4 p-2">
-        <Card className="bg-slate-700 border-slate-600 text-white">
+      <div className="space-y-4 p-2 flex-1 min-h-0 overflow-auto">
+        <Card className="bg-card border-border text-foreground">
           <CardContent className="p-4">
-            <p className="text-center text-slate-400">Select an army to view details</p>
+            <p className="text-center text-text-secondary">Select an army to view details</p>
           </CardContent>
         </Card>
       </div>
@@ -243,7 +243,7 @@ const GameOperationPanel = ({
   }
 
   return (
-    <div className="space-y-4 p-2">
+    <div className="space-y-4 p-2 flex-1 min-h-0 overflow-auto">
       <ArmyDetails
         selectedArmy={selectedArmy}
         animatingArmies={animatingArmies}

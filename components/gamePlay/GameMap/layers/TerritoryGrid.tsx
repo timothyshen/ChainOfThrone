@@ -31,7 +31,7 @@ export const TerritoryGrid = memo(
             {Array.from({ length: 9 }).map((_, i) => (
               <div
                 key={i}
-                className="relative border-2 border-slate-600 rounded-lg bg-slate-700/50 animate-pulse min-h-[80px] md:min-h-[120px]"
+                className="relative border-2 border-border rounded-lg bg-surface-3/50 animate-pulse aspect-square"
               />
             ))}
           </div>
@@ -111,7 +111,7 @@ export const TerritoryGrid = memo(
         }
       }
 
-      return "border-slate-600"
+      return "border-border"
     }, [currentPlayerAddress, hasOwner])
 
     return (
@@ -133,8 +133,8 @@ export const TerritoryGrid = memo(
               tabIndex={0}
               aria-label={`${territory.name}${territory.isCastle ? ' (Castle - Win Condition!)' : ''}${hasFriendly ? `, ${armyGroups.friendly.reduce((sum, army) => sum + Number(army.size), 0)} friendly units` : ''}${hasEnemy ? `, ${armyGroups.enemy.reduce((sum, army) => sum + Number(army.size), 0)} enemy units` : ''}`}
               aria-pressed={territory.isSelected}
-              className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 min-h-[80px] md:min-h-[120px] min-w-[60px] md:min-w-0 focus:outline-none focus:ring-2 focus:ring-yellow-400
-                ${territory.isCastle ? 'bg-slate-700/70' : 'bg-slate-700/50'}
+              className={`relative border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-95 aspect-square focus:outline-none focus:ring-2 focus:ring-yellow-400
+                ${territory.isCastle ? 'bg-surface-3/70' : 'bg-surface-3/50'}
                 ${getBorderStyles(territory)}
                 ${getCastleStyles(territory)}`}
               onClick={(e) => onTerritoryClick(e, territory)}
@@ -158,7 +158,7 @@ export const TerritoryGrid = memo(
                       </div>
                     </div>
                   ) : (
-                    <Flag className="w-3 h-3 md:w-4 md:h-4 text-slate-400" />
+                    <Flag className="w-3 h-3 md:w-4 md:h-4 text-text-secondary" />
                   )}
                   <span className={`text-[10px] md:text-xs font-bold truncate ${territory.isCastle ? 'text-amber-200' : ''}`}>
                     {territory.name}
@@ -228,7 +228,7 @@ export const TerritoryGrid = memo(
                   />
                 ) : (
                   territory.isCastle && (
-                    <div className="flex-1 h-1 bg-slate-500/50" />
+                    <div className="flex-1 h-1 bg-surface-3/50" />
                   )
                 )}
                 {territory.isCastle && (

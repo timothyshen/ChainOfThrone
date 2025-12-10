@@ -37,7 +37,7 @@ export const RewardSection = memo(({ type, gameAddress }: RewardSectionProps) =>
 
   return (
     <div>
-      <p className="text-center font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center justify-center gap-2">
+      <p className="text-center font-medium text-foreground mb-3 flex items-center justify-center gap-2">
         <Scroll className="h-5 w-5 text-amber-600 dark:text-amber-400" />
         Redeem your reward
       </p>

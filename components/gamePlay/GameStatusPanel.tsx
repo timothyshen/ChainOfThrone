@@ -24,7 +24,7 @@ export const GameStatusPanel = memo(function GameStatusPanel() {
   } = useGameStateContext();
 
   return (
-    <div className="w-full space-y-6 p-4">
+    <div className="w-full space-y-4 p-4 flex-shrink-0">
       <GameStatus
         isLoading={isStatusLoading}
         currentPlayer={address ?? ""}

@@ -166,14 +166,14 @@ export const TurnHistoryPanel = memo(({
 
   if (!isExpanded && isCollapsible) {
     return (
-      <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden">
+      <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden flex-shrink-0 mt-auto">
         {header}
       </div>
     )
   }
 
   return (
-    <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden">
+    <div className="bg-surface-1/95 backdrop-blur-sm border border-border shadow-soft rounded-lg overflow-hidden flex-shrink-0 mt-auto p-4">
       {header}
 
       <div className="p-2 pt-0 space-y-1 max-h-60 overflow-y-auto">

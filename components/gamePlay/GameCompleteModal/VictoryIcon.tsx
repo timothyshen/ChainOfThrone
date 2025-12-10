@@ -31,7 +31,7 @@ export const VictoryIcon = memo(({ type }: VictoryIconProps) => {
         <div
           className={cn(
             "h-20 w-20 rounded-full flex items-center justify-center",
-            "bg-slate-100 dark:bg-slate-800 border-2",
+            "bg-surface-2 border-2",
             "border-amber-500"
           )}
         >
@@ -60,16 +60,16 @@ export const VictoryIcon = memo(({ type }: VictoryIconProps) => {
       }}
       className="relative"
     >
-      <div className="h-20 w-20 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 border-2 border-slate-300">
+      <div className="h-20 w-20 rounded-full flex items-center justify-center bg-surface-2 border-2 border-border">
         <Map className="h-10 w-10 text-blue-600 dark:text-blue-400 text-primary" />
       </div>
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.3 }}
-        className="absolute -bottom-1 -right-1 bg-slate-200 dark:bg-slate-700 p-1 rounded-full"
+        className="absolute -bottom-1 -right-1 bg-surface-3 p-1 rounded-full"
       >
-        <Swords className="h-6 w-6 text-slate-500 dark:text-slate-400" />
+        <Swords className="h-6 w-6 text-text-secondary" />
       </motion.div>
     </motion.div>
   )

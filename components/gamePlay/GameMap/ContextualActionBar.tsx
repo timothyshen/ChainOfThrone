@@ -225,11 +225,7 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
   }
 
   return (
-    <div className={`
-      bg-surface-1/95 backdrop-blur-sm border-t border-border shadow-soft
-      px-3 py-2 md:px-4 md:py-3
-      ${isMobile ? "fixed bottom-0 left-0 right-0 z-20" : ""}
-    `}>
+    <div className="bg-surface-1/95 backdrop-blur-sm border-t border-border shadow-soft px-3 py-2 md:px-4 md:py-3 flex-shrink-0">
       {renderContent()}
     </div>
   )

@@ -29,12 +29,12 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
 
   if (!round || round.moves.length === 0) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardContent className={cn(CARD_CONTENT_PADDING.lg, "text-center")}>
           <div className="max-w-md mx-auto">
-            <Info className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-            <h3 className="text-lg font-semibold text-slate-300 mb-2">No Moves in This Round</h3>
-            <p className="text-sm text-slate-400 mb-4">
+            <Info className="w-16 h-16 mx-auto mb-4 text-text-muted" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Moves in This Round</h3>
+            <p className="text-sm text-text-secondary mb-4">
               This round doesn't contain any recorded moves. Players may not have submitted actions during this round.
             </p>
             {onClose && (
@@ -88,19 +88,19 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Play className="w-5 h-5" />
               Round {round.roundNumber} Replay
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-slate-700 text-white">
+              <Badge variant="secondary" className="bg-surface-3 text-foreground">
                 Move {currentMoveIndex + 1} / {round.moves.length}
               </Badge>
               {onClose && (
-                <Button size="sm" variant="ghost" onClick={onClose} className="text-slate-400">
+                <Button size="sm" variant="ghost" onClick={onClose} className="text-text-secondary">
                   Close
                 </Button>
               )}
@@ -110,7 +110,7 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
       </Card>
 
       {/* Current Move Display */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           {/* Player Info */}
           <div className="flex items-center gap-4 mb-6">
@@ -122,29 +122,29 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
               <Users className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <div className="text-sm text-slate-400">Player</div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-sm text-text-secondary">Player</div>
+              <div className="text-lg font-semibold text-foreground">
                 {currentMove.player.slice(0, 6)}...{currentMove.player.slice(-4)}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-slate-400">Timestamp</div>
-              <div className="text-sm text-slate-300">
+              <div className="text-sm text-text-secondary">Timestamp</div>
+              <div className="text-sm text-foreground">
                 {formatTimestamp(currentMove.timestamp)}
               </div>
             </div>
           </div>
 
           {/* Move Visualization */}
-          <div className="bg-slate-900/50 rounded-lg p-6 mb-6">
+          <div className="bg-surface-3/50 rounded-lg p-6 mb-6">
             <div className="flex items-center justify-center gap-4">
               {/* From Position */}
               <div className="text-center">
-                <div className="flex items-center justify-center w-20 h-20 bg-slate-700 rounded-lg border-2 border-blue-500 mb-2">
+                <div className="flex items-center justify-center w-20 h-20 bg-surface-3 rounded-lg border-2 border-blue-500 mb-2">
                   <MapPin className="w-8 h-8 text-blue-400" />
                 </div>
-                <div className="text-xs text-slate-400">From</div>
-                <div className="text-lg font-bold text-white">
+                <div className="text-xs text-text-secondary">From</div>
+                <div className="text-lg font-bold text-foreground">
                   ({currentMove.fromX}, {currentMove.fromY})
                 </div>
               </div>
@@ -159,18 +159,18 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
 
               {/* To Position */}
               <div className="text-center">
-                <div className="flex items-center justify-center w-20 h-20 bg-slate-700 rounded-lg border-2 border-green-500 mb-2">
+                <div className="flex items-center justify-center w-20 h-20 bg-surface-3 rounded-lg border-2 border-green-500 mb-2">
                   <MapPin className="w-8 h-8 text-green-400" />
                 </div>
-                <div className="text-xs text-slate-400">To</div>
-                <div className="text-lg font-bold text-white">
+                <div className="text-xs text-text-secondary">To</div>
+                <div className="text-lg font-bold text-foreground">
                   ({currentMove.toX}, {currentMove.toY})
                 </div>
               </div>
             </div>
 
             {/* Distance Info */}
-            <div className="text-center mt-4 text-sm text-slate-400">
+            <div className="text-center mt-4 text-sm text-text-secondary">
               Distance:{' '}
               {Math.abs(currentMove.toX - currentMove.fromX) +
                 Math.abs(currentMove.toY - currentMove.fromY)}{' '}
@@ -181,7 +181,7 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
           {/* Progress Bar */}
           <div className="space-y-2">
             <Progress value={progress} className="h-2" />
-            <div className="flex justify-between text-xs text-slate-400">
+            <div className="flex justify-between text-xs text-text-secondary">
               <span>Start of Round</span>
               <span>End of Round</span>
             </div>
@@ -190,7 +190,7 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
       </Card>
 
       {/* Controls */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardContent className="p-4">
           <div className="flex items-center justify-center gap-2">
             <Button
@@ -198,7 +198,7 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
               variant="outline"
               onClick={handlePrevious}
               disabled={currentMoveIndex === 0}
-              className="text-white border-slate-600 hover:bg-slate-700"
+              className="text-white border-border hover:bg-surface-3"
             >
               <SkipBack className="w-4 h-4" />
             </Button>
@@ -228,7 +228,7 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
               variant="outline"
               onClick={handleNext}
               disabled={currentMoveIndex === round.moves.length - 1}
-              className="text-white border-slate-600 hover:bg-slate-700"
+              className="text-white border-border hover:bg-surface-3"
             >
               <SkipForward className="w-4 h-4" />
             </Button>
@@ -237,9 +237,9 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
       </Card>
 
       {/* All Moves List */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-sm">All Moves in Round {round.roundNumber}</CardTitle>
+          <CardTitle className="text-foreground text-sm">All Moves in Round {round.roundNumber}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -249,8 +249,8 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
                 onClick={() => setCurrentMoveIndex(index)}
                 className={`w-full text-left p-3 rounded-lg transition-all ${
                   index === currentMoveIndex
-                    ? 'bg-slate-700 border border-yellow-500'
-                    : 'bg-slate-900/30 hover:bg-slate-700/50'
+                    ? 'bg-surface-3 border border-yellow-500'
+                    : 'bg-surface-3/30 hover:bg-surface-3/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -258,11 +258,11 @@ export function RoundReplayPlayer({ round, onClose }: RoundReplayPlayerProps) {
                     <Badge variant="outline" className="text-xs">
                       #{index + 1}
                     </Badge>
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-foreground">
                       {move.player.slice(0, 6)}...{move.player.slice(-4)}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-text-secondary">
                     ({move.fromX},{move.fromY}) → ({move.toX},{move.toY})
                   </div>
                 </div>

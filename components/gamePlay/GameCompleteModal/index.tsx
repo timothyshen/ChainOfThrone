@@ -100,10 +100,10 @@ export function DiplomacyResultModal({
                   "p-3 rounded-lg mb-4 border",
                   type === "win"
                     ? "bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200 dark:border-amber-900/30"
-                    : "bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800/50 dark:to-blue-900/20 border-slate-200 dark:border-slate-700"
+                    : "bg-gradient-to-r from-stone-50 to-blue-50 dark:from-stone-800/50 dark:to-blue-900/20 border-stone-200 dark:border-stone-700"
                 )}
               >
-                <p className="font-medium text-lg text-slate-800 dark:text-slate-200 text-center">
+                <p className="font-medium text-lg text-foreground text-center">
                   {type === "win"
                     ? "The balance of power has shifted in your favor!"
                     : "The diplomatic landscape has shifted against you."}

@@ -20,7 +20,7 @@ export const BattleProgress = memo(({ activeBattle, isMobile = false }: BattlePr
 
         {activeBattle.phase === "combat" && (
           <>
-            <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+            <div className="w-full bg-surface-3 rounded-full h-2 mb-2">
               <div
                 className="bg-red-500 h-2 rounded-full transition-all duration-100"
                 style={{ width: `${activeBattle.progress * 100}%` }}

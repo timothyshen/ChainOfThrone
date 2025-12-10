@@ -91,12 +91,12 @@ export const BattlePreview = memo(({
       </div>
 
       {/* Forces Comparison */}
-      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+      <div className="bg-surface-3/50 rounded-lg p-3 space-y-3">
         {/* Attacker */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400">Your Army</span>
+          <span className="text-sm text-text-secondary">Your Army</span>
           <div className="flex items-center gap-2">
-            <div className="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="w-20 h-2 bg-surface-3 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-500 transition-all"
                 style={{ width: `${Math.min(100, (attackerSize / Math.max(attackerSize, defenderSize)) * 100)}%` }}
@@ -110,18 +110,18 @@ export const BattlePreview = memo(({
 
         {/* VS Divider */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 h-px bg-slate-600" />
-          <span className="text-xs text-slate-500 font-medium">VS</span>
-          <div className="flex-1 h-px bg-slate-600" />
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-text-muted font-medium">VS</span>
+          <div className="flex-1 h-px bg-border" />
         </div>
 
         {/* Defender */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-text-secondary">
             {battleTarget.army ? "Enemy Army" : "Territory Defense"}
           </span>
           <div className="flex items-center gap-2">
-            <div className="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="w-20 h-2 bg-surface-3 rounded-full overflow-hidden">
               <div
                 className="h-full bg-red-500 transition-all"
                 style={{ width: `${Math.min(100, (defenderSize / Math.max(attackerSize, defenderSize || 1)) * 100)}%` }}
@@ -203,7 +203,7 @@ export const BattlePreview = memo(({
 
       {/* After Battle Summary */}
       {battleResult.outcome !== "tie" && defenderSize > 0 && (
-        <div className="text-xs text-slate-400 bg-slate-800/30 rounded-lg p-2">
+        <div className="text-xs text-text-secondary bg-surface-3/30 rounded-lg p-2">
           <p className="font-medium mb-1">After battle:</p>
           <ul className="space-y-0.5">
             <li>

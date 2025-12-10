@@ -40,7 +40,7 @@ export function CurrentGameStats({
     return (
       <div className="space-y-6">
         {/* Game Status Skeleton */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-card border-border">
           <CardHeader>
             <Skeleton className="h-6 w-48" />
           </CardHeader>
@@ -54,7 +54,7 @@ export function CurrentGameStats({
         </Card>
 
         {/* Territory Control Skeleton */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-card border-border">
           <CardHeader>
             <Skeleton className="h-6 w-40" />
           </CardHeader>
@@ -67,7 +67,7 @@ export function CurrentGameStats({
         </Card>
 
         {/* Movement Stats Skeleton */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-card border-border">
           <CardHeader>
             <Skeleton className="h-6 w-48" />
           </CardHeader>
@@ -87,7 +87,7 @@ export function CurrentGameStats({
   // Error state
   if (player1Stats.error || player2Stats.error) {
     return (
-      <Card className="bg-slate-800 border-slate-700 border-red-500/50">
+      <Card className="bg-card border-border border-red-500/50">
         <CardContent className="p-8 text-center text-red-400">
           <AlertCircle className="w-12 h-12 mx-auto mb-4" />
           <p>{player1Stats.error || player2Stats.error}</p>
@@ -106,7 +106,7 @@ export function CurrentGameStats({
   return (
     <div className={cn("space-y-6", TRANSITIONS.normal)}>
       {/* Game Status Header */}
-      <Card className="bg-slate-800 border-slate-700 text-white">
+      <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export function CurrentGameStats({
               Current Game Statistics
             </CardTitle>
             <div className="flex gap-2">
-              <Badge variant="secondary" className="bg-slate-700">
+              <Badge variant="secondary" className="bg-surface-3">
                 Round {player1Stats.gameProgress.currentRound}
               </Badge>
               <Badge className={getGameStatusBadge(player1Stats.gameProgress.gameStatus)}>
@@ -126,20 +126,20 @@ export function CurrentGameStats({
         <CardContent className={CARD_CONTENT_PADDING.md}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
             <div>
-              <div className="text-slate-400 mb-1">Duration</div>
-              <div className="text-white font-semibold">
+              <div className="text-text-secondary mb-1">Duration</div>
+              <div className="text-foreground font-semibold">
                 {formatDuration(player1Stats.gameProgress.gameDuration)}
               </div>
             </div>
             <div>
-              <div className="text-slate-400 mb-1">Players</div>
-              <div className="text-white font-semibold">
+              <div className="text-text-secondary mb-1">Players</div>
+              <div className="text-foreground font-semibold">
                 {player1Stats.gameProgress.totalPlayers}
               </div>
             </div>
             <div>
-              <div className="text-slate-400 mb-1">Current Round</div>
-              <div className="text-white font-semibold">
+              <div className="text-text-secondary mb-1">Current Round</div>
+              <div className="text-foreground font-semibold">
                 {player1Stats.gameProgress.currentRound}
               </div>
             </div>
@@ -148,7 +148,7 @@ export function CurrentGameStats({
       </Card>
 
       {/* Territory Control */}
-      <Card className="bg-slate-800 border-slate-700 text-white">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="w-5 h-5" />
@@ -160,23 +160,23 @@ export function CurrentGameStats({
             {/* Player 1 */}
             <div className="space-y-3">
               <div className="text-center">
-                <div className="text-sm text-slate-400 mb-1">Player 1</div>
-                <div className="text-xs text-slate-500">
+                <div className="text-sm text-text-secondary mb-1">Player 1</div>
+                <div className="text-xs text-text-muted">
                   {player1Address.slice(0, 6)}...{player1Address.slice(-4)}
                 </div>
               </div>
 
-              <div className="bg-slate-900/50 rounded-lg p-4 space-y-3">
+              <div className="bg-surface-3/50 rounded-lg p-4 space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-400">Territories</span>
+                    <span className="text-text-secondary">Territories</span>
                     <span className="text-blue-400 font-semibold">
                       {player1Stats.territoryControl.territoriesControlled}/9
                     </span>
                   </div>
                   <Progress
                     value={player1Stats.territoryControl.controlPercentage}
-                    className="h-2 bg-slate-700"
+                    className="h-2 bg-surface-3"
                   />
                   <div className="text-xs text-blue-400 mt-1 text-right">
                     {player1Stats.territoryControl.controlPercentage.toFixed(1)}%
@@ -188,13 +188,13 @@ export function CurrentGameStats({
                     <div className="text-2xl font-bold text-blue-400">
                       {player1Stats.territoryControl.castlesControlled}
                     </div>
-                    <div className="text-xs text-slate-400">Castles</div>
+                    <div className="text-xs text-text-secondary">Castles</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-blue-400">
                       {player1Stats.territoryControl.totalUnits}
                     </div>
-                    <div className="text-xs text-slate-400">Total Units</div>
+                    <div className="text-xs text-text-secondary">Total Units</div>
                   </div>
                 </div>
               </div>
@@ -203,23 +203,23 @@ export function CurrentGameStats({
             {/* Player 2 */}
             <div className="space-y-3">
               <div className="text-center">
-                <div className="text-sm text-slate-400 mb-1">Player 2</div>
-                <div className="text-xs text-slate-500">
+                <div className="text-sm text-text-secondary mb-1">Player 2</div>
+                <div className="text-xs text-text-muted">
                   {player2Address.slice(0, 6)}...{player2Address.slice(-4)}
                 </div>
               </div>
 
-              <div className="bg-slate-900/50 rounded-lg p-4 space-y-3">
+              <div className="bg-surface-3/50 rounded-lg p-4 space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-400">Territories</span>
+                    <span className="text-text-secondary">Territories</span>
                     <span className="text-red-400 font-semibold">
                       {player2Stats.territoryControl.territoriesControlled}/9
                     </span>
                   </div>
                   <Progress
                     value={player2Stats.territoryControl.controlPercentage}
-                    className="h-2 bg-slate-700"
+                    className="h-2 bg-surface-3"
                   />
                   <div className="text-xs text-red-400 mt-1 text-right">
                     {player2Stats.territoryControl.controlPercentage.toFixed(1)}%
@@ -231,13 +231,13 @@ export function CurrentGameStats({
                     <div className="text-2xl font-bold text-red-400">
                       {player2Stats.territoryControl.castlesControlled}
                     </div>
-                    <div className="text-xs text-slate-400">Castles</div>
+                    <div className="text-xs text-text-secondary">Castles</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-red-400">
                       {player2Stats.territoryControl.totalUnits}
                     </div>
-                    <div className="text-xs text-slate-400">Total Units</div>
+                    <div className="text-xs text-text-secondary">Total Units</div>
                   </div>
                 </div>
               </div>
@@ -247,7 +247,7 @@ export function CurrentGameStats({
       </Card>
 
       {/* Movement Stats */}
-      <Card className="bg-slate-800 border-slate-700 text-white">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
@@ -257,102 +257,102 @@ export function CurrentGameStats({
         <CardContent className={CARD_CONTENT_PADDING.md}>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total Moves */}
-            <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-              <div className="text-sm text-slate-400 mb-2">Total Moves</div>
+            <div className="bg-surface-3/50 rounded-lg p-4 text-center">
+              <div className="text-sm text-text-secondary mb-2">Total Moves</div>
               <div className="flex justify-around">
                 <div>
                   <div className="text-xl font-bold text-blue-400">
                     {player1Stats.movementStats.totalMoves}
                   </div>
-                  <div className="text-xs text-slate-500">P1</div>
+                  <div className="text-xs text-text-muted">P1</div>
                 </div>
-                <div className="border-l border-slate-700 mx-2" />
+                <div className="border-l border-border mx-2" />
                 <div>
                   <div className="text-xl font-bold text-red-400">
                     {player2Stats.movementStats.totalMoves}
                   </div>
-                  <div className="text-xs text-slate-500">P2</div>
+                  <div className="text-xs text-text-muted">P2</div>
                 </div>
               </div>
             </div>
 
             {/* Units Moved */}
-            <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-              <div className="text-sm text-slate-400 mb-2">Units Moved</div>
+            <div className="bg-surface-3/50 rounded-lg p-4 text-center">
+              <div className="text-sm text-text-secondary mb-2">Units Moved</div>
               <div className="flex justify-around">
                 <div>
                   <div className="text-xl font-bold text-blue-400">
                     {player1Stats.movementStats.totalUnitsMoved.toString()}
                   </div>
-                  <div className="text-xs text-slate-500">P1</div>
+                  <div className="text-xs text-text-muted">P1</div>
                 </div>
-                <div className="border-l border-slate-700 mx-2" />
+                <div className="border-l border-border mx-2" />
                 <div>
                   <div className="text-xl font-bold text-red-400">
                     {player2Stats.movementStats.totalUnitsMoved.toString()}
                   </div>
-                  <div className="text-xs text-slate-500">P2</div>
+                  <div className="text-xs text-text-muted">P2</div>
                 </div>
               </div>
             </div>
 
             {/* Average per Move */}
-            <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-              <div className="text-sm text-slate-400 mb-2">Avg per Move</div>
+            <div className="bg-surface-3/50 rounded-lg p-4 text-center">
+              <div className="text-sm text-text-secondary mb-2">Avg per Move</div>
               <div className="flex justify-around">
                 <div>
                   <div className="text-xl font-bold text-blue-400">
                     {player1Stats.movementStats.averageUnitsPerMove}
                   </div>
-                  <div className="text-xs text-slate-500">P1</div>
+                  <div className="text-xs text-text-muted">P1</div>
                 </div>
-                <div className="border-l border-slate-700 mx-2" />
+                <div className="border-l border-border mx-2" />
                 <div>
                   <div className="text-xl font-bold text-red-400">
                     {player2Stats.movementStats.averageUnitsPerMove}
                   </div>
-                  <div className="text-xs text-slate-500">P2</div>
+                  <div className="text-xs text-text-muted">P2</div>
                 </div>
               </div>
             </div>
 
             {/* Participation */}
-            <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-              <div className="text-sm text-slate-400 mb-2">Rounds Active</div>
+            <div className="bg-surface-3/50 rounded-lg p-4 text-center">
+              <div className="text-sm text-text-secondary mb-2">Rounds Active</div>
               <div className="flex justify-around">
                 <div>
                   <div className="text-xl font-bold text-blue-400">
                     {player1Stats.movementStats.roundsParticipated}
                   </div>
-                  <div className="text-xs text-slate-500">P1</div>
+                  <div className="text-xs text-text-muted">P1</div>
                 </div>
-                <div className="border-l border-slate-700 mx-2" />
+                <div className="border-l border-border mx-2" />
                 <div>
                   <div className="text-xl font-bold text-red-400">
                     {player2Stats.movementStats.roundsParticipated}
                   </div>
-                  <div className="text-xs text-slate-500">P2</div>
+                  <div className="text-xs text-text-muted">P2</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Longest Move */}
-          <div className="mt-4 bg-slate-900/50 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-2 text-center">Longest Move Distance</div>
+          <div className="mt-4 bg-surface-3/50 rounded-lg p-4">
+            <div className="text-sm text-text-secondary mb-2 text-center">Longest Move Distance</div>
             <div className="flex justify-around">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-400">
                   {player1Stats.movementStats.longestMoveDistance}
                 </div>
-                <div className="text-xs text-slate-500">Player 1 - cells</div>
+                <div className="text-xs text-text-muted">Player 1 - cells</div>
               </div>
-              <div className="border-l border-slate-700" />
+              <div className="border-l border-border" />
               <div className="text-center">
                 <div className="text-2xl font-bold text-red-400">
                   {player2Stats.movementStats.longestMoveDistance}
                 </div>
-                <div className="text-xs text-slate-500">Player 2 - cells</div>
+                <div className="text-xs text-text-muted">Player 2 - cells</div>
               </div>
             </div>
           </div>
@@ -360,18 +360,18 @@ export function CurrentGameStats({
       </Card>
 
       {/* Combat Stats - Coming Soon */}
-      <Card className="bg-slate-800 border-slate-700 text-white border-dashed">
+      <Card className="bg-card border-border border-dashed">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sword className="w-5 h-5 text-slate-500" />
-            <span className="text-slate-400">Combat Statistics</span>
+            <Sword className="w-5 h-5 text-text-muted" />
+            <span className="text-text-secondary">Combat Statistics</span>
             <Badge variant="outline" className="text-yellow-400 border-yellow-400 ml-auto">
               Coming Soon
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-500 text-center py-4">
+          <p className="text-sm text-text-muted text-center py-4">
             Combat statistics including territories captured, units destroyed, and K/D ratio
             will be available in the next update.
           </p>

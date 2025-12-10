@@ -41,7 +41,7 @@ export default function GameProfile() {
     }, [gameAddress])
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white p-4">
+        <div className="min-h-screen bg-background text-foreground p-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
@@ -55,7 +55,7 @@ export default function GameProfile() {
                     <div className="flex flex-wrap gap-2">
                         <Button
                             variant={selectedView === "overview" ? "default" : "outline"}
-                            className={selectedView === "overview" ? "text-white" : "text-slate-400"}
+                            className={selectedView === "overview" ? "text-white" : "text-text-secondary"}
                             onClick={() => setSelectedView("overview")}
                             size="sm"
                         >
@@ -65,7 +65,7 @@ export default function GameProfile() {
                         {gameAddress && (
                             <Button
                                 variant={selectedView === "gameStats" ? "default" : "outline"}
-                                className={selectedView === "gameStats" ? "text-white" : "text-slate-400"}
+                                className={selectedView === "gameStats" ? "text-white" : "text-text-secondary"}
                                 onClick={() => setSelectedView("gameStats")}
                                 size="sm"
                             >
@@ -76,7 +76,7 @@ export default function GameProfile() {
                         {gameAddress && (
                             <Button
                                 variant={selectedView === "history" ? "default" : "outline"}
-                                className={selectedView === "history" ? "text-white" : "text-slate-400"}
+                                className={selectedView === "history" ? "text-white" : "text-text-secondary"}
                                 onClick={() => setSelectedView("history")}
                                 size="sm"
                             >
@@ -99,13 +99,13 @@ export default function GameProfile() {
                 ) : (
                     <>
                         {/* Coming Soon Notice */}
-                        <Card className={cn("bg-gradient-to-r from-slate-800 to-slate-700 border-slate-600 mb-6 text-white", TRANSITIONS.normal)}>
+                        <Card className={cn("bg-gradient-to-r from-card to-surface-3 border-border mb-6", TRANSITIONS.normal)}>
                             <CardContent className={CARD_CONTENT_PADDING.md}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <Info className="w-8 h-8 text-yellow-400" />
                                     <div>
                                         <h3 className="text-xl font-semibold">Cross-Game Statistics Coming Soon</h3>
-                                        <p className="text-sm text-slate-300 mt-1">
+                                        <p className="text-sm text-foreground mt-1">
                                             Player profiles with win rates, rankings, and cross-game statistics will be available
                                             when the game factory is deployed.
                                         </p>
@@ -118,7 +118,7 @@ export default function GameProfile() {
                         </Card>
 
                         {/* Current Players */}
-                        <Card className={cn("bg-slate-800 border-slate-700 text-white", TRANSITIONS.normal)}>
+                        <Card className={cn("bg-card border-border", TRANSITIONS.normal)}>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Users className="w-5 h-5" />
@@ -128,13 +128,13 @@ export default function GameProfile() {
                             <CardContent className={CARD_CONTENT_PADDING.md}>
                                 <div className="space-y-4">
                                     {/* Player 1 */}
-                                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-lg">
+                                    <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
                                         <Avatar className="w-12 h-12">
                                             <AvatarFallback className="bg-blue-600 text-white">P1</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1">
-                                            <div className="text-sm text-slate-400 mb-1">Player 1</div>
-                                            <div className="font-mono text-sm text-white">
+                                            <div className="text-sm text-text-secondary mb-1">Player 1</div>
+                                            <div className="font-mono text-sm text-foreground">
                                                 {player1Address || "Loading..."}
                                             </div>
                                         </div>
@@ -142,13 +142,13 @@ export default function GameProfile() {
                                     </div>
 
                                     {/* Player 2 */}
-                                    <div className="flex items-center gap-4 p-4 bg-slate-900/50 rounded-lg">
+                                    <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
                                         <Avatar className="w-12 h-12">
                                             <AvatarFallback className="bg-red-600 text-white">P2</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1">
-                                            <div className="text-sm text-slate-400 mb-1">Player 2</div>
-                                            <div className="font-mono text-sm text-white">
+                                            <div className="text-sm text-text-secondary mb-1">Player 2</div>
+                                            <div className="font-mono text-sm text-foreground">
                                                 {player2Address || "Loading..."}
                                             </div>
                                         </div>
@@ -156,8 +156,8 @@ export default function GameProfile() {
                                     </div>
                                 </div>
 
-                                <div className="mt-6 p-4 bg-slate-900/30 rounded-lg border border-slate-700">
-                                    <p className="text-sm text-slate-400 text-center">
+                                <div className="mt-6 p-4 bg-background/30 rounded-lg border border-border">
+                                    <p className="text-sm text-text-secondary text-center">
                                         For detailed statistics about this game, check the{" "}
                                         <button
                                             onClick={() => setSelectedView("gameStats")}

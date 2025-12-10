@@ -27,15 +27,15 @@ export default function ProfilePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-4">
+      <div className="min-h-screen bg-background text-foreground p-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Player Profile</h1>
           </div>
-          <Card className="bg-slate-800 border-slate-700">
+          <Card className="bg-card border-border">
             <CardContent className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-              <span className="ml-3 text-slate-400">Loading profile...</span>
+              <Loader2 className="h-8 w-8 animate-spin text-text-secondary" />
+              <span className="ml-3 text-text-secondary">Loading profile...</span>
             </CardContent>
           </Card>
         </div>
@@ -47,22 +47,22 @@ export default function ProfilePage() {
   // Not connected state
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-4">
+      <div className="min-h-screen bg-background text-foreground p-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Player Profile</h1>
           </div>
-          <Card className="bg-slate-800 border-slate-700">
+          <Card className="bg-card border-border">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <Wallet className="h-12 w-12 text-slate-500 mb-4" />
+              <Wallet className="h-12 w-12 text-text-muted mb-4" />
               <h2 className="text-xl font-semibold mb-2">
                 Connect Your Wallet
               </h2>
-              <p className="text-slate-400 mb-6 max-w-md">
+              <p className="text-text-secondary mb-6 max-w-md">
                 Connect your wallet to view your player profile, statistics, and
                 match history.
               </p>
-              <Button variant="outline" className="border-slate-600">
+              <Button variant="outline" className="border-border">
                 Connect Wallet
               </Button>
             </CardContent>
@@ -76,12 +76,12 @@ export default function ProfilePage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-4">
+      <div className="min-h-screen bg-background text-foreground p-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Player Profile</h1>
           </div>
-          <Card className="bg-slate-800 border-slate-700 border-red-500/50">
+          <Card className="bg-card border-border border-red-500/50">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <p className="text-red-400 mb-4">{error}</p>
               <Button
@@ -101,14 +101,14 @@ export default function ProfilePage() {
   // No player stats (shouldn't happen if connected, but handle gracefully)
   if (!playerStats) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-4">
+      <div className="min-h-screen bg-background text-foreground p-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Player Profile</h1>
           </div>
-          <Card className="bg-slate-800 border-slate-700">
+          <Card className="bg-card border-border">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-slate-400">
+              <p className="text-text-secondary">
                 No profile data available. Start playing to build your stats!
               </p>
             </CardContent>
@@ -120,7 +120,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-4">
+    <div className="min-h-screen bg-background text-foreground p-4">
       <div className="max-w-6xl mx-auto">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
@@ -131,25 +131,25 @@ export default function ProfilePage() {
         <PlayerHeader player={playerStats} />
 
         {/* Detailed Stats Tabs */}
-        <Tabs defaultValue="stats" className="space-y-4 text-white">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+        <Tabs defaultValue="stats" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3 bg-card">
             <TabsTrigger
               value="stats"
-              className="data-[state=active]:bg-slate-700"
+              className="data-[state=active]:bg-surface-3"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
               Statistics
             </TabsTrigger>
             <TabsTrigger
               value="achievements"
-              className="data-[state=active]:bg-slate-700"
+              className="data-[state=active]:bg-surface-3"
             >
               <Trophy className="w-4 h-4 mr-2" />
               Achievements
             </TabsTrigger>
             <TabsTrigger
               value="matches"
-              className="data-[state=active]:bg-slate-700"
+              className="data-[state=active]:bg-surface-3"
             >
               <Sword className="w-4 h-4 mr-2" />
               Recent Matches

@@ -67,10 +67,10 @@ export function GameHistoryView({ gameAddress }: GameHistoryViewProps) {
 
   if (isLoading) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardContent className="p-12 text-center">
           <Spinner className="mx-auto mb-4" />
-          <p className="text-slate-400">Loading game history...</p>
+          <p className="text-text-secondary">Loading game history...</p>
         </CardContent>
       </Card>
     )
@@ -78,7 +78,7 @@ export function GameHistoryView({ gameAddress }: GameHistoryViewProps) {
 
   if (error) {
     return (
-      <Card className="bg-slate-800 border-slate-700 border-red-500/50">
+      <Card className="bg-card border-border border-red-500/50">
         <CardContent className="p-8 text-center text-red-400">
           <AlertCircle className="w-12 h-12 mx-auto mb-4" />
           <p>{error}</p>
@@ -89,8 +89,8 @@ export function GameHistoryView({ gameAddress }: GameHistoryViewProps) {
 
   if (!history) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
-        <CardContent className="p-8 text-center text-slate-400">
+      <Card className="bg-card border-border">
+        <CardContent className="p-8 text-center text-text-secondary">
           <p>No history data available</p>
         </CardContent>
       </Card>

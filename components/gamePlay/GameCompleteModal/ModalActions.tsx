@@ -19,7 +19,7 @@ export const ModalActions = memo(({ type, onClose, onNewGame }: ModalActionsProp
   if (type === "win") {
     return (
       <>
-        <p className="text-slate-600 dark:text-slate-400 text-center mb-2">
+        <p className="text-text-secondary text-center mb-2">
           Would you like to start a new game of diplomacy?
         </p>
 

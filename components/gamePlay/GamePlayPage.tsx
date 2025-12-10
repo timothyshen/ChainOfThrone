@@ -133,7 +133,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
   }, [missedRoundsInfo, playMissedRounds, toast]);
 
   return (
-    <div className="flex flex-col h-screen md:mt-12 bg-background">
+    <div className="flex flex-col h-[calc(100dvh-60px)] md:h-[calc(100vh-3rem)] md:mt-12 bg-background overflow-hidden">
       {/* Missed Rounds Notification */}
       <MissedRoundsNotification
         missedRoundsInfo={missedRoundsInfo}
@@ -157,9 +157,9 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
       </div>
 
       {/* Main game layout */}
-      <div className="flex flex-col md:flex-row flex-1 min-h-0">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
         {/* Game map section */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
           {isGridLoading ? (
             <div className="h-full flex items-center justify-center">
               <Spinner />
@@ -173,13 +173,15 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
           )}
         </div>
 
-        {/* Mobile operation panel */}
-        <GameOperationPanel
-          gameAddress={gameAddressParam}
-          isMobile={isMobile}
-          mobileBottomPanelOpen={mobileBottomPanelOpen}
-          setMobileBottomPanelOpen={setMobileBottomPanelOpen}
-        />
+        {/* Mobile operation panel - only on mobile */}
+        {isMobile && (
+          <GameOperationPanel
+            gameAddress={gameAddressParam}
+            isMobile={true}
+            mobileBottomPanelOpen={mobileBottomPanelOpen}
+            setMobileBottomPanelOpen={setMobileBottomPanelOpen}
+          />
+        )}
 
         {/* Battle Effects Overlay */}
         {battleEffects.length > 0 && (
@@ -187,7 +189,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
         )}
 
         {/* Desktop side panel */}
-        <div className="hidden md:block md:w-1/3 p-4 space-y-4 overflow-auto flex-shrink-0">
+        <div className="hidden md:flex md:flex-col md:w-1/3 p-4 space-y-4 overflow-hidden flex-shrink-0">
           <GameStatusPanel />
           <GameOperationPanel
             gameAddress={gameAddressParam}

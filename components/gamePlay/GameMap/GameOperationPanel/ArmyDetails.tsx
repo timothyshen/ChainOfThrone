@@ -16,7 +16,7 @@ export const ArmyDetails = memo(({
   getTerritoryColor,
   isMobile = false
 }: ArmyDetailsProps) => (
-  <Card className="bg-slate-700 border-slate-600 text-white">
+  <Card className="bg-card border-border text-foreground">
     <CardHeader className="pb-2">
       <CardTitle className="text-lg flex items-center gap-2">
         <Users className="w-4 h-4" />

@@ -153,7 +153,7 @@ export const MovementOverlay = memo(
               return (
                 <div
                   key={territory.id}
-                  className="relative bg-slate-900/40 rounded-lg"
+                  className="relative bg-stone-800/40 rounded-lg"
                   style={{
                     gridColumn: gridY + 1,
                     gridRow: gridX + 1,

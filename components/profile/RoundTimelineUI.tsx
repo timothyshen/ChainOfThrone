@@ -33,15 +33,15 @@ export function RoundTimelineUI({
 
   if (!history || history.rounds.length === 0) {
     return (
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardContent className={cn(CARD_CONTENT_PADDING.lg, "text-center")}>
           <div className="max-w-md mx-auto">
-            <Activity className="w-16 h-16 mx-auto mb-4 text-slate-600" />
-            <h3 className="text-lg font-semibold text-slate-300 mb-2">No Game History Yet</h3>
-            <p className="text-sm text-slate-400 mb-4">
+            <Activity className="w-16 h-16 mx-auto mb-4 text-text-muted" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Game History Yet</h3>
+            <p className="text-sm text-text-secondary mb-4">
               Rounds will appear here as the game progresses. Make your first move to start creating history!
             </p>
-            <div className="inline-flex items-center gap-2 text-xs text-slate-500 bg-slate-900/50 px-4 py-2 rounded-full">
+            <div className="inline-flex items-center gap-2 text-xs text-text-muted bg-surface-3/50 px-4 py-2 rounded-full">
               <Clock className="w-3 h-3" />
               Waiting for game activity...
             </div>
@@ -73,22 +73,22 @@ export function RoundTimelineUI({
       case 'completed':
         return 'bg-green-500'
       default:
-        return 'bg-slate-500'
+        return 'bg-surface-3'
     }
   }
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Clock className="w-5 h-5" />
               Round History Timeline
             </CardTitle>
             <div className="flex gap-2">
-              <Badge variant="secondary" className="bg-slate-700 text-white">
+              <Badge variant="secondary" className="bg-surface-3 text-foreground">
                 {history.totalRounds} Rounds
               </Badge>
               {history.endTimestamp && (
@@ -103,10 +103,10 @@ export function RoundTimelineUI({
 
       {/* Timeline View */}
       {viewMode === 'timeline' && (
-        <ScrollArea className="h-[600px] rounded-md border border-slate-700 bg-slate-800/50 p-6">
+        <ScrollArea className="h-[600px] rounded-md border border-border bg-card/50 p-6">
           <div className="relative">
             {/* Vertical Timeline Line */}
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-700" />
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-surface-3" />
 
             {/* Timeline Items */}
             <div className="space-y-6">
@@ -122,14 +122,14 @@ export function RoundTimelineUI({
                   >
                     {/* Timeline Dot */}
                     <div
-                      className={`absolute left-6 w-5 h-5 rounded-full border-4 border-slate-800 ${getRoundColor(
+                      className={`absolute left-6 w-5 h-5 rounded-full border-4 border-card ${getRoundColor(
                         status
                       )} ${isSelected ? 'ring-4 ring-yellow-400/50' : ''} transition-all`}
                     />
 
                     {/* Round Card */}
                     <Card
-                      className={`bg-slate-800 border-slate-700 hover:border-slate-600 transition-all cursor-pointer ${
+                      className={`bg-card border-border hover:border-border transition-all cursor-pointer ${
                         isSelected ? 'ring-2 ring-yellow-400 shadow-lg shadow-yellow-400/20' : ''
                       }`}
                       onClick={() => !isEmpty && onSelectRound(round.roundNumber)}
@@ -138,7 +138,7 @@ export function RoundTimelineUI({
                         <div className="flex items-start justify-between mb-3">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-lg font-semibold text-white">
+                              <h3 className="text-lg font-semibold text-foreground">
                                 Round {round.roundNumber}
                               </h3>
                               {status === 'current' && (
@@ -147,7 +147,7 @@ export function RoundTimelineUI({
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-text-secondary">
                               {formatTimestamp(round.timestamp)}
                             </p>
                           </div>
@@ -156,7 +156,7 @@ export function RoundTimelineUI({
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-blue-400 hover:text-blue-300 hover:bg-slate-700"
+                              className="text-blue-400 hover:text-blue-300 hover:bg-surface-3"
                             >
                               <Play className="w-4 h-4 mr-2" />
                               Replay
@@ -165,20 +165,20 @@ export function RoundTimelineUI({
                         </div>
 
                         {isEmpty ? (
-                          <div className="text-sm text-slate-500 italic">
+                          <div className="text-sm text-text-muted italic">
                             No moves recorded
                           </div>
                         ) : (
                           <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div className="flex items-center gap-2 text-slate-300">
+                            <div className="flex items-center gap-2 text-foreground">
                               <Users className="w-4 h-4 text-blue-400" />
                               <span>{round.playerActions.size} Players</span>
                             </div>
-                            <div className="flex items-center gap-2 text-slate-300">
+                            <div className="flex items-center gap-2 text-foreground">
                               <Sword className="w-4 h-4 text-red-400" />
                               <span>{round.moves.length} Moves</span>
                             </div>
-                            <div className="flex items-center gap-2 text-slate-300">
+                            <div className="flex items-center gap-2 text-foreground">
                               <TrendingUp className="w-4 h-4 text-green-400" />
                               <span>
                                 {round.moves.reduce((sum, m) => sum + Number(m.units), 0)}{' '}
@@ -190,8 +190,8 @@ export function RoundTimelineUI({
 
                         {/* Player Actions Preview */}
                         {!isEmpty && (
-                          <div className="mt-3 pt-3 border-t border-slate-700">
-                            <div className="text-xs text-slate-400 space-y-1">
+                          <div className="mt-3 pt-3 border-t border-border">
+                            <div className="text-xs text-text-secondary space-y-1">
                               {Array.from(round.playerActions.entries()).map(
                                 ([player, move]) => (
                                   <div
@@ -201,7 +201,7 @@ export function RoundTimelineUI({
                                     <span>
                                       {player.slice(0, 6)}...{player.slice(-4)}
                                     </span>
-                                    <span className="text-slate-500">
+                                    <span className="text-text-muted">
                                       ({move.fromX},{move.fromY}) →
                                       ({move.toX},{move.toY})
                                     </span>
@@ -222,32 +222,32 @@ export function RoundTimelineUI({
       )}
 
       {/* Summary Statistics */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-card border-border">
         <CardContent className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-blue-400">
                 {history.totalRounds}
               </div>
-              <div className="text-sm text-slate-400">Total Rounds</div>
+              <div className="text-sm text-text-secondary">Total Rounds</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-green-400">
                 {history.rounds.reduce((sum, r) => sum + r.moves.length, 0)}
               </div>
-              <div className="text-sm text-slate-400">Total Moves</div>
+              <div className="text-sm text-text-secondary">Total Moves</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-purple-400">
                 {formatTimestamp(history.startTimestamp)}
               </div>
-              <div className="text-sm text-slate-400">Game Started</div>
+              <div className="text-sm text-text-secondary">Game Started</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-yellow-400">
                 {currentRound || 0}
               </div>
-              <div className="text-sm text-slate-400">Current Round</div>
+              <div className="text-sm text-text-secondary">Current Round</div>
             </div>
           </div>
         </CardContent>
