@@ -38,7 +38,7 @@ export const getStatusDisplayText = (status: number): string =>
  */
 export const getStatusBadgeStyles = (status: number): string => {
   const baseStyles =
-    "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium";
+    "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap";
   const statusStyles: Record<GameStatusNumber, string> = {
     0: "bg-white text-green-400 border border-green-400",
     1: "bg-white text-yellow-400 border border-yellow-400",

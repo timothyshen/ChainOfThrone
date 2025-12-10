@@ -96,7 +96,7 @@ export default function GameTable({ games, searchTerm, statusFilter, onSelectGam
                                         className="w-fit"
                                         onClick={() => onSelectGame(game)}
                                     >
-                                        <Info className="h-4 w-4" />
+                                        <Info className="h-4 w-4 mr-1" /> Details
                                     </Button>
                                 </div>
                             </TableCell>
@@ -114,11 +114,11 @@ export default function GameTable({ games, searchTerm, statusFilter, onSelectGam
                 <Card key={game.gameAddress} className="border-gray-800">
                     <CardContent className="pt-6">
                         <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <div className="font-mono text-sm w-[70%] mr-2">
+                            <div className="flex justify-between items-center gap-2">
+                                <div className="font-mono text-sm truncate flex-1 min-w-0">
                                     {game.gameAddress.slice(0, 6)}...{game.gameAddress.slice(-4)}
                                 </div>
-                                <span className={cn(getStatusBadgeStyles(game.status), "w-fit")}>
+                                <span className={cn(getStatusBadgeStyles(game.status), "flex-shrink-0")}>
                                     {getStatusDisplayText(game.status)}
                                 </span>
                             </div>
