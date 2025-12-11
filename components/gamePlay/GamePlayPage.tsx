@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/lib/hooks/use-toast";
 import { logger } from "@/lib/utils/logger";
 import { Spinner } from "../ui/spinner";
+import { HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Components
 import GameOperationPanel from "@/components/gamePlay/GameMap/GameOperationPanel";
@@ -12,8 +14,11 @@ import BattleEffectOverlay from "@/components/gamePlay/GameMap/BattleEffectOverl
 import { MissedRoundsNotification } from "./MissedRoundsNotification";
 import { GameStatusPanel } from "./GameStatusPanel";
 import { TurnHistoryPanel } from "./GameMap/panels/TurnHistoryPanel";
+import { QuickRulesPanel } from "./GameMap/panels/QuickRulesPanel";
 import { MiniStatusBar } from "./MiniStatusBar";
 import { ContextualActionBar } from "./GameMap/ContextualActionBar";
+import { HowToPlayDialog } from "@/components/home/HowToPlay";
+import { TutorialOverlay } from "./TutorialOverlay";
 
 // Context
 import {
@@ -50,6 +55,7 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
   const [mobileBottomPanelOpen, setMobileBottomPanelOpen] = useState(false);
   const [missedRoundsInfo, setMissedRoundsInfo] =
     useState<MissedRoundsInfo | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Round animation system
   const { isAnimating, playRoundTransition, checkForMissedRounds, playMissedRounds } =
@@ -180,6 +186,9 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
         {battleEffects.length > 0 && (
           <BattleEffectOverlay battleEffects={battleEffects} />
         )}
+
+        {/* Tutorial Overlay for Mobile */}
+        <TutorialOverlay />
       </div>
     );
   }
@@ -218,6 +227,24 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
 
         {/* Desktop side panel */}
         <div className="flex flex-col w-1/3 max-w-md p-4 space-y-4 overflow-hidden flex-shrink-0">
+          {/* Panel Header with Help Button */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Game Info</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowHelp(true)}
+              className="h-8 w-8"
+              aria-label="How to play"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <QuickRulesPanel
+            isCollapsible={true}
+            defaultExpanded={false}
+          />
           <GameStatusPanel />
           <GameOperationPanel
             gameAddress={gameAddressParam}
@@ -231,6 +258,12 @@ function GamePlayContent({ gameAddressParam }: GamePlayPageProps) {
           />
         </div>
       </div>
+
+      {/* How to Play Dialog */}
+      <HowToPlayDialog open={showHelp} onOpenChange={setShowHelp} />
+
+      {/* Tutorial Overlay for Desktop */}
+      <TutorialOverlay />
     </div>
   );
 }

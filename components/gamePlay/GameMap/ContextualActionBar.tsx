@@ -122,29 +122,32 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
         return (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-game-player flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-game-player flex items-center justify-center animate-pulse">
                 <Users className="w-4 h-4 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  {actionHint.armySize} units selected
+                  {actionHint.armySize} units ready to move
                 </p>
                 <p className="text-xs text-text-secondary">
-                  Tap a destination on the map
+                  Tap <span className="text-emerald-500 font-medium">green</span> to move
+                  {actionHint.attackOptions > 0 && (
+                    <>, <span className="text-game-enemy font-medium">red</span> to attack</>
+                  )}
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
               {actionHint.moveOptions > 0 && (
-                <div className="flex items-center gap-1 text-emerald-600 text-xs">
+                <div className="flex items-center gap-1 text-emerald-600 text-xs bg-emerald-50 px-2 py-1 rounded">
                   <Navigation className="w-3 h-3" />
-                  <span>{actionHint.moveOptions} move</span>
+                  <span>{actionHint.moveOptions} moves</span>
                 </div>
               )}
               {actionHint.attackOptions > 0 && (
-                <div className="flex items-center gap-1 text-game-enemy text-xs">
+                <div className="flex items-center gap-1 text-game-enemy text-xs bg-red-50 px-2 py-1 rounded">
                   <Sword className="w-3 h-3" />
-                  <span>{actionHint.attackOptions} attack</span>
+                  <span>{actionHint.attackOptions} attacks</span>
                 </div>
               )}
             </div>
@@ -195,28 +198,30 @@ export const ContextualActionBar = memo(({ isMobile = false }: ContextualActionB
         return (
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center">
-                <Users className="w-4 h-4 text-text-secondary" />
+              <div className="w-8 h-8 rounded-full bg-game-player/20 flex items-center justify-center border-2 border-dashed border-game-player">
+                <Users className="w-4 h-4 text-game-player" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">
                   {actionHint.hasArmies ? (
-                    <>Tap your army ({actionHint.totalUnits} units) to move</>
+                    <>Your turn - tap your <span className="text-game-player">blue army</span></>
                   ) : (
-                    <>No armies available</>
+                    <>Waiting for units...</>
                   )}
                 </p>
                 <p className="text-xs text-text-secondary">
-                  Select an army on the map to begin
+                  {actionHint.hasArmies
+                    ? `You have ${actionHint.totalUnits} units ready to command`
+                    : "No armies available to move"}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1 text-game-castle text-xs bg-game-castle-light px-2 py-1 rounded">
+            <div className="flex items-center gap-1 text-game-castle text-xs bg-game-castle/10 border border-game-castle/30 px-2 py-1 rounded">
               <Crown className="w-3 h-3" />
-              <span>
+              <span className="font-medium">
                 {actionHint.castlesNeeded > 0
-                  ? `${actionHint.castlesNeeded} more to win`
-                  : "You win!"}
+                  ? `Need ${actionHint.castlesNeeded} more`
+                  : "Victory!"}
               </span>
             </div>
           </div>

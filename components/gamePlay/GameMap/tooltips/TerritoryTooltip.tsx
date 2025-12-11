@@ -19,6 +19,7 @@ interface TerritoryTooltipProps {
   isEnemyOwned: boolean
   hasArmy: boolean
   delayDuration?: number
+  playerCastleCount?: number
 }
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
@@ -32,6 +33,8 @@ const zeroAddress = "0x0000000000000000000000000000000000000000"
  * - Army details (friendly/enemy)
  * - Action hints
  */
+const CASTLES_TO_WIN = 3
+
 export const TerritoryTooltip = memo(({
   territory,
   children,
@@ -41,9 +44,12 @@ export const TerritoryTooltip = memo(({
   isEnemyOwned,
   hasArmy,
   delayDuration = 300,
+  playerCastleCount = 0,
 }: TerritoryTooltipProps) => {
   const hasOwner = territory.player && territory.player.toLowerCase() !== zeroAddress.toLowerCase()
   const isNeutral = !hasOwner
+  const castlesNeeded = CASTLES_TO_WIN - playerCastleCount
+  const wouldWinIfCaptured = territory.isCastle && !isPlayerOwned && castlesNeeded === 1
 
   return (
     <TooltipProvider>
@@ -104,6 +110,35 @@ export const TerritoryTooltip = memo(({
                 )}
               </span>
             </div>
+
+            {/* Castle Defense Bonus */}
+            {territory.isCastle && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-text-secondary">Defense:</span>
+                <span className="font-bold text-game-castle flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  2.5x bonus
+                </span>
+              </div>
+            )}
+
+            {/* Strategic Hint for Castles */}
+            {territory.isCastle && !isPlayerOwned && (
+              <div className={`mt-1 p-1.5 rounded text-[10px] font-medium ${
+                wouldWinIfCaptured
+                  ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                  : "bg-game-castle/10 text-game-castle border border-game-castle/30"
+              }`}>
+                {wouldWinIfCaptured ? (
+                  <span className="flex items-center gap-1">
+                    <Crown className="w-3 h-3" />
+                    Capture this to WIN!
+                  </span>
+                ) : (
+                  <span>Capture = {playerCastleCount + 1}/3 castles</span>
+                )}
+              </div>
+            )}
 
             {/* Army Info */}
             {(friendlyUnits > 0 || enemyUnits > 0) && (

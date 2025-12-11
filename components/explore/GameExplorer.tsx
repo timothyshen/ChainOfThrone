@@ -132,7 +132,7 @@ export default function GameExplorer() {
                     </DialogHeader>
 
                     {selectedGame && (
-                        <div className="space-y-4 py-2">
+                        <div className="space-y-4 py-2 rounded-lg">
                             {/* Contract Address */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-muted-foreground">Contract Address</label>

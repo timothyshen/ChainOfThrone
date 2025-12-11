@@ -120,6 +120,7 @@ export default function GameMap({
       {/* Map Canvas - Square aspect ratio */}
       <div
         ref={mapRef}
+        data-tutorial="game-map"
         className="relative bg-gradient-to-br from-surface-1 to-surface-2 rounded-lg overflow-hidden"
         style={{
           width: containerSize,
